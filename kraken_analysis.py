@@ -49,7 +49,7 @@ plt.xlabel('Percent of reads in group')
 plt.title('Kraken classification \nof synthetics RNA-seq library')
 plt.show()
 
-# NCBI_taxonomy table made here /home/scripts_inProcess/NCBI_taxonomy.py.
+# NCBI_taxonomy table made using script /home/scripts_inProcess/NCBI_taxonomy.py.
 Div_tax = {'UNA':'Unannotated', 'BCT':'Bacteria', 'ENV':'Environmental samples', 'SYN':'Synthetic', 'PLN':'Plants', 'INV':'Invertebrates', 'VRT':'Other vertebrates', 'MAM':'Other mammals', 'PRI':'Primates', 'ROD':'Rodents', 'VRL':'Viruses', 'PHG':'Phages'}
 
 ncbi_tax = pd.read_csv('NCBI_taxonomy.csv', sep=",")
