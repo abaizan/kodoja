@@ -32,8 +32,25 @@ Div_tax = {'UNA':'Unannotated', 'BCT':'Bacteria', 'ENV':'Environmental samples',
 ncbi_tax = pd.read_csv('NCBI_taxonomy.csv', sep=",")
 ncbi_slice = ncbi_tax.iloc[:,[1,2]]
 
-# Merge tablesNCBI taxonomy categories with kraken data
+# Merge tables NCBI taxonomy categories with kraken data
 kraken_all =  pd.merge(kraken_all, ncbi_slice, on='Tax_ID', how='outer')
+
+# Remove entries from the NCBI table that do not correspond to any in the kraken results table
+kraken_all = kraken_all.dropna(subset = ['Seq_ID', 'Classified'])
+
+# Make a list of "Seq_ID" column value if sequence is unclassified in "Classified" column or classified as VRL (virus) in column "Div_ID". This list will be used to determine which sequences will be further analysed by Kaiju and retranslation.py
+
+unclassified_IDs = kraken_all.loc[(kraken_all.Classified == 'U'), ['Seq_ID']]
+VRL_IDs = kraken_all.loc[(kraken_all.Div_ID == 'VRL'), ['Seq_ID']]
+
+seq_reanalyse = unclassified_IDs['Seq_ID'].tolist() + VRL_IDs['Seq_ID'].tolist()
+
+# Add "@" and "/1" t the start and end of each ID so they can be matched to fastq file (which has 
+
+# Export the list seq_reanalyse so that each line is a Seq_ID
+outfile = open("/home/ae42909/Scratch/kraken/customdataset/reanalyse_IDs", "w")
+print >> outfile, "\n".join(str(i) for i in seq_reanalyse)
+outfile.close()
 
 
 #### Testing synthetic data ####
