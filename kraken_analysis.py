@@ -10,28 +10,44 @@ matplotlib.style.use('ggplot')
 
 os.chdir('/mnt/shared/scratch/ae42909/201609_BBSRC_Diagnostics/kraken/kraken_analysis/customDatabase')
 
-#Name of the data to be analysed
+# Name of the data to be analysed
 result_data='PotatoViruses_CD_results'
 label_data='Potato_withViruses_classified.labels'
 result_names=["Classified", "Seq_ID","Tax_ID", "length", "k-mer classification" ]
 label_names=["Seq_ID", "Seq_tax"] #(superkingdom, kingdom, phylum, class, order, family, genus, species)
 
+# Read tables in with pandas
 kraken_result = pd.read_csv(result_data, sep="\t", header = None, names= result_names)
 kraken_label = pd.read_csv(label_data, sep="\t", header = None, names= label_names)
 
-# http://chrisalbon.com/python/pandas_join_merge_dataframe.html
+# Merge result tables for Kraken - to include taxonomc names to each sequence that was classified - http://chrisalbon.com/python/pandas_join_merge_dataframe.html
 kraken_all = pd.merge(kraken_result, kraken_label, on='Seq_ID', how='outer')
 
-# Reads classified in total for each ID, correctly or incorrectly, and unclassified.
+### To be able to identify what broad category (plant, virus bacteria, etc) a sequence has been categorised into and NCBI taxonomy table was made with the broad categories next to each taxID and merged with the kraken results table
+
+# Possible categories for NCBI_taxonomy table abreviations and long names:
+Div_tax = {'UNA':'Unannotated', 'BCT':'Bacteria', 'ENV':'Environmental samples', 'SYN':'Synthetic', 'PLN':'Plants', 'INV':'Invertebrates', 'VRT':'Other vertebrates', 'MAM':'Other mammals', 'PRI':'Primates', 'ROD':'Rodents', 'VRL':'Viruses', 'PHG':'Phages'}
+
+# Read in NCBI table - made using script /home/scripts_inProcess/NCBI_taxonomy.py
+ncbi_tax = pd.read_csv('NCBI_taxonomy.csv', sep=",")
+ncbi_slice = ncbi_tax.iloc[:,[1,2]]
+
+# Merge tablesNCBI taxonomy categories with kraken data
+kraken_all =  pd.merge(kraken_all, ncbi_slice, on='Tax_ID', how='outer')
+
+
+#### Testing synthetic data ####
+
+### When concatinating libraries to make synthetic data, each had an ID that was kept for identification (first value dictionary). Second value in dict is the correct taxID from NCBI - to determine if the sequences were classified correctlyfor the correct species. The Third value in dict is the correct genus of the species 
 library_ID =  {}
 library_ID['Tabacco_etch']=['SRR3466597', 12227, 'Potyvirus']
 library_ID['UBSV']=['ERR996011', 946046, 'Ipomovirus']
 library_ID['BSV']=['ERR996013', 137758, 'Ipomovirus']
 library_ID['Potato']=['SRR1207289', 4113, 'Solanum']
 
-# Summarise data
+# Summarise kraken data: percent of sequences (from each key in library_ID) which are unclassified,  classified correctly or classified incorrectly at the species level
 kraken_summary = pd.DataFrame(columns=['Unclassified', 'Classified_correctly','Classified_incorrectly'], index=library_ID.keys())
-
+ 
 for key in library_ID.keys():
     unclassified_total = kraken_all[(kraken_all.Seq_ID.str.contains(library_ID[key][0])) & (kraken_all['Classified'] == 'U')].count()
 
@@ -49,13 +65,10 @@ plt.xlabel('Percent of reads in group')
 plt.title('Kraken classification \nof synthetics RNA-seq library')
 plt.show()
 
-# NCBI_taxonomy table made using script /home/scripts_inProcess/NCBI_taxonomy.py.
-Div_tax = {'UNA':'Unannotated', 'BCT':'Bacteria', 'ENV':'Environmental samples', 'SYN':'Synthetic', 'PLN':'Plants', 'INV':'Invertebrates', 'VRT':'Other vertebrates', 'MAM':'Other mammals', 'PRI':'Primates', 'ROD':'Rodents', 'VRL':'Viruses', 'PHG':'Phages'}
 
-ncbi_tax = pd.read_csv('NCBI_taxonomy.csv', sep=",")
-ncbi_slice = ncbi_tax.iloc[:,[1,2]]
-kraken_all =  pd.merge(kraken_all, ncbi_slice, on='Tax_ID', how='outer')
 
+
+############################# WORKING ON IT #############################
 
 #Find frequency of incorrectly classified species in Potato reads
 potato_classInc = kraken_all[(kraken_all.Seq_ID.str.contains(library_ID[key][0])) & (kraken_all['Classified'] == 'C') & ~(kraken_all['Tax_ID'] == library_ID[key][1])]
