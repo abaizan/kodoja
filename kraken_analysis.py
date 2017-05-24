@@ -1,3 +1,4 @@
+
 #Analysing data frm kraken output
 #python 2.7
 import os
@@ -31,7 +32,7 @@ kraken_all = pd.merge(kraken_result, kraken_label, on='Seq_ID', how='outer')
 Div_tax = {'UNA':'Unannotated', 'BCT':'Bacteria', 'ENV':'Environmental samples', 'SYN':'Synthetic', 'PLN':'Plants', 'INV':'Invertebrates', 'VRT':'Other vertebrates', 'MAM':'Other mammals', 'PRI':'Primates', 'ROD':'Rodents', 'VRL':'Viruses', 'PHG':'Phages'}
 
 # Read in NCBI table - made using script /home/scripts_inProcess/NCBI_taxonomy.py
-ncbi_tax = pd.read_csv('NCBI_taxonomy.csv', sep=",")
+ncbi_tax = pd.read_csv('/home/ae42909/Scratch/kraken/kraken_analysis/customDatabase/NCBI_taxonomy.csv', sep=",")
 ncbi_slice = ncbi_tax.iloc[:,[1,2]]
 
 # Merge tables NCBI taxonomy categories with kraken data
