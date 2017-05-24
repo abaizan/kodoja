@@ -305,3 +305,21 @@ classified_incorrect = kraken_all[(kraken_all.Seq_ID.str.contains(library_ID[key
 total_reads = float(unclassified_total[0] + classified_correct[0] + classified_incorrect[0])
 
 kraken_summary.loc[key] = pd.Series({'Unclassified': (float(unclassified_total[0])/total_reads)*100, 'Classified_correctly':(float(classified_correct[0])/total_reads)*100, 'Classified_incorrectly':(float(classified_incorrect[0])/total_reads)*100})
+
+
+###### Making a sequence identifier library after these have been replaced with numberscontaining the previous identifiers and the new
+
+with open("/home/ae42909/synthetic_RNAseq/fastq_IDs") as f:
+    ID_list = f.read().splitlines()
+
+ID_dict = {}  
+
+for i in range(0,len(ID_list)):
+    ID_dict[i + 1] =ID_list[i]
+
+example = pd.DataFrame({'col2': {0: 'a', 1: 2, 2: np.nan}, 'col1': {0: 'w', 1: 1, 2: 2}})
+
+example.replace({"col1": ID_dict})
+
+# Copy the sequence ID numbers to another column and replace with second sequence ID
+    
