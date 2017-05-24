@@ -4,9 +4,22 @@
 #$ -j yes
 #$ -pe smp 4
 THREADS=4
-PEAKS=EBF1_peaks_small
-BAM=RAGko__sorted.bam
-DIROUT=RAGko_2_fdrlDefult
+DIROUT=fdrlDefult # mkdir before running
+
+for TF in peak_intersect/pyDNase_ragEBF1 peak_intersect/pyDNase_ragPAX5
+do
+    PEAKS=$TF
+    for DATA in RAGko_1_sorted.bam RAGko_2_sorted.bam IL7RxRAGko_1_sorted.bam IL7RxRAGko_2_sorted.bam
+    do
+	BAM=$DATA
+	wellington_footprints.py -A $PEAKS $BAM $DIROUT
+    done
+done
+
+
+# PEAKS=peak_intersect/pyDNase_ragEBF1
+# BAM=RAGko__sorted.bam
+# DIROUT=RAGko_2_fdrlDefult
 
 #optional arguments:
 #  -h, --help            show this help message and exit
@@ -40,4 +53,4 @@ DIROUT=RAGko_2_fdrlDefult
 #  -p P                  Number of processes to use (default: uses all CPUs)
 #  -A                    ATAC-seq mode (default: False)
 
-wellington_footprints.py -A $PEAKS $BAM $DIROUT
+# wellington_footprints.py -A $PEAKS $BAM $DIROUT
