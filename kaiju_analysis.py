@@ -1,4 +1,4 @@
-#Analysing data frm kraken output
+#Analysing data frm kaiju output
 #python 2.7
 import os
 import pandas as pd
@@ -9,8 +9,9 @@ matplotlib.style.use('ggplot')
 
 os.chdir('/home/ae42909/Scratch/kaiju')
 
-#Name of the data to be analysed
-result_data='SynthPotato_ouput'
+# Name of the data to be analysed
+#result_data='SynthPotato_ouput'
+result_data='subsetSynthPotato_ouput'
 result_names=["Classified", "Seq_ID","Tax_ID", "length_bestmatch", "Tax_AN","accession_multiple", "Fragment" ]
 
 kaiju_result = pd.read_csv(result_data, sep="\t", header = None, names= result_names)
