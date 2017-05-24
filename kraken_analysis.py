@@ -7,8 +7,10 @@ import re
 import matplotlib.pyplot as plt
 import matplotlib
 matplotlib.style.use('ggplot')
+from Bio import SeqIO
 
 os.chdir('/mnt/shared/scratch/ae42909/201609_BBSRC_Diagnostics/kraken/kraken_analysis/customDatabase')
+#os.chdir('/Volumes/ae42909/Scratch/kraken/kraken_analysis/customDatabase')
 
 # Name of the data to be analysed
 result_data='PotatoViruses_CD_results'
@@ -42,15 +44,129 @@ kraken_all = kraken_all.dropna(subset = ['Seq_ID', 'Classified'])
 
 unclassified_IDs = kraken_all.loc[(kraken_all.Classified == 'U'), ['Seq_ID']]
 VRL_IDs = kraken_all.loc[(kraken_all.Div_ID == 'VRL'), ['Seq_ID']]
-
-seq_reanalyse = unclassified_IDs['Seq_ID'].tolist() + VRL_IDs['Seq_ID'].tolist()
-
-# Add "@" and "/1" t the start and end of each ID so they can be matched to fastq file (which has 
+reanalyse_IDs = unclassified_IDs['Seq_ID'].tolist() + VRL_IDs['Seq_ID'].tolist()
 
 # Export the list seq_reanalyse so that each line is a Seq_ID
-outfile = open("/home/ae42909/Scratch/kraken/customdataset/reanalyse_IDs", "w")
-print >> outfile, "\n".join(str(i) for i in seq_reanalyse)
+outfile = open("test_reanalyse_IDs1.txt", "w")
+print >> outfile, "\n".join(str(i) for i in test)
 outfile.close()
+
+
+# Use biopython to make new fastq files of sequences to be reanalysed. The IDs from Kraken ('Seq_ID') don't correspond to the IDs when you parse data with SeqIO, they are shortened (don't have the "/1" and "/2" that identifies them as paired end 1 and 2). It is easy to add the "/1" (as is done in the section "Test ID" below), but it could be differennt for different paired end files so need to find a better solution.
+
+####### Test ID: Having a problem with te IDs (they need to be exact so tha seqio can identify them in "records"). This test is to check if indeed taht is the case (only requires a "/1" or "/2"). The output of this test ("subset_Potato_withViruses_1/2.fastq") was fed into Kaiju for protein analysis and it worked.
+
+# Test for first pairend fastq file:
+#test1 = [s + "/1" for s in reanalyse_IDs]
+
+#outfile = open("test_reanalyse_IDs1.txt", "w")
+#print >> outfile, "\n".join(str(i) for i in test1)
+#outfile.close()
+
+#id_file = "test_reanalyse_IDs1.txt"
+#wanted = set(line.rstrip("\n").split(None,1)[0] for line in open(id_file))
+#print "Found %i unique identifiers in %s" % (len(wanted), id_file)
+
+#input_file = "Potato_withViruses_1.fastq"
+#output_file = "subset_Potato_withViruses_1.fastq"
+#records = (r for r in SeqIO.parse(input_file, "fastq") if r.id in wanted)
+#count = SeqIO.write(records, output_file, "fastq")
+#print "Saved %i records from %s to %s" % (count, input_file, output_file)
+#if count < len(wanted):
+#    print "Warning %i IDs not found in %s" % (len(wanted)-count, input_file)
+
+# Test for second pairend fastq file:
+#test2 = [s + "/2" for s in reanalyse_IDs]
+
+#outfile = open("test_reanalyse_IDs2.txt", "w")
+#print >> outfile, "\n".join(str(i) for i in test2)
+#outfile.close()
+    
+#id_file = "test_reanalyse_IDs2.txt"
+#wanted = set(line.rstrip("\n").split(None,1)[0] for line in open(id_file))
+#print "Found %i unique identifiers in %s" % (len(wanted), id_file)
+
+#input_file = "Potato_withViruses_2.fastq"
+#output_file = "subset_Potato_withViruses_2.fastq"
+#records = (r for r in SeqIO.parse(input_file, "fastq") if r.id in wanted)
+#count = SeqIO.write(records, output_file, "fastq")
+#print "Saved %i records from %s to %s" % (count, input_file, output_file)
+#if count < len(wanted):
+#    print "Warning %i IDs not found in %s" % (len(wanted)-count, input_file)
+
+
+# Find what the SeqIO identifiers have in common - could find extra pattern to add to the Kraken IDs
+
+def longestSubstringFinder(string1, string2):
+    answer = ""
+    len1, len2 = len(string1), len(string2)
+    for i in range(len1):
+        match = ""
+        for j in range(len2):
+            if (i + j < len1 and string1[i + j] == string2[j]):
+                match += string2[j]
+            else:
+                if (len(match) > len(answer)): answer = match
+                match = ""
+    return answer
+
+print longestSubstringFinder("apple pie available", "apple pies")
+print longestSubstringFinder("apples", "appleses")
+print longestSubstringFinder("bapples", "cappleses")
+
+input_file = "Potato_withViruses_1.fastq"
+
+all_IDs = []
+for record in SeqIO.parse(input_file, "fastq"):
+    all_IDs.append(record.id)
+
+
+
+reanalyse_SeqIO_IDs = []
+for ids in reanalyse_IDs:
+    possible_IDs = [s for s in all_IDs if ids in s]
+    if len(possible_IDs) > 1:
+        reanalyse_SeqIO_IDs.append(min(possible_IDs, key=len))
+    else:
+        reanalyse_SeqIO_IDs.append(possible_IDs[0])
+        
+
+def reanalyse_data (list_sequenceData, list_subsetDataNames):
+    
+    id_file = "reanalyse_SeqIO_IDs.txt"
+    wanted = set(line.rstrip("\n").split(None,1)[0] for line in open(id_file))
+    print "Found %i unique identifiers in %s" % (len(wanted), id_file)
+    
+    for libraries in list_sequenceData:
+        input_file = list_sequenceData[libraries]
+        output_file = list_subsetDataNames[libraries]
+        records = (r for r in SeqIO.parse(input_file, "fastq") if r.id in wanted)
+        count = SeqIO.write(records, output_file, "fastq")
+        print "Saved %i records from %s to %s" % (count, input_file, output_file)
+        if count < len(wanted):
+            print "Warning %i IDs not found in %s" % (len(wanted)-count, input_file)
+
+sequenceData = ["/home/ae42909/synthetic_RNAseq/mappingRNAseq/concatenated_fastaFiles/Potato_withViruses_1.fastq", "/home/ae42909/synthetic_RNAseq/mappingRNAseq/concatenated_fastaFiles/Potato_withViruses_2.fastq"]
+subsetDataNames = ["subset_Potato_withViruses_1.fastq", "subset_Potato_withViruses_2.fastq"]
+
+
+
+############ Merge Kaiju and kraken results
+os.chdir('/home/ae42909/Scratch/kaiju')
+
+# Name of the data to be analysed
+#result_data='SynthPotato_ouput'
+result_data='subsetSynthPotato_ouput'
+result_names=["Classified", "Seq_ID","Tax_ID", "length_bestmatch", "Tax_AN","accession_multiple", "Fragment" ]
+
+kaiju_result = pd.read_csv(result_data, sep="\t", header = None, names= result_names)
+
+kaiju_small = kaiju_result[['Classified','Seq_ID','Tax_ID']]
+
+# Merge Kraken and Kaiju results
+Ks = pd.merge(kraken_all, kaiju_small, on='Seq_ID', how='outer')
+
+
 
 
 #### Testing synthetic data ####
