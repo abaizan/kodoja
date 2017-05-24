@@ -199,6 +199,59 @@ plt.xlabel('Percent of reads in group')
 plt.title('Kraken classification \nof synthetics RNA-seq library')
 plt.show()
 
+library_ID =  {}
+library_ID['Tabacco_etch']=['SRR3466597', 12227, 'Potyvirus']
+library_ID['UBSV']=['ERR996011', 946046, 'Ipomovirus']
+library_ID['BSV']=['ERR996013', 137758, 'Ipomovirus']
+library_ID['Potato']=['SRR1207289', 4113, 'Solanum']
+
+def percents (obj):
+    p = float(obj[0])/float(total[0])*100
+    return round(p,2)
+kraken_summary = pd.DataFrame(columns=['Unclassified', 'Classified_correctly','Classified_incorrectly'], index=library_ID.keys())
+kaiju_summary = pd.DataFrame(columns=['Unclassified', 'Classified_correctly','Classified_incorrectly'], index=library_ID.keys())
+together_summary = pd.DataFrame(columns=['Unclassified', 'Classified_correctly','Classified_incorrectly'], index=library_ID.keys())
+
+for key in library_ID.keys():
+    subset_key = Ks[(Ks.Seq_ID.str.contains(library_ID[key][0]))]
+    total = subset_key.count()
+
+    kraken_correct = subset_key[(subset_key['Classified_x'] == 'C') & (subset_key['Tax_ID_x'] == library_ID[key][1])].count()
+    kraken_incorr = subset_key[(subset_key['Classified_x'] == 'C') & ~(subset_key['Tax_ID_x'] == library_ID[key][1])].count()
+    kraken_unclass = subset_key[(subset_key['Classified_x'] == 'U')].count()
+    
+    kaiju_correct = subset_key[(subset_key['Classified_y'] == 'C') & (subset_key['Tax_ID_y'] == library_ID[key][1])].count()
+    kaiju_incorr = subset_key[(subset_key['Classified_y'] == 'C') & ~(subset_key['Tax_ID_y'] == library_ID[key][1])].count()
+    kaiju_unclass = subset_key[(subset_key['Classified_y'] == 'U')].count() 
+
+#    either_correct = subset_key[(subset_key['Tax_ID_x'] == library_ID[key][1]) | (subset_key['Tax_ID_y'] == library_ID[key][1])].count()
+
+    both_classified = subset_key[(subset_key['Classified_x'] == 'C') & (subset_key['Classified_y'] == 'C')]
+    both_correct = both_classified[(both_classified['Tax_ID_x'] == library_ID[key][1]) & (both_classified['Tax_ID_y'] == library_ID[key][1])].count()
+    both_incorrect = both_classified[(both_classified['Classified_x'] == 'C') & (['Classified_y'] == 'C') & ~(both_classified['Tax_ID_x'] == library_ID[key][1]) & ~(both_classified['Tax_ID_y'] == library_ID[key][1])].count()
+    both_unclassified = subset_key[(subset_key['Classified_x'] == 'U') & (subset_key['Classified_y'] == 'U')].count()
+
+    kraken_summary.loc[key] = pd.Series({'Unclassified':percents(kraken_unclass), 'Classified_correctly':percents(kraken_correct), 'Classified_incorrectly':percents(kraken_incorr)})
+    kaiju_summary.loc[key] = pd.Series({'Unclassified':percents(kaiju_unclass) , 'Classified_correctly': percents(kaiju_correct), 'Classified_incorrectly': percents(kaiju_incorr)})
+    together_summary.loc[key] = pd.Series({'Unclassified':percents(both_unclassified), 'Classified_correctly':percents(both_correct), 'Classified_incorrectly':percents(both_incorrect)})
+
+
+# Figure: /home/ae42909/python_figures/synthPotato_kraken1.png
+kraken_summary.plot.barh(stacked=True)
+plt.xlabel('Percent of reads in group')
+plt.title('Kraken classification \nof synthetics RNA-seq library')
+plt.show()
+
+kaiju_summary.plot.barh(stacked=True)
+plt.xlabel('Percent of reads in group')
+plt.title('Kaiju classification \nof synthetics RNA-seq library')
+plt.show()
+
+together_summary.plot.barh(stacked=True)
+plt.xlabel('Percent of reads in group')
+plt.title('Kraken and Kaiju combined classification \nof synthetics RNA-seq library')
+plt.show() 
+
 
 
 
