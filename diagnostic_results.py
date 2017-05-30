@@ -1,4 +1,3 @@
-
 #Analysing data from the diagnostic_pipeline.sh script
 #python 2.7
 import os
@@ -8,134 +7,103 @@ import re
 import matplotlib.pyplot as plt
 import matplotlib
 matplotlib.style.use('ggplot')
-from Bio import SeqIO
+#from Bio import SeqIO
 
 directory = os.environ["OUTDIR"]
 
-# Name of the data to be analysed
+# Import initialresults from sequence_reanalysis.py
+kraken_nt_table = pd.read_csv(directory + 'kraken_nt_table', header = 0, sep='\t')
+kraken_nt_table["Backtranslate_classification"] =''
+kraken_nt_table["Backtranslate_TaxID"] = ''
+kraken_nt_table["Backtranslate_k-mer"] = ''
 
-result_data='kraken_aa_results'
-label_data= 'kraken_nt_labels'
+
+#Import results from aa kraken analysis (backtranslated sequences), add labels and NCBi taxa
 
 def kraken_analysis(result_data, label_data):
-    kraken_data = directory + '/' + result_data
-    kraken_labelData = directory + '/' + label_data
-
-    result_names=["Classified", "Seq_ID","Tax_ID", "length", "k-mer classification" ]
+    result_names=["Classified", "Seq_ID","Tax_ID", "length", "k-mer" ]
     label_names=["Seq_ID", "Seq_tax"] #(superkingdom, kingdom, phylum, class, order, family, genus, species)
 
     # Read tables in with pandas
-    kraken_result = pd.read_csv(result_data, sep="\t", header = None, names= result_names)
-    kraken_label = pd.read_csv(label_data, sep="\t", header = None, names= label_names)
+    kraken_result = pd.read_csv(directory + result_data, sep="\t", header = None, names= result_names)
+    kraken_label = pd.read_csv(directory + label_data, sep="\t", header = None, names= label_names)
 
     # Merge result tables for Kraken - to include taxonomc names to each sequence that was classified - http://chrisalbon.com/python/pandas_join_merge_dataframe.html
-    kraken_table = pd.merge(kraken_result, kraken_label, on='Seq_ID', how='outer')
+    kraken_result = pd.merge(kraken_result, kraken_label, on='Seq_ID', how='outer')
 
-### To be able to identify what broad category (plant, virus bacteria, etc) a sequence has been categorised into and NCBI taxonomy table was made with the broad categories next to each taxID and merged with the kraken results table
+    # Add taxa information from NCBI
+    Div_tax = {'UNA':'Unannotated', 'BCT':'Bacteria', 'ENV':'Environmental samples', 'SYN':'Synthetic', 'PLN':'Plants', 'INV':'Invertebrates', 'VRT':'Other vertebrates', 'MAM':'Other mammals', 'PRI':'Primates', 'ROD':'Rodents', 'VRL':'Viruses', 'PHG':'Phages'}
 
-# Possible categories for NCBI_taxonomy table abreviations and long names:
-Div_tax = {'UNA':'Unannotated', 'BCT':'Bacteria', 'ENV':'Environmental samples', 'SYN':'Synthetic', 'PLN':'Plants', 'INV':'Invertebrates', 'VRT':'Other vertebrates', 'MAM':'Other mammals', 'PRI':'Primates', 'ROD':'Rodents', 'VRL':'Viruses', 'PHG':'Phages'}
+    # Read in NCBI table - made using script /home/scripts_inProcess/NCBI_taxonomy.py
+    ncbi_tax = pd.read_csv('/home/ae42909/Scratch/kraken/kraken_analysis/customDatabase/NCBI_taxonomy.csv', sep=",")
+    ncbi_slice = ncbi_tax.iloc[:,[1,2]]
 
-# Read in NCBI table - made using script /home/scripts_inProcess/NCBI_taxonomy.py
-ncbi_tax = pd.read_csv('/home/ae42909/Scratch/kraken/kraken_analysis/customDatabase/NCBI_taxonomy.csv', sep=",")
-ncbi_slice = ncbi_tax.iloc[:,[1,2]]
+    # Merge tables NCBI taxonomy categories with kraken data
+    kraken_all =  pd.merge(kraken_result, ncbi_slice, on='Tax_ID', how='outer')
 
-# Merge tables NCBI taxonomy categories with kraken data
-kraken_all =  pd.merge(kraken_all, ncbi_slice, on='Tax_ID', how='outer')
+    # Remove entries from the NCBI table that do not correspond to any in the kraken results table, convert sequence IDs back to str and export results table to append further data
+    kraken_all = kraken_all.dropna(subset = ['Seq_ID'])
+    kraken_all[['Seq_ID']] = kraken_all[['Seq_ID']].astype(str) # Not the same as the def in 'sequence_reanalysis.py
+    return kraken_all
 
-# Remove entries from the NCBI table that do not correspond to any in the kraken results table
-kraken_all = kraken_all.dropna(subset = ['Seq_ID', 'Classified'])
+kraken_aa_table = kraken_analysis('kraken_aa_results', 'kraken_aa_labels')
 
-# Make a list of "Seq_ID" column value if sequence is unclassified in "Classified" column or classified as VRL (virus) in column "Div_ID". This list will be used to determine which sequences will be further analysed by Kaiju and retranslation.py
+### Find which of the 6 frames is most likely
+# Make a new column for Seq_ID and frame (1:6) separetely
 
-unclassified_IDs = kraken_all.loc[(kraken_all.Classified == 'U'), ['Seq_ID']]
-VRL_IDs = kraken_all.loc[(kraken_all.Div_ID == 'VRL'), ['Seq_ID']]
-reanalyse_IDs = unclassified_IDs['Seq_ID'].tolist() + VRL_IDs['Seq_ID'].tolist()
+frame_df = pd.DataFrame(kraken_aa_table.Seq_ID.str.split('_',1).tolist(),columns = ['Seq_ID','aa_frame'])
 
-# Export the list seq_reanalyse so that each line is a Seq_ID
-outfile = open("test_reanalyse_IDs1.txt", "w")
-print >> outfile, "\n".join(str(i) for i in test)
-outfile.close()
+ # remove colmn with Seq_ID + frame number
 
-
-# Use biopython to make new fastq files of sequences to be reanalysed. The IDs from Kraken ('Seq_ID') don't correspond to the IDs when you parse data with SeqIO, they are shortened (don't have the "/1" and "/2" that identifies them as paired end 1 and 2). It is easy to add the "/1" (as is done in the section "Test ID" below), but it could be differennt for different paired end files so need to find a better solution.
-
-####### Test ID: Having a problem with te IDs (they need to be exact so tha seqio can identify them in "records"). This test is to check if indeed taht is the case (only requires a "/1" or "/2"). The output of this test ("subset_Potato_withViruses_1/2.fastq") was fed into Kaiju for protein analysis and it worked.
-
-# Test for first pairend fastq file:
-#test1 = [s + "/1" for s in reanalyse_IDs]
-
-#outfile = open("test_reanalyse_IDs1.txt", "w")
-#print >> outfile, "\n".join(str(i) for i in test1)
-#outfile.close()
-
-#id_file = "test_reanalyse_IDs1.txt"
-#wanted = set(line.rstrip("\n").split(None,1)[0] for line in open(id_file))
-#print "Found %i unique identifiers in %s" % (len(wanted), id_file)
-
-#input_file = "Potato_withViruses_1.fastq"
-#output_file = "subset_Potato_withViruses_1.fastq"
-#records = (r for r in SeqIO.parse(input_file, "fastq") if r.id in wanted)
-#count = SeqIO.write(records, output_file, "fastq")
-#print "Saved %i records from %s to %s" % (count, input_file, output_file)
-#if count < len(wanted):
-#    print "Warning %i IDs not found in %s" % (len(wanted)-count, input_file)
-
-# Test for second pairend fastq file:
-#test2 = [s + "/2" for s in reanalyse_IDs]
-
-#outfile = open("test_reanalyse_IDs2.txt", "w")
-#print >> outfile, "\n".join(str(i) for i in test2)
-#outfile.close()
-    
-#id_file = "test_reanalyse_IDs2.txt"
-#wanted = set(line.rstrip("\n").split(None,1)[0] for line in open(id_file))
-#print "Found %i unique identifiers in %s" % (len(wanted), id_file)
-
-#input_file = "Potato_withViruses_2.fastq"
-#output_file = "subset_Potato_withViruses_2.fastq"
-#records = (r for r in SeqIO.parse(input_file, "fastq") if r.id in wanted)
-#count = SeqIO.write(records, output_file, "fastq")
-#print "Saved %i records from %s to %s" % (count, input_file, output_file)
-#if count < len(wanted):
-#    print "Warning %i IDs not found in %s" % (len(wanted)-count, input_file)
+kraken_frame = pd.concat([kraken_aa_table.drop('Seq_ID', axis=1), frame_df], axis=1)
+kraken_frame = kraken_frame.sort_values(['Seq_ID', 'aa_frame'])
+kraken_frame = kraken_frame.reset_index(drop=True) # reset the index as all classifed were out of order (so index was confusinfg)
 
 
-# Find what the SeqIO identifiers have in common - could find extra pattern to add to the Kraken IDs
-
-def longestSubstringFinder(string1, string2):
-    answer = ""
-    len1, len2 = len(string1), len(string2)
-    for i in range(len1):
-        match = ""
-        for j in range(len2):
-            if (i + j < len1 and string1[i + j] == string2[j]):
-                match += string2[j]
-            else:
-                if (len(match) > len(answer)): answer = match
-                match = ""
-    return answer
-
-print longestSubstringFinder("apple pie available", "apple pies")
-print longestSubstringFinder("apples", "appleses")
-print longestSubstringFinder("bapples", "cappleses")
-
-input_file = "Potato_withViruses_1.fastq"
-
-all_IDs = []
-for record in SeqIO.parse(input_file, "fastq"):
-    all_IDs.append(record.id)
-
-
-
-reanalyse_SeqIO_IDs = []
-for ids in reanalyse_IDs:
-    possible_IDs = [s for s in all_IDs if ids in s]
-    if len(possible_IDs) > 1:
-        reanalyse_SeqIO_IDs.append(min(possible_IDs, key=len))
+for seqIDs in range(0,len(kraken_frame)/6):
+    if seqIDs == 0:
+        start = 0
+        end = 5
     else:
-        reanalyse_SeqIO_IDs.append(possible_IDs[0])
-        
+        start = start + 6
+        end = end + 6
+    df_seqID = kraken_frame.loc[start:end]
+    class_seqID = [float(df_seqID[(df_seqID['Classified'] == 'U')].count()[0]), float(df_seqID[(df_seqID['Classified'] == 'C')].count()[0])]
+    table_index = float(kraken_nt_table.index[kraken_nt_table['Seq_ID'] == int(kraken_frame.Seq_ID[start])][0])
+    if class_seqID[1] < 1.0:
+        kraken_nt_table.ix[table_index, 'Backtranslate_classification'] = 'U'
+    if class_seqID[1] == 1.0:
+        kraken_nt_table.ix[table_index, 'Backtranslate_classification'] = 'C'
+        kraken_nt_table.ix[table_index, 'Backtranslate_TaxID'] = df_seqID[df_seqID['Classified'] == 'C'].Tax_ID.item()
+        kraken_nt_table.ix[table_index, 'Backtranslate_k-mer'] = df_seqID[df_seqID['Classified'] == 'C'].Seq_tax.item()
+    if class_seqID[1] > 1.0:
+        kraken_nt_table.ix[table_index, 'Backtranslate_classification'] = 'A'
+    
+
+###############
+import pickle
+ 
+with open(directory + 'class_seqID.pkl', 'wb') as f:
+    pickle.dump(class_list, f)
+
+with open(directory + 'class_seqID.pkl', 'rb') as f:
+  class_list = pickle.load(f)
+
+###############
+
+def frame_analysis (classList, numResults):
+    index_result = []
+    for item in range(0,len(classList)):
+        if classList[item][1] == numResults:
+           index_result.append(item)
+    return index_result
+
+one_class = frame_analysis(class_list, 1)
+two_class = frame_analysis(class_list, 2)
+three_class = frame_analysis(class_list, 3)
+four_class = frame_analysis(class_list, 4) 
+
+# Get the real sequence ID    
 
 def reanalyse_data (list_sequenceData, list_subsetDataNames):
     
