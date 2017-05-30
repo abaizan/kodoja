@@ -295,4 +295,14 @@ example = pd.DataFrame({'col2': {0: 'a', 1: 2, 2: np.nan}, 'col1': {0: 'w', 1: 1
 example.replace({"col1": ID_dict})
 
 # Copy the sequence ID numbers to another column and replace with second sequence ID
+
+# Import replaced sequence IDs
+id1_values = open("ID1", "r").read().split('\n')
+id2_values = open("ID2", "r").read().split('\n')
+id_keys = list(range(1,len(id1_values)))
+id1_dic = dict(zip(id_keys, id1_values))
+id2_dic = dict(zip(id_keys, id2_values))
+
+reanalyse_ID1 = map(id1_dic.get, reanalyse_IDs)
+reanalyse_ID2 = map(id2_dic.get, reanalyse_IDs)
     
