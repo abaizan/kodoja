@@ -1,7 +1,7 @@
 import pybedtools
 import pandas as pd
 # Tutorial https://daler.github.io/pybedtools/intersections.html
-# Explanation of different arguments for intersectBED
+# Explanation of different arguments for intersectBED http://bedtools.readthedocs.io/en/latest/content/tools/intersect.html
 
 # Get MACS data and TF data into bed-like format for pybedtools
 def seqmonk_to_bedish (data_loc, outfile_name):
@@ -53,11 +53,11 @@ def intersecting_peaks (rep1_bed, rep2_bed, genotype, outdir):
         outfile_rep2 = outdir + genotype + '_' + element + '_2'
         outfile_joint = outdir + genotype + '_' + element + '_together'
 
-       # TF_rep1 = TF.intersect(rep1) # get ChIP peaks that intersect with MACS peaks
-        TF_rep1 = rep1.intersect(TF)  # get MACS peaks that intersect with ChIP peaks
+        TF_rep1 = TF.intersect(rep1) # get ChIP peaks that intersect with MACS peaks
+       # TF_rep1 = rep1.intersect(TF)  # get MACS peaks that intersect with ChIP peaks - make sure you change the percent too!
         TF_rep1.saveas(outfile_rep1)
-       # TF_rep2 = TF.intersect(rep2)
-        TF_rep2 = rep2.intersect(TF)
+        TF_rep2 = TF.intersect(rep2)
+       # TF_rep2 = rep2.intersect(TF)
         TF_rep2.saveas(outfile_rep2)
         TF_joint = TF_rep1.intersect(TF_rep2)
         TF_joint.saveas(outfile_joint)
