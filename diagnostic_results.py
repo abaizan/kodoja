@@ -179,20 +179,7 @@ subsetDataNames = ["subset_Potato_withViruses_1.fastq", "subset_Potato_withVirus
 
 
 
-############ Merge Kaiju and kraken results
-os.chdir('/home/ae42909/Scratch/kaiju')
 
-# Name of the data to be analysed
-#result_data='SynthPotato_ouput'
-result_data='subsetSynthPotato_ouput'
-result_names=["Classified", "Seq_ID","Tax_ID", "length_bestmatch", "Tax_AN","accession_multiple", "Fragment" ]
-
-kaiju_result = pd.read_csv(result_data, sep="\t", header = None, names= result_names)
-
-kaiju_small = kaiju_result[['Classified','Seq_ID','Tax_ID']]
-
-# Merge Kraken and Kaiju results
-Ks = pd.merge(kraken_all, kaiju_small, on='Seq_ID', how='outer')
 
 
 
