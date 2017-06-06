@@ -4,17 +4,14 @@
 #$ -j yes
 #$ -pe smp 4
 THREADS=4
-DIROUT=fdrlDefult # mkdir before running
+#PEAKS=$1
+#BAM=$2
+#DIROUT=$3
 
-for TF in peak_intersect/pyDNase_ragEBF1 peak_intersect/pyDNase_ragPAX5
-do
-    PEAKS=$TF
-    for DATA in RAGko_1_sorted.bam RAGko_2_sorted.bam IL7RxRAGko_1_sorted.bam IL7RxRAGko_2_sorted.bam
-    do
-	BAM=$DATA
-	wellington_footprints.py -A $PEAKS $BAM $DIROUT
-    done
-done
+#wellington_footprints.py -A $PEAKS $BAM $DIROUT
+
+wellington_footprints.py -A peak_intersect/pyDNase_ragEBF1 bam_data/RAGko_1_sorted.bam wellington/RAGko1_test
+
 
 
 # PEAKS=peak_intersect/pyDNase_ragEBF1
