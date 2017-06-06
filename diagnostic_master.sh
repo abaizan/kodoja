@@ -31,12 +31,12 @@ python /home/ae42909/scripts_inProcess/sequences_reanalysis.py
 /home/ae42909/scripts_inProcess/kaiju_nucleotide.sh
 
 # Emboss translation
-/home/ae42909/scripts_inProcess/translate_nucleotide.sh
+# /home/ae42909/scripts_inProcess/translate_nucleotide.sh
 
 # Backtranslate
-python /home/ae42909/scripts_inProcess/backtranslate.py
+# python /home/ae42909/scripts_inProcess/backtranslate.py
 
 # Kraken analysis of backtranslate
-/home/ae42909/scripts_inProcess/kraken_aminoacids.sh
+# /home/ae42909/scripts_inProcess/kraken_aminoacids.sh
 
 # Result analysis
