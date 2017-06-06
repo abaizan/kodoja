@@ -7,101 +7,155 @@ import re
 import matplotlib.pyplot as plt
 import matplotlib
 matplotlib.style.use('ggplot')
+import time
 #from Bio import SeqIO
 
-directory = os.environ["OUTDIR"]
+#directory = os.environ["OUTDIR"]
+directory = '/home/ae42909/Scratch/synthPotato_pipeline/'
 
-# Import initialresults from sequence_reanalysis.py
+# Import initial results from sequence_reanalysis.py
 kraken_nt_table = pd.read_csv(directory + 'kraken_nt_table', header = 0, sep='\t')
-kraken_nt_table["Backtranslate_classification"] =''
-kraken_nt_table["Backtranslate_TaxID"] = ''
-kraken_nt_table["Backtranslate_k-mer"] = ''
 
+# Merge Kaiju and kraken results
+kaiju_data= directory + 'kaiju_ouput'
+kaiju_names=["kaiju_classified", "Seq_ID","kaiju_TaxID", "length_bestmatch", "Tax_AN","accession_multiple", "Fragment" ]
+kaiju_result = pd.read_csv(kaiju_data, sep="\t", header = None, names= kaiju_names)
+#kaiju_small = kaiju_result[['kaiju_classified', 'Seq_ID','kaiju_TaxID']]
+
+# Merge Kraken and Kaiju results
+kraiju = pd.merge(kraken_nt_table, kaiju_result, on='Seq_ID', how='outer')
+kraiju = kraiju.sort_values(['Seq_ID'])
+kraiju = kraiju.reset_index(drop=True)
+
+# Find what viruses are in the sample
+
+
+
+# How confiden
+
+
+
+
+
+# Add colums for backtranslate results
+# kraiju["Backtranslate_classification"] = np.nan
+# kraiju["Backtranslate_TaxID"] = np.nan
+# kraiju["Backtranslate_k-mer"] = np.nan
 
 #Import results from aa kraken analysis (backtranslated sequences), add labels and NCBi taxa
 
-def kraken_analysis(result_data, label_data):
-    result_names=["Classified", "Seq_ID","Tax_ID", "length", "k-mer" ]
-    label_names=["Seq_ID", "Seq_tax"] #(superkingdom, kingdom, phylum, class, order, family, genus, species)
+# def kraken_analysis(result_data, label_data):
+#     result_names=["Classified", "Seq_ID","Tax_ID", "length", "k-mer" ]
+#     label_names=["Seq_ID", "Seq_tax"] #(superkingdom, kingdom, phylum, class, order, family, genus, species)
 
-    # Read tables in with pandas
-    kraken_result = pd.read_csv(directory + result_data, sep="\t", header = None, names= result_names)
-    kraken_label = pd.read_csv(directory + label_data, sep="\t", header = None, names= label_names)
+#     # Read tables in with pandas
+#     kraken_result = pd.read_csv(directory + result_data, sep="\t", header = None, names= result_names)
+#     kraken_label = pd.read_csv(directory + label_data, sep="\t", header = None, names= label_names)
 
-    # Merge result tables for Kraken - to include taxonomc names to each sequence that was classified - http://chrisalbon.com/python/pandas_join_merge_dataframe.html
-    kraken_result = pd.merge(kraken_result, kraken_label, on='Seq_ID', how='outer')
+#     # Merge result tables for Kraken - to include taxonomc names to each sequence that was classified - http://chrisalbon.com/python/pandas_join_merge_dataframe.html
+#     kraken_result = pd.merge(kraken_result, kraken_label, on='Seq_ID', how='outer')
 
-    # Add taxa information from NCBI
-    Div_tax = {'UNA':'Unannotated', 'BCT':'Bacteria', 'ENV':'Environmental samples', 'SYN':'Synthetic', 'PLN':'Plants', 'INV':'Invertebrates', 'VRT':'Other vertebrates', 'MAM':'Other mammals', 'PRI':'Primates', 'ROD':'Rodents', 'VRL':'Viruses', 'PHG':'Phages'}
+#     # Add taxa information from NCBI
+#     Div_tax = {'UNA':'Unannotated', 'BCT':'Bacteria', 'ENV':'Environmental samples', 'SYN':'Synthetic', 'PLN':'Plants', 'INV':'Invertebrates', 'VRT':'Other vertebrates', 'MAM':'Other mammals', 'PRI':'Primates', 'ROD':'Rodents', 'VRL':'Viruses', 'PHG':'Phages'}
 
-    # Read in NCBI table - made using script /home/scripts_inProcess/NCBI_taxonomy.py
-    ncbi_tax = pd.read_csv('/home/ae42909/Scratch/kraken/kraken_analysis/customDatabase/NCBI_taxonomy.csv', sep=",")
-    ncbi_slice = ncbi_tax.iloc[:,[1,2]]
+#     # Read in NCBI table - made using script /home/scripts_inProcess/NCBI_taxonomy.py
+#     ncbi_tax = pd.read_csv('/home/ae42909/Scratch/kraken/kraken_analysis/customDatabase/NCBI_taxonomy.csv', sep=",")
+#     ncbi_slice = ncbi_tax.iloc[:,[1,2]]
 
-    # Merge tables NCBI taxonomy categories with kraken data
-    kraken_all =  pd.merge(kraken_result, ncbi_slice, on='Tax_ID', how='outer')
+#     # Merge tables NCBI taxonomy categories with kraken data
+#     kraken_all =  pd.merge(kraken_result, ncbi_slice, on='Tax_ID', how='outer')
 
-    # Remove entries from the NCBI table that do not correspond to any in the kraken results table, convert sequence IDs back to str and export results table to append further data
-    kraken_all = kraken_all.dropna(subset = ['Seq_ID'])
-    kraken_all[['Seq_ID']] = kraken_all[['Seq_ID']].astype(str) # Not the same as the def in 'sequence_reanalysis.py
-    return kraken_all
+#     # Remove entries from the NCBI table that do not correspond to any in the kraken results table, convert sequence IDs back to str and export results table to append further data
+#     kraken_all = kraken_all.dropna(subset = ['Seq_ID'])
+#     kraken_all[['Seq_ID']] = kraken_all[['Seq_ID']].astype(str) # Not the same as the def in 'sequence_reanalysis.py
+#     return kraken_all
 
-kraken_aa_table = kraken_analysis('kraken_aa_results', 'kraken_aa_labels')
+# kraken_aa_table = kraken_analysis('kraken_aa_results', 'kraken_aa_labels')
 
-### Find which of the 6 frames is most likely
-# Make a new column for Seq_ID and frame (1:6) separetely
+# ### Find which of the 6 frames is most likely
+# # Make a new column for Seq_ID and frame (1:6) separetely
 
-frame_df = pd.DataFrame(kraken_aa_table.Seq_ID.str.split('_',1).tolist(),columns = ['Seq_ID','aa_frame'])
+# frame_df = pd.DataFrame(kraken_aa_table.Seq_ID.str.split('_',1).tolist(),columns = ['Seq_ID','aa_frame'])
 
- # remove colmn with Seq_ID + frame number
+#  # remove colmn with Seq_ID + frame number
 
-kraken_frame = pd.concat([kraken_aa_table.drop('Seq_ID', axis=1), frame_df], axis=1)
-kraken_frame = kraken_frame.sort_values(['Seq_ID', 'aa_frame'])
-kraken_frame = kraken_frame.reset_index(drop=True) # reset the index as all classifed were out of order (so index was confusinfg)
+# kraken_frame = pd.concat([kraken_aa_table.drop('Seq_ID', axis=1), frame_df], axis=1)
+# kraken_frame['Seq_ID'] = kraken_frame['Seq_ID'].apply(int)
+# kraken_frame = kraken_frame.sort_values(['Seq_ID', 'aa_frame'])
+# kraken_frame = kraken_frame.reset_index(drop=True) # reset the index as all classifed were out of order (so index was confusing)
 
 
-for seqIDs in range(0,len(kraken_frame)/6):
-    if seqIDs == 0:
-        start = 0
-        end = 5
-    else:
-        start = start + 6
-        end = end + 6
-    df_seqID = kraken_frame.loc[start:end]
-    class_seqID = [float(df_seqID[(df_seqID['Classified'] == 'U')].count()[0]), float(df_seqID[(df_seqID['Classified'] == 'C')].count()[0])]
-    table_index = float(kraken_nt_table.index[kraken_nt_table['Seq_ID'] == int(kraken_frame.Seq_ID[start])][0])
-    if class_seqID[1] < 1.0:
-        kraken_nt_table.ix[table_index, 'Backtranslate_classification'] = 'U'
-    if class_seqID[1] == 1.0:
-        kraken_nt_table.ix[table_index, 'Backtranslate_classification'] = 'C'
-        kraken_nt_table.ix[table_index, 'Backtranslate_TaxID'] = df_seqID[df_seqID['Classified'] == 'C'].Tax_ID.item()
-        kraken_nt_table.ix[table_index, 'Backtranslate_k-mer'] = df_seqID[df_seqID['Classified'] == 'C'].Seq_tax.item()
-    if class_seqID[1] > 1.0:
-        kraken_nt_table.ix[table_index, 'Backtranslate_classification'] = 'A'
+
+# t0 = time.time()
+# #for seqIDs in range(0,len(kraken_frame)/6):
+# for i in range(0,200):
+#     start = i*6
+#     end  = start + 6
     
+#     df_seqID = kraken_frame.iloc[start:end]
+#     class_seqID = np.sum(class_arr[start:end])
+#     table_index = np.where(ix_arr == int(kraken_frame.Seq_ID[start]))[0][0]
+#     if class_seqID < 1.0:
+#         kraiju.ix[table_index, 'Backtranslate_classification'] = 'U'
+#     if class_seqID == 1.0:
+#         kraiju.ix[table_index, 'Backtranslate_classification'] = 'C'
+#         kraiju.ix[table_index, 'Backtranslate_TaxID'] = df_seqID[df_seqID['Classified'] == 'C'].Tax_ID.item()
+#         kraiju.ix[table_index, 'Backtranslate_k-mer'] = df_seqID[df_seqID['Classified'] == 'C'].Seq_tax.item()
+#     if class_seqID > 1.0:
+#         kraiju.ix[table_index, 'Backtranslate_classification'] = 'A'
+# t1 = time.time()
+# print t1-t0
 
-###############
-import pickle
- 
-with open(directory + 'class_seqID.pkl', 'wb') as f:
-    pickle.dump(class_list, f)
 
-with open(directory + 'class_seqID.pkl', 'rb') as f:
-  class_list = pickle.load(f)
 
-###############
+# def backtranslate_analysis (kraiju_data, frame_data):
+#     kraiju_reanalysis = kraiju_data.loc[(kraiju_data.Classified == 'U')].append(kraiju_data.loc[(kraiju_data.Div_ID == 'VRL')])
+#     kraiju_left = kraiju_data.loc[(kraiju_data.Classified != 'U') & (kraiju_data.Div_ID != 'VRL')]
 
-def frame_analysis (classList, numResults):
-    index_result = []
-    for item in range(0,len(classList)):
-        if classList[item][1] == numResults:
-           index_result.append(item)
-    return index_result
+#     class_arr = np.asarray(frame_data['Classified'] == 'C')
+#     ix_arr = np.asarray(kraiju_data['Seq_ID'])
+#     df_together = pd.DataFrame(data={'kraiju_ix':[],
+#                              'Backtranslate_classification':[],
+#                              'Backtranslate_TaxID':[],
+#                              'Backtranslate_k-mer':[]})
 
-one_class = frame_analysis(class_list, 1)
-two_class = frame_analysis(class_list, 2)
-three_class = frame_analysis(class_list, 3)
-four_class = frame_analysis(class_list, 4) 
+#     #for i in range(0,len(frame_data)/6):
+#     for i in range(0,2000):
+#         start = i*6
+#         end  = start + 6
+
+#         df_seqID = frame_data.iloc[start:end]
+#         class_seqID = np.sum(class_arr[start:end])
+#         table_index = np.where(ix_arr== int(frame_data.Seq_ID[start]))[0][0]
+
+
+#         if class_seqID < 1:
+#             df_fill = pd.DataFrame(data={'kraiju_ix':table_index,
+#                                          'Backtranslate_classification':['U']})
+#         if class_seqID == 1:
+#             df_fill = pd.DataFrame(data={'kraiju_ix':table_index,
+#                                  'Backtranslate_classification':['C'],
+#                                  'Backtranslate_TaxID':[df_seqID[df_seqID['Classified'] == 'C'].Tax_ID.item()],
+#                                  'Backtranslate_k-mer':[df_seqID[df_seqID['Classified'] == 'C'].Seq_tax.item()]})
+
+#         elif class_seqID > 1:
+#             df_fill = pd.DataFrame(data={'kraiju_ix':table_index,
+#                                  'Backtranslate_classification':['A']})
+
+
+#         df_together = df_together.append(df_fill)
+
+#     df_together = df_together.set_index('kraiju_ix')
+#     kraiju_reanalysis[['Backtranslate_classification', 'Backtranslate_TaxID', 'Backtranslate_k-mer']] = kraiju_reanalysis[['Backtranslate_classification', 'Backtranslate_TaxID', 'Backtranslate_k-mer']].fillna(df_together)
+
+#     kraijate = pd.concat([kraiju_reanalysis, kraiju_left]).sort_values(['Seq_ID'])
+#     return kraijate
+
+# %mprun kraijate = backtranslate_analysis(kraiju, kraken_frame)
+
+# kraijate.to_csv(directory  + 'kraijate_table', sep='\t', index= False)
+
+
 
 # Get the real sequence ID    
 
