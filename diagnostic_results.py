@@ -16,26 +16,51 @@ directory = '/home/ae42909/Scratch/synthPotato_pipeline/'
 # Import initial results from sequence_reanalysis.py
 kraken_nt_table = pd.read_csv(directory + 'kraken_nt_table', header = 0, sep='\t')
 
-# Merge Kaiju and kraken results
+# Import Kaiju results and add ncbi div_ids
 kaiju_data= directory + 'kaiju_ouput'
-kaiju_names=["kaiju_classified", "Seq_ID","kaiju_TaxID", "length_bestmatch", "Tax_AN","accession_multiple", "Fragment" ]
+kaiju_names=["kaiju_classified", "Seq_ID","Tax_ID", "length_bestmatch", "Tax_AN","accession_multiple", "Fragment" ]
 kaiju_result = pd.read_csv(kaiju_data, sep="\t", header = None, names= kaiju_names)
 #kaiju_small = kaiju_result[['kaiju_classified', 'Seq_ID','kaiju_TaxID']]
 
-# Merge Kraken and Kaiju results
-kraiju = pd.merge(kraken_nt_table, kaiju_result, on='Seq_ID', how='outer')
+ncbi_tax = pd.read_csv('/home/ae42909/Scratch/kraken/kraken_analysis/customDatabase/NCBI_taxonomy.csv', sep=",")
+ncbi_slice = ncbi_tax.iloc[:,[1,2]]
+kaiju_final =  pd.merge(kaiju_result, ncbi_slice, on='Tax_ID', how='outer')
+kaiju_final = kaiju_final.dropna(subset = ['Seq_ID']) # Remove entries from the NCBI table that do not correspond to result
+
+# Merge Kaiju and kraken results, sort, reindex and rename two columns
+kraiju = pd.merge(kraken_nt_table, kaiju_final, on='Seq_ID', how='outer')
 kraiju = kraiju.sort_values(['Seq_ID'])
 kraiju = kraiju.reset_index(drop=True)
+kraiju.rename(columns={'Div_ID_x':'kraken_Div_ID', 'Div_ID_y':'kaiju_Div_ID', 'Tax_ID_x':'kraken_Tax_ID', 'Tax_ID_y':'kaiju_Tax_ID'}, inplace=True)
 
-# Find what viruses are in the sample
+# Get results where they are in agreement
+kraiju['combined_result'] = None
+kraiju['combined_result'] = kraiju.kraken_Tax_ID[kraiju['kraken_Tax_ID'] == kraiju['kaiju_Tax_ID']]
+kraiju.to_csv(directory  + 'kraiju_table', sep='\t', index= False)
 
+# Separate reads which are classified as VRL, make a table with all identified viruses and count number of intances for each
+kraiju_vrl = kraiju_data[(kraiju_data.kraken_Div_ID == 'VRL') | (kraiju_data.kaiju_Div_ID == 'VRL')]
 
+# Create a summary table 
+def summary_table(kraiju_data):
+    kraken_class = dict(kraiju_data['kraken_Tax_ID'].value_counts())
+    kaiju_class = dict(kraiju_data['kaiju_Tax_ID'].value_counts())
+    combined_class = dict(kraiju_data['combined_result'].value_counts())
 
-# How confiden
+    class_list = list(set(list(kraken_class.keys()) + list(kaiju_class.keys())))
+    class_list.remove(0)
 
+    table_summary = pd.DataFrame(columns=['Virus name', 'Tax_ID', 'kraken', 'kaiju','combined'])
+    table_summary['Tax_ID'] =  map(int, class_list)
+    table_summary['kraken'] = table_summary['Tax_ID'].map(kraken_class)
+    table_summary['kaiju'] = table_summary['Tax_ID'].map(kaiju_class)
+    table_summary['combined'] = table_summary['Tax_ID'].map(combined_class)
+    table_summary['Virus name'] = table_summary.apply(lambda row: ncbi_tax[ncbi_tax['Tax_ID'] == row['Tax_ID']]['Name'].item(), axis=1)
+    table_summary = table_summary.sort_values(['combined'], ascending=False)
 
+    return table_summary
 
-
+vrl_summary = summary_table(kraiju_vrl)
 
 # Add colums for backtranslate results
 # kraiju["Backtranslate_classification"] = np.nan
