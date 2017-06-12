@@ -4,19 +4,9 @@
 #$ -j yes
 #$ -pe smp 4
 THREADS=4
-#PEAKS=$1
-#BAM=$2
-#DIROUT=$3
-
-#wellington_footprints.py -A $PEAKS $BAM $DIROUT
-
-wellington_footprints.py -A peak_intersect/pyDNase_ragEBF1 bam_data/RAGko_1_sorted.bam wellington/RAGko1_test
-
-
-
-# PEAKS=peak_intersect/pyDNase_ragEBF1
-# BAM=RAGko__sorted.bam
-# DIROUT=RAGko_2_fdrlDefult
+PEAKS=peak_intersect/pyDNase_EBF1
+BAM=bam_data/RAGko_1_sorted.bam
+DIROUT=wellington/RAGko1_EBF1
 
 #optional arguments:
 #  -h, --help            show this help message and exit
@@ -50,4 +40,4 @@ wellington_footprints.py -A peak_intersect/pyDNase_ragEBF1 bam_data/RAGko_1_sort
 #  -p P                  Number of processes to use (default: uses all CPUs)
 #  -A                    ATAC-seq mode (default: False)
 
-# wellington_footprints.py -A $PEAKS $BAM $DIROUT
+wellington_footprints.py -A $PEAKS $BAM $DIROUT
