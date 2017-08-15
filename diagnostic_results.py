@@ -11,10 +11,12 @@ import time
 #from Bio import SeqIO
 
 #directory = os.environ["OUTDIR"]
-directory = '/home/ae42909/Scratch/synthPotato_pipeline/'
+#directory = '/home/ae42909/Scratch/synthPotato_pipeline/'
+directory = '/home/ae42909/Scratch/fullPipeline_krakenDB_viral/'
 
 # Import initial results from sequence_reanalysis.py
-kraken_nt_table = pd.read_csv(directory + 'kraken_nt_table', header = 0, sep='\t')
+# kraken_nt_table = pd.read_csv(directory + 'kraken_nt_table', header = 0, sep='\t')
+kraken_nt_table = pd.read_csv(directory + 'kraken_FormatedTable.txt', header = 0, sep='\t')
 
 # Import Kaiju results and add ncbi div_ids
 kaiju_data= directory + 'kaiju_ouput'
@@ -39,10 +41,12 @@ kraiju['combined_result'] = kraiju.kraken_Tax_ID[kraiju['kraken_Tax_ID'] == krai
 kraiju.to_csv(directory  + 'kraiju_table', sep='\t', index= False)
 
 # Separate reads which are classified as VRL, make a table with all identified viruses and count number of intances for each
-kraiju_vrl = kraiju_data[(kraiju_data.kraken_Div_ID == 'VRL') | (kraiju_data.kaiju_Div_ID == 'VRL')]
+kraiju_vrl = kraiju[(kraiju.kraken_Div_ID == 'VRL') | (kraiju.kaiju_Div_ID == 'VRL')]
 
 # Create a summary table 
+
 def summary_table(kraiju_data):
+    ncbi_tax = pd.read_csv('/home/ae42909/Scratch/kraken/kraken_analysis/customDatabase/NCBI_taxonomy.csv', sep=",")
     kraken_class = dict(kraiju_data['kraken_Tax_ID'].value_counts())
     kaiju_class = dict(kraiju_data['kaiju_Tax_ID'].value_counts())
     combined_class = dict(kraiju_data['combined_result'].value_counts())
@@ -50,17 +54,27 @@ def summary_table(kraiju_data):
     class_list = list(set(list(kraken_class.keys()) + list(kaiju_class.keys())))
     class_list.remove(0)
 
-    table_summary = pd.DataFrame(columns=['Virus name', 'Tax_ID', 'kraken', 'kaiju','combined'])
+    table_summary = pd.DataFrame(columns=['Name', 'Tax_ID', 'kraken', 'kaiju','combined'])
     table_summary['Tax_ID'] =  map(int, class_list)
     table_summary['kraken'] = table_summary['Tax_ID'].map(kraken_class)
     table_summary['kaiju'] = table_summary['Tax_ID'].map(kaiju_class)
     table_summary['combined'] = table_summary['Tax_ID'].map(combined_class)
-    table_summary['Virus name'] = table_summary.apply(lambda row: ncbi_tax[ncbi_tax['Tax_ID'] == row['Tax_ID']]['Name'].item(), axis=1)
+
+
+    def name_lookup(each_row):
+        try:
+            tax_name = ncbi_tax[ncbi_tax['Tax_ID'] == each_row['Tax_ID']]['Name'].item()
+        except:
+            tax_name = 'Not found'
+        return tax_name  
+
+    table_summary['Name'] = table_summary.apply(lambda row: name_lookup(row), axis=1)
     table_summary = table_summary.sort_values(['combined'], ascending=False)
 
     return table_summary
 
 vrl_summary = summary_table(kraiju_vrl)
+vrl_summary.to_csv('virus table.txt', sep = '\t', index = False)
 
 # Add colums for backtranslate results
 # kraiju["Backtranslate_classification"] = np.nan
@@ -218,11 +232,14 @@ library_ID['UBSV']=['ERR996011', 946046, 'Ipomovirus']
 library_ID['BSV']=['ERR996013', 137758, 'Ipomovirus']
 library_ID['Potato']=['SRR1207289', 4113, 'Solanum']
 
+# Convert 'Tax_ID' column to str
+kraken_all['Tax_ID'] = kraken_all['Tax_ID'].astype(str)
+
 # Summarise kraken data: percent of sequences (from each key in library_ID) which are unclassified,  classified correctly or classified incorrectly at the species level
 kraken_summary = pd.DataFrame(columns=['Unclassified', 'Classified_correctly','Classified_incorrectly'], index=library_ID.keys())
  
 for key in library_ID.keys():
-    unclassified_total = kraken_all[(kraken_all.Seq_ID.str.contains(library_ID[key][0])) & (kraken_all['Classified'] == 'U')].count()
+    unclassified_total = kraken_all[(kraken_all.Seq_ID.contains(library_ID[key][0])) & (kraken_all['Classified'] == 'U')].count()
 
     classified_correct = kraken_all[(kraken_all.Seq_ID.str.contains(library_ID[key][0])) & (kraken_all['Classified'] == 'C') & (kraken_all['Tax_ID'] == library_ID[key][1])].count()
 
