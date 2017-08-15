@@ -1,4 +1,3 @@
-
 #!/bin/bash
 
 DBNAME=/mnt/shared/scratch/ae42909/201609_BBSRC_Diagnostics/kraken/customdataset/CD_build
