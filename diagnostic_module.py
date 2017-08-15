@@ -1,17 +1,19 @@
 # python 2.7.13
 import subprocess
+import pandas as pd
+import numpy as np
+import os
 from Bio import SeqIO
-
+from itertools import izip
 
 # Test input data format
 def test_format(file1, user_format):
-
     with open(file1) as myfile:
         small_file = [next(myfile) for x in xrange(8)]
 
     file_format = "not identified"
 
-    if small_file[0][0] == "@" and small_file[3][0] == "@":
+    if small_file[0][0] == "@" and small_file[4][0] == "@":
         file_format = "fastq"
     if small_file[0][0] == ">" and small_file[2][0] == ">":
         file_format = "fasta"
@@ -27,7 +29,7 @@ def fastqc_trim(out_dir, file1, trimlen, threads, file2 = False):
 
     if file2:
         subprocess.call("fastqc " + file2 + " -o " + out_dir, shell=True)
-        subprocess.call("java -jar /mnt/apps/trimmomatic/0.32/trimmomatic.jar PE -threads " + threads + " " + file1 + " " + file2 +
+        subprocess.call("java -jar /mnt/apps/trimmomatic/0.32/trimmomatic.jar PE -threads " + threads + " " + file1 + " " + file2 + 
                         " PE_trimmed_data_1P PE_trimmed_data_1U PE_trimmed_data_2P PE_trimmed_data_2U " +
                         "ILLUMINACLIP:$ADAPTERS:2:30:10 LEADING:20 TRAILING:20 MINLEN:" + trimlen, shell=True)
         subprocess.call("rm PE_trimmed_data_1U PE_trimmed_data_2U", shell=True)
@@ -37,8 +39,8 @@ def fastqc_trim(out_dir, file1, trimlen, threads, file2 = False):
                         "ILLUMINACLIP:$ADAPTERS:2:30:10 LEADING:20 TRAILING:20 MINLEN:" + trimlen, shell=True)
 
 
-# Order and replace names
-def rename_seq(trim_file, user_format, paired=False):
+# Order and replace sequence IDs with numberic IDs
+def rename_seq(trim_file, out_dir, user_format, paired=False):
     if user_format == "fasta":
         form_line = 2
         symb = ">"
