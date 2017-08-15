@@ -6,7 +6,7 @@ THREADS=4
 TRIMLEN=$1
 FILE1=$2
 
-#trimmomatic requires both PE files to be called the same so file2 can b recognised by file1
+#trimmomatic requires both PE files to be called the same so file2 can be recognised by file1
 
 fastqc $FILE1 -o $OUTDIR
 
@@ -20,3 +20,6 @@ else
     fastqc $FILE2 -o $OUTDIR
     trimmomatic PE -basein $FILE1 -baseout PE_trimmed_data -threads $THREADS  ILLUMINACLIP:$ADAPTERS:2:30:10 LEADING:20 TRAILING:20 MINLEN:$TRIMLEN
 fi
+
+
+# java -jar /mnt/apps/trimmomatic/0.32/trimmomatic PE -threads $THREADS $FILE1 $FILE2 PE_trimmed_data_1P PE_trimmed_data_1U PE_trimmed_data_1P PE_trimmed_data_1U ILLUMINACLIP:$ADAPTERS:2:30:10 LEADING:20 TRAILING:20 MINLEN:$TRIMLEN
