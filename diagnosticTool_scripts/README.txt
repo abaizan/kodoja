@@ -11,5 +11,6 @@ diagnostic_master.py - this script contains the parameters and calls the modules
 diagnostic_module.py - this contains all the functions called by diagnostic_master.py
 
 There are also scripts to make a custom k-mer database for kraken:
-database_construction.sh - this script is to qsub the master python script
-database_construction.py - this script contains the parameters and calls the modules to create a new database
+database_master.sh - this script is to qsub the master python script
+database_master.py - this script contains the parameters and calls the modules to create a new database
+database_modules.py - contains all the functions called by database_master.py
