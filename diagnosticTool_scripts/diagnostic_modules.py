@@ -22,11 +22,11 @@ def test_format(file1, user_format):
 
 
 # QC and trim data
-def fastqc_trim(out_dir, file1, trimlen, threads, file2 = False):
+def fastqc_trim(out_dir, file1, trim_minlen, threads, adapter_file, file2 = False):
 
     subprocess.call("fastqc " + file1 + " -o " + out_dir, shell=True)
 
-    trimAdapt_command = "ILLUMINACLIP:$ADAPTERS:2:30:10 LEADING:20 TRAILING:20 MINLEN:" + trimlen
+    trimAdapt_command = "ILLUMINACLIP:" + adapter_file + ":2:30:10 LEADING:20 TRAILING:20 MINLEN:" + trim_minlen
 
     if file2:
         subprocess.call("fastqc " + file2 + " -o " + out_dir, shell=True)
