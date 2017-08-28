@@ -5,51 +5,75 @@ import numpy as np
 import os
 import urllib
 import re
-import StringIO
-# from Bio import SeqIO
 
+# Check directory paths have "/" at end
+def check_path(dirs):
+    if dirs[-1] != "/":
+        return "/"
+    else:
+        return ""
 
-# Download refseq files from ncbi ftp site - use ncbi-genome-download - and the assembly_summary.txt" file for taxid information
-def ncbi_download(file_format, genome_download_dir, parallel=False):
+# Download refseq files from ncbi ftp site - use ncbi-genome-download
+def ncbi_download(tool, genome_download_dir, parallel=False):
+    assert (tool == "kraken") | (tool == "kaiju"), "Argument 'tool' must be either 'kraken' or 'kaiju'."
+    if tool == "kraken":
+        file_format = "fasta"
+    else:
+        file_format = "protein-fasta"
+
+    # Check directory exists
+    if not os.path.exists(genome_download_dir):
+        os.makedirs(genome_download_dir)
+        
     ngd_command = "ncbi-genome-download -F " + file_format +  " -o " + genome_download_dir + " viral "
     if parallel:
         ngd_command += "--parallel " + parallel
     subprocess.call(ngd_command, shell = True)
     
-# Rename sequence identifiers for ".fna" genomic files downloaded using "ncbi_download"
-def kraken_fna_rename(genome_download_dir):
-    # Download assembly summary file from ncbi ftp site and load as pandas dataframe
+# Rename ncbi data files for custom databases
+def ncbi_rename_customDB(tool, genome_download_dir):
+    assert (tool == "kraken") | (tool == "kaiju"), "Argument 'tool' must be either 'kraken' or 'kaiju'."
+    if tool == "kraken":
+        file_extension = ".fna.gz"
+    else:
+        file_extension = ".faa.gz"
+
     genome_download_dir += "refseq/"
-    os.chdir(genome_download_dir)  
-    urllib.urlretrieve('ftp://ftp.ncbi.nih.gov/genomes/refseq/viral/assembly_summary.txt', 'viral_assembly_summary.txt')
+    # Download assembly summary file from ncbi ftp site and load as pandas dataframe
+    if not os.path.exists(genome_download_dir + "viral_assembly_summary.txt"):
+        os.chdir(genome_download_dir)
+        urllib.urlretrieve('ftp://ftp.ncbi.nih.gov/genomes/refseq/viral/assembly_summary.txt', 'viral_assembly_summary.txt')
     path_assembly_summary = genome_download_dir + "viral_assembly_summary.txt"
     assembly_summary = pd.read_table(path_assembly_summary, sep='\t', skiprows=1, header = 0)
     assembly_summary.rename(columns={'# assembly_accession':'assembly_accession'}, inplace=True)  # rename column to exclude "#"
-
-    # Rename all .fna files so that sequence identifiers comply with Kraken requirments
-    for root, subdirs, files in os.walk(genome_download_dir + "viral/"):
+    
+    for root, subdirs, files in os.walk(genome_download_dir):
         for filename in files:
-            if filename[-7:] == ".fna.gz":
-                zip_file = os.path.join(root, filename)
+            if filename.endswith(file_extension):
+                zip_filename = os.path.join(root, filename)
                 # Uncompress ".gz" file
-                subprocess.call("gunzip " + zip_file, shell =True)
-                unzip_file = zip_file[:-3]
+                subprocess.call("gunzip " + zip_filename, shell =True)
+                unzip_filename = zip_filename[:-3]
 
                 # Retrieve assembly accession number for file
-                assembly_accession = re.findall(r'/viral/([^(]*)/', unzip_file)
+                assembly_accession = re.findall(r'/viral/([^(]*)/', unzip_filename)
                 # retrieve taxid for file
-                taxid = list(assembly_summary.loc[assembly_summary['assembly_accession'] == assembly_accession[0]]["taxid"])[0]
+                taxid = list(assembly_summary.loc[assembly_summary['assembly_accession'] == assembly_accession[0]]["taxid"])
+                assert (len(taxid) == 1), "Taxid has " + len(taxid) + "vales. Should only have 1 value"
 
-                # Create new genomic file with rename sequence identifier to comply with Kraken requirements
-                renamed_file = unzip_file[:-4] + ".kraken" + unzip_file[-4:]
-                with open(renamed_file, 'w') as out_file, open(unzip_file, 'r') as in_file:
+                # Create new genomic file with rename sequence identifier to comply with tool requirements for custom database
+                renamed_file = unzip_filename[:-4] + "." + tool + unzip_filename[-4:]
+                with open(renamed_file, 'w') as out_file, open(unzip_filename, 'r') as in_file:
                     for line in in_file:
                         if line[0] == ">":
-                            out_file.write(line[:line.index(" ")] + "|kraken:taxid|" + str(taxid) + line[line.index(" "):])
+                            if tool == "kraken":
+                                out_file.write(line[:line.index(" ")] + "|kraken:taxid|" + str(taxid[0]) + line[line.index(" "):])
+                            else:
+                                out_file.write(">" + str(taxid[0]) + "\n")
                         else:
                             out_file.write(line)
                 # Delete original file
-                subprocess.call("rm " + unzip_file,shell=True)
+                subprocess.call("rm " + unzip_filename,shell=True)
                 # Compress modified file
                 subprocess.call("gzip " + renamed_file, shell =True)
 
@@ -63,25 +87,26 @@ def kraken_fna_rename(genome_download_dir):
 #         if files[-3:] == ".gz":
 #             if files[-7:] == ".faa.gz":
 #                 count_file += 1
-        
-        
+ 
 
 # Build the database with the renamed genome files from ncbi
 def krakenDB_build(genome_download_dir, kraken_db_dir, threads, kraken_kmer, kraken_minimizer, jellyfish_hash_size, kraken_max_dbSize = False):
     # Make a kraken database directory
-    os.makedirs(kraken_db_dir)
+    if not os.path.exists(kraken_db_dir):
+        os.makedirs(kraken_db_dir)
     
     # Download taxonomy for Kraken database
-#    subprocess.call("kraken-build --download-taxonomy --threads " + threads + " --db " + kraken_db_dir, shell = True)
+    subprocess.call("kraken-build --download-taxonomy --threads " + threads + " --db " + kraken_db_dir, shell = True)
 
     # Add files downloaded and ready for kraken ("<file>.tax.fna") through krakenDB_download() to kraken library
-for path, subdirs, files in os.walk(genome_download_dir + "refseq/"):
-    for filename in files:
-        if filename.endswith("kraken.fna.gz"):
-            subprocess.call("gunzip " + names,shell = True)
-            unzip_names = names[:-3]
-            subprocess.call("kraken-build --add-to-library "  + os.path.join(path,unzip_names) + " --db " + kraken_db_dir, shell = True)
-            subprocess.call("gzip " + unzip_names, shell = True)
+    for root, subdirs, files in os.walk(genome_download_dir + "refseq/"):
+        for filename in files:
+            if filename.endswith("kraken.fna.gz"):
+                zip_filename = os.path.join(root,filename)
+                subprocess.call("gunzip " + zip_filename,shell = True)
+                unzip_filename = zip_filename[:-3]
+                subprocess.call("kraken-build --add-to-library "  + unzip_filename + " --db " + kraken_db_dir, shell = True)
+                subprocess.call("gzip " + unzip_filename, shell = True)
 
     # Build the command to run kraken-build based on parameters specifed
     kraken_command = "kraken-build --build --threads " + threads + " --db " + kraken_db_dir + " --kmer-len " + kraken_kmer + " --minimizer-len " + kraken_minimizer
@@ -97,44 +122,40 @@ for path, subdirs, files in os.walk(genome_download_dir + "refseq/"):
     subprocess.call("kraken-build --clean --db " + kraken_db_dir, shell = True)
 #    subprocess.call("tar -czvf kraken_db.tar.gz " + kraken_db_dir, shell = True)
 
-# def krakenDB_shrink(kraken_db_dir, num_kmer, newDB_name):
-#     # mkdir newDB_name
-#     subprocess.call("kraken-build --shrink " + num_kmer + " --db " + kraken_db_dir + " --new-db " + newDB_name, shell = True)
+def kaijuDB_build(genome_download_dir, kaiju_db_dir):
+    # Make a kaiju database directory
+    if not os.path.exists(kaiju_db_dir):
+        os.makedirs(kaiju_db_dir)
 
-# def kaijuDB_faa_rename(genome_download_dir):
-    genome_download_dir += "refseq/"
-    # Download assembly summary file from ncbi ftp site and load as pandas dataframe
-    if not os.path.isfile(genome_download_dir + "viral_assembly_summary.txt"):
-        os.chdir(genome_download_dir)
-        urllib.urlretrieve('ftp://ftp.ncbi.nih.gov/genomes/refseq/viral/assembly_summary.txt', 'viral_assembly_summary.txt')
-    path_assembly_summary = genome_download_dir + "viral_assembly_summary.txt"
-    assembly_summary = pd.read_table(path_assembly_summary, sep='\t', skiprows=1, header = 0)
-    assembly_summary.rename(columns={'# assembly_accession':'assembly_accession'}, inplace=True)  # rename column to exclude "#"
+    # Add all .faa files to one fasta file
+    kaijuDB_fasta = kaiju_db_dir + "kaiju_library.faa"
+    count = 0
+    with open(kaijuDB_fasta, "w") as out_file:
+        for root, subdirs, files in os.walk(genome_download_dir + "refseq/"):
+            for filename in files:
+                if filename.endswith("kaiju.faa.gz"):
+                    zip_filename = os.path.join(root,filename)
+                    subprocess.call("gunzip " + zip_filename,shell = True)
+                    unzip_filename = zip_filename[:-3]
+                    with open(unzip_filename, 'r') as in_file:
+                        for line in in_file:
+                            if line[0] == ">":
+                                out_file.write(line[:1] + str(count) + "_" + line[1:])
+                                count += 1
+                            else:
+                                 out_file.write(line)
 
-    # Rename all .fna files so that sequence identifiers comply with Kraken requirments
-    for root, dirs, filenames in os.walk(genome_download_dir + "viral/"):
-        for f in filenames:
-            if f[-7:] == ".faa.gz":
-                zip_file = os.path.join(root, f)
-                # Uncompress ".gz" file
-                subprocess.call("gunzip " + zip_file, shell =True)
-                unzip_file = zip_file[:-3]
+                    subprocess.call("gzip " + unzip_filename, shell = True)
 
-                # Retrieve assembly accession number for file
-                assembly_accession = re.findall(r'/viral/([^(]*)/', unzip_file)
-                # retrieve taxid for file
-                taxid = list(assembly_summary.loc[assembly_summary['assembly_accession'] == assembly_accession[0]]["taxid"])[0]
-
-                # Create new genomic file with rename sequence identifier to comply with Kraken requirements
-                renamed_file = unzip_file[:-4] + ".kraken" + unzip_file[-4:]
-                with open(renamed_file, 'w') as out_file, open(unzip_file, 'r') as in_file:
-                    for line in in_file:
-                        if line[0] == ">":
-                            out_file.write(line[:line.index(" ")] + "|kraken:taxid|" + str(taxid) + line[line.index(" "):])
-                        else:
-                            out_file.write(line)
-                # Delete original file
-                subprocess.call("rm " + unzip_file,shell=True)
-                # Compress modified file
-                subprocess.call("gzip " + renamed_file, shell =True)
+    os.chdir(kaiju_db_dir)
+    # Fetch "nodes.dmp" and "names.dmp"
+    if not os.path.exists(kaiju_db_dir + "names.dmp"):
+        urllib.urlretrieve('ftp://ftp.ncbi.nih.gov/pub/taxonomy/taxdump.tar.gz', 'taxdump.tar.gz')
+        subprocess.call("tar -xzvf taxdump.tar.gz", shell = True)
+        subprocess.call("rm taxdump.tar.gz citations.dmp delnodes.dmp division.dmp gc.prt gencode.dmp merged.dmp readme.txt", shell = True)
+        
+    # Build Kaiju database
+    subprocess.call("mkbwt -n 5 -a ACDEFGHIKLMNPQRSTVWY -o kaiju_library kaiju_library.faa", shell = True)
+    subprocess.call("mkfmi kaiju_library", shell = True)
+    subprocess.call("rm kaiju_library.faa kaiju_library.bwt kaiju_library.sa", shell = True)
 
