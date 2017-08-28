@@ -167,9 +167,12 @@ def seq_reanalysis(kraken_table, kraken_labels, out_dir, user_format, renamed_fi
 # Kaiju classification of subset sequences
 def kaiju_classify(subset_file1, user_format, threads, kaiju_nodes, kaiju_fmi, kaiju_names, kaiju_missmatch, kraken_db, subset_file2 = False):
     if subset_file2:
-        kaiju_command = "/home/ae42909/Programs/Kaiju/kaiju-v1.5.0-linux-x86_64-static/bin/kaiju -z " + threads + " -t " + kaiju_nodes + " -f " + kaiju_fmi + " -i " + subset_file1 + user_format + " and -j " + subset_file2 + user_format + " -o kaiju_table.txt -x -v -a greedy -e" + kaiju_missmatch
+#        kaiju_command = "/home/ae42909/Programs/Kaiju/kaiju-v1.5.0-linux-x86_64-static/bin/kaiju -z " + threads + " -t " + kaiju_nodes + " -f " + kaiju_fmi + " -i " + subset_file1 + user_format + " and -j " + subset_file2 + user_format + " -o kaiju_table.txt -x -v -a greedy -e" + kaiju_missmatch
+        kaiju_command = "kaiju -z " + threads + " -t " + kaiju_nodes + " -f " + kaiju_fmi + " -i " + subset_file1 + user_format + " and -j " + subset_file2 + user_format + " -o kaiju_table.txt -x -v -a greedy -e" + kaiju_missmatch
     else:
-        kaiju_command = "/home/ae42909/Programs/Kaiju/kaiju-v1.5.0-linux-x86_64-static/bin/kaiju -z " + threads + " -t " + kaiju_nodes + " -f " + kaiju_fmi + " -i "  + subset_file1 + user_format + " -o kaiju_table.txt -x -v -a greedy -e" + kaiju_missmatch
+#        kaiju_command = "/home/ae42909/Programs/Kaiju/kaiju-v1.5.0-linux-x86_64-static/bin/kaiju -z " + threads + " -t " + kaiju_nodes + " -f " + kaiju_fmi + " -i "  + subset_file1 + user_format + " -o kaiju_table.txt -x -v -a greedy -e" + kaiju_missmatch
+        kaiju_command = "kaiju -z " + threads + " -t " + kaiju_nodes + " -f " + kaiju_fmi + " -i "  + subset_file1 + user_format + " -o kaiju_table.txt -x -v -a greedy -e" + kaiju_missmatch
+
 
     subprocess.call(kaiju_command, shell = True)
     subprocess.call("kraken-translate --mpa-format --db " + kraken_db + " " + "kaiju_table.txt > kaiju_labels.txt", shell = True)
