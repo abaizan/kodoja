@@ -2,8 +2,8 @@ import os
 import time
 from diagnostic_modules import *
 
+# General parameters
 file2 = False
-threads = "4"
 # file1 = "/home/ae42909/synthetic_RNAseq/mappingRNAseq/concatenated_fastaFiles/Potato_withViruses_1.fastq"
 # file2 = "/home/ae42909/synthetic_RNAseq/mappingRNAseq/concatenated_fastaFiles/Potato_withViruses_2.fastq"
 #file1 = "/home/ae42909/Scratch/100_Potato_withViruses_1.fastq"
@@ -11,11 +11,15 @@ threads = "4"
 file1 = "/home/ae42909/Scratch/100_Potato_withViruses_1.fasta"
 #file2 = "/home/ae42909/Scratch/100_Potato_withViruses_2.fasta"
 user_format = "fasta"
-#user_format = "fastq"
 # out_dir = "/home/ae42909/Scratch/synthPotato_krakenDB_viral"
 out_dir = "/home/ae42909/Scratch/100Seq_krakenDB_viral"
-trimlen = "50"
+threads = "4"
+# Trimmomatic paramters
+trim_minlen = "50"
+adapter_file = "/mnt/apps/trimmomatic/IlluminaAdapters.fasta"
+# Kraken parameters
 kraken_db = "/home/ae42909/Scratch/krakenDB_viral/"
+# Kaiju parameters
 kaiju_nodes = "/mnt/shared/scratch/ae42909/201609_BBSRC_Diagnostics/kaiju/kaijudb/nodes.dmp"
 kaiju_names = "/mnt/shared/scratch/ae42909/201609_BBSRC_Diagnostics/kaiju/kaijudb/names.dmp"
 kaiju_fmi = "/mnt/shared/scratch/ae42909/201609_BBSRC_Diagnostics/kaiju/kaijudb/kaiju_db.fmi"
@@ -42,7 +46,7 @@ if file2:
     # fasta files cannot be QC'd - only for fastq files
     if user_format == "fastq":
         # QC and trim data
-        fastqc_trim(out_dir, file1, trimlen, threads, file2)
+        fastqc_trim(out_dir, file1, trim_minlen, threads, adapter_file, file2)
         t2 = time.time()
         # Order and replace names from trimmed sequences
         rename_seq("PE_trimmed_data_1P", out_dir, user_format, paired = "1")
