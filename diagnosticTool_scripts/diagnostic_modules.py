@@ -5,6 +5,13 @@ import numpy as np
 import os
 from Bio import SeqIO
 
+# Check directory paths have "/" at end
+def check_path(dirs):
+    if dirs[-1] != "/":
+        return "/"
+    else:
+        return ""
+
 # Test input data format
 def test_format(file1, user_format):
     with open(file1) as myfile:
@@ -26,14 +33,14 @@ def fastqc_trim(out_dir, file1, trim_minlen, threads, adapter_file, file2 = Fals
 
     subprocess.call("fastqc " + file1 + " -o " + out_dir, shell=True)
 
-    trimAdapt_command = "ILLUMINACLIP:" + adapter_file + ":2:30:10 LEADING:20 TRAILING:20 MINLEN:" + trim_minlen
+    trimAdapt_command = "ILLUMINACLIP:" + adapter_file + ":2:30:10 LEADING:20 TRAILING:20 MINLEN:" + str(trim_minlen)
 
     if file2:
         subprocess.call("fastqc " + file2 + " -o " + out_dir, shell=True)
-        subprocess.call("java -jar /mnt/apps/trimmomatic/0.32/trimmomatic.jar PE -threads " + threads + " " + file1 + " " + file2 + " PE_trimmed_data_1P PE_trimmed_data_1U PE_trimmed_data_2P PE_trimmed_data_2U " + trimAdapt_command, shell=True)
+        subprocess.call("java -jar /mnt/apps/trimmomatic/0.32/trimmomatic.jar PE -threads " + str(threads) + " " + file1 + " " + file2 + " PE_trimmed_data_1P PE_trimmed_data_1U PE_trimmed_data_2P PE_trimmed_data_2U " + trimAdapt_command, shell=True)
         subprocess.call("rm PE_trimmed_data_1U PE_trimmed_data_2U", shell=True)
     else:
-        subprocess.call("java -jar /mnt/apps/trimmomatic/0.32/trimmomatic.jar SE -threads " + threads + " " + file1 + " SE_trimmed_data " + trimAdapt_command, shell=True)
+        subprocess.call("java -jar /mnt/apps/trimmomatic/0.32/trimmomatic.jar SE -threads " + str(threads) + " " + file1 + " SE_trimmed_data " + trimAdapt_command, shell=True)
 
 
 # Order and replace sequence IDs with numberic IDs
