@@ -27,7 +27,7 @@ def ncbi_download(tool, genome_download_dir, parallel=False):
         
     ngd_command = "ncbi-genome-download -F " + file_format +  " -o " + genome_download_dir + " viral "
     if parallel:
-        ngd_command += "--parallel " + parallel
+        ngd_command += "--parallel " + str(parallel)
     subprocess.call(ngd_command, shell = True)
     
 # Rename ncbi data files for custom databases
@@ -90,13 +90,13 @@ def ncbi_rename_customDB(tool, genome_download_dir):
  
 
 # Build the database with the renamed genome files from ncbi
-def krakenDB_build(genome_download_dir, kraken_db_dir, threads, kraken_kmer, kraken_minimizer, jellyfish_hash_size, kraken_max_dbSize = False):
+def krakenDB_build(genome_download_dir, kraken_db_dir, threads, kraken_kmer, kraken_minimizer, jellyfish_hash_size = False, kraken_max_dbSize = False):
     # Make a kraken database directory
     if not os.path.exists(kraken_db_dir):
         os.makedirs(kraken_db_dir)
     
     # Download taxonomy for Kraken database
-    subprocess.call("kraken-build --download-taxonomy --threads " + threads + " --db " + kraken_db_dir, shell = True)
+    subprocess.call("kraken-build --download-taxonomy --threads " + str(threads) + " --db " + kraken_db_dir, shell = True)
 
     # Add files downloaded and ready for kraken ("<file>.tax.fna") through krakenDB_download() to kraken library
     for root, subdirs, files in os.walk(genome_download_dir + "refseq/"):
@@ -109,12 +109,12 @@ def krakenDB_build(genome_download_dir, kraken_db_dir, threads, kraken_kmer, kra
                 subprocess.call("gzip " + unzip_filename, shell = True)
 
     # Build the command to run kraken-build based on parameters specifed
-    kraken_command = "kraken-build --build --threads " + threads + " --db " + kraken_db_dir + " --kmer-len " + kraken_kmer + " --minimizer-len " + kraken_minimizer
+    kraken_command = "kraken-build --build --threads " + str(threads) + " --db " + kraken_db_dir + " --kmer-len " + str(kraken_kmer) + " --minimizer-len " + str(kraken_minimizer)
     if kraken_max_dbSize:
-        kraken_command += " --max-db-size " + kraken_max_dbSize
+        kraken_command += " --max-db-size " + str(kraken_max_dbSize)
 
-    #kraken_command += " --jellyfish-hash-size 11400M"
-    kraken_command += " --jellyfish-hash-size " + jellyfish_hash_size
+    if jellyfish_hash_size:
+        kraken_command += " --jellyfish-hash-size " + jellyfish_hash_size
 
     subprocess.call(kraken_command, shell = True)
     
