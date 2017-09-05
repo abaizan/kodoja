@@ -87,18 +87,28 @@ def rename_seq(trim_file, out_dir, user_format, paired=False):
 
 
 # Kraken classification
-def kraken_classify(renamed_file1, threads, user_format, kraken_db, renamed_file2 = False):
+def kraken_classify(renamed_file1, threads, user_format, kraken_db, renamed_file2 = False, quick_minhits = False, preload = False):
     if user_format == "fastq":
         format_switch = " --fastq-input"
     elif user_format == "fasta":
         format_switch = " --fasta-input"
-        assert (format_switch == " --fastq-input") | (format_switch == " --fasta-input"), "Incorrect format - check correct format assigned."
-        
-    kraken_command = "kraken --preload --threads " + threads + " --db " + kraken_db + format_switch
+    assert (format_switch == " --fastq-input") | (format_switch == " --fasta-input"), "Incorrect format - check correct format assigned."
+
+    if preload:
+        kraken_command = "kraken --preload "
+    else:
+        kraken_command = "kraken "
+
+    kraken_command += "--threads " + str(threads) + " --db " + kraken_db + format_switch
+
+    if quick_minhits:
+        kraken_command += " --quick --min-hits " + str(quick_minhits)
+    
     if renamed_file2:
         kraken_command += " --paired " +  renamed_file1 + user_format + " " + renamed_file2 + user_format + " > kraken_table.txt"
     else:
         kraken_command += " " + renamed_file1 + user_format + " > kraken_table.txt"
+        
     subprocess.call(kraken_command, shell = True)
     subprocess.call("kraken-translate --mpa-format --db " + kraken_db + " kraken_table.txt > kraken_labels.txt", shell = True)
 
