@@ -182,22 +182,30 @@ def seq_reanalysis(kraken_table, kraken_labels, out_dir, user_format, renamed_fi
     subprocess.call("rm reanalyse_ID.txt", shell=True)
 
 # Kaiju classification of subset sequences
-def kaiju_classify(subset_file1, user_format, threads, kaiju_nodes, kaiju_fmi, kaiju_names, kaiju_missmatch, kraken_db, subset_file2 = False):
-    if subset_file2:
-#        kaiju_command = "/home/ae42909/Programs/Kaiju/kaiju-v1.5.0-linux-x86_64-static/bin/kaiju -z " + threads + " -t " + kaiju_nodes + " -f " + kaiju_fmi + " -i " + subset_file1 + user_format + " and -j " + subset_file2 + user_format + " -o kaiju_table.txt -x -v -a greedy -e" + kaiju_missmatch
-        kaiju_command = "kaiju -z " + threads + " -t " + kaiju_nodes + " -f " + kaiju_fmi + " -i " + subset_file1 + user_format + " and -j " + subset_file2 + user_format + " -o kaiju_table.txt -x -v -a greedy -e" + kaiju_missmatch
+def kaiju_classify(subset_file1, user_format, threads, kaiju_db, kaiju_minlen, kraken_db, subset_file2 = False, kaiju_mismatch = False, kaiju_score = False):
+    kaiju_nodes = kaiju_db + "nodes.dmp"
+    kaiju_fmi = kaiju_db + "kaiju_library.fmi"
+    kaiju_names = kaiju_db + "names.dmp"
+
+    if kaiju_mismatch:
+        assert(kaiju_score), "Set kaiju_score for greedy mode"
+        mode = "greedy -e " + str(kaiju_mismatch) + " -s " + str(kaiju_score)
     else:
-#        kaiju_command = "/home/ae42909/Programs/Kaiju/kaiju-v1.5.0-linux-x86_64-static/bin/kaiju -z " + threads + " -t " + kaiju_nodes + " -f " + kaiju_fmi + " -i "  + subset_file1 + user_format + " -o kaiju_table.txt -x -v -a greedy -e" + kaiju_missmatch
-        kaiju_command = "kaiju -z " + threads + " -t " + kaiju_nodes + " -f " + kaiju_fmi + " -i "  + subset_file1 + user_format + " -o kaiju_table.txt -x -v -a greedy -e" + kaiju_missmatch
+        mode = "mem"
+
+    kaiju_command = "kaiju -z " + str(threads) + " -t " + kaiju_nodes + " -f " + kaiju_fmi + " -i " + subset_file1 + user_format + " -o kaiju_table.txt -x -v -a " + mode + " -m " + str(kaiju_minlen)
+    
+    if subset_file2:
+         kaiju_command += " -j " + subset_file2 + user_format
 
 
     subprocess.call(kaiju_command, shell = True)
     subprocess.call("kraken-translate --mpa-format --db " + kraken_db + " " + "kaiju_table.txt > kaiju_labels.txt", shell = True)
 
     # Delete subset files
-    subprocess.call("rm subset_file1.fastq", shell=True)
+    subprocess.call("rm subset_file1." + user_format, shell=True)
     if subset_file2:
-        subprocess.call("rm subset_file2.fastq", shell=True)
+        subprocess.call("rm subset_file2." + user_format, shell=True)
 
 
 # Import kraken and kaiju results, merge and summarise
