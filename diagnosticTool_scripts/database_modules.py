@@ -76,13 +76,18 @@ def ncbi_rename_customDB(tool, genome_download_dir, extra_files = False, extra_t
                     for line in in_file:
                         if line[0] == ">":
                             if tool == "kraken":
-                                out_file.write(line[:line.index(" ")] + "|kraken:taxid|" + str(taxid[0]) + line[line.index(" "):])
+                                if " " in line:
+                                    insert = line.index(" ")
+                                else:
+                                    insert = len(line) - 1
+                                out_file.write(line[:insert] + "|kraken:taxid|" + str(taxid) + line[insert:])
                             else:
-                                out_file.write(">" + str(taxid[0]) + "\n")
+                                out_file.write(">" + str(kaiju_count) + "_" + str(taxid) + "\n")
+                                kaiju_count += 1
                         else:
                             out_file.write(line)
                 # Delete original file
-                subprocess.call("rm " + unzip_filename,shell=True)
+                subprocess.call("rm " + unzip_filename, shell=True)
                 # Compress modified file
                 subprocess.call("gzip " + renamed_file, shell =True)
 
