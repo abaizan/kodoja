@@ -31,35 +31,44 @@ def ncbi_download(tool, genome_download_dir, parallel=False):
     subprocess.call(ngd_command, shell = True)
     
 # Rename ncbi data files for custom databases
-def ncbi_rename_customDB(tool, genome_download_dir):
+def ncbi_rename_customDB(tool, genome_download_dir, extra_files = False, extra_taxid = False):
     assert (tool == "kraken") | (tool == "kaiju"), "Argument 'tool' must be either 'kraken' or 'kaiju'."
     if tool == "kraken":
         file_extension = ".fna.gz"
     else:
         file_extension = ".faa.gz"
 
-    genome_download_dir += "refseq/"
     # Download assembly summary file from ncbi ftp site and load as pandas dataframe
-    if not os.path.exists(genome_download_dir + "viral_assembly_summary.txt"):
+    if not os.path.exists(genome_download_dir + "refseq/viral_assembly_summary.txt"):
         os.chdir(genome_download_dir)
-        urllib.urlretrieve('ftp://ftp.ncbi.nih.gov/genomes/refseq/viral/assembly_summary.txt', 'viral_assembly_summary.txt')
-    path_assembly_summary = genome_download_dir + "viral_assembly_summary.txt"
+        urllib.urlretrieve('ftp://ftp.ncbi.nih.gov/genomes/refseq/viral/assembly_summary.txt', 'refseq/viral_assembly_summary.txt')
+    path_assembly_summary = genome_download_dir + "refseq/viral_assembly_summary.txt"
     assembly_summary = pd.read_table(path_assembly_summary, sep='\t', skiprows=1, header = 0)
     assembly_summary.rename(columns={'# assembly_accession':'assembly_accession'}, inplace=True)  # rename column to exclude "#"
-    
+
+    # Count for protein sequences
+    kaiju_count = 1
     for root, subdirs, files in os.walk(genome_download_dir):
         for filename in files:
-            if filename.endswith(file_extension):
+            if filename.endswith(file_extension) and not filename.endswith(tool + file_extension):
                 zip_filename = os.path.join(root, filename)
                 # Uncompress ".gz" file
                 subprocess.call("gunzip " + zip_filename, shell =True)
                 unzip_filename = zip_filename[:-3]
 
-                # Retrieve assembly accession number for file
-                assembly_accession = re.findall(r'/viral/([^(]*)/', unzip_filename)
-                # retrieve taxid for file
-                taxid = list(assembly_summary.loc[assembly_summary['assembly_accession'] == assembly_accession[0]]["taxid"])
-                assert (len(taxid) == 1), "Taxid has " + len(taxid) + "vales. Should only have 1 value"
+                if root.endswith("extra"):
+                    id_loc = [i for i,x in enumerate(extra_files) if x == filename][0]
+                    assert 'id_loc' in locals() or 'id_loc' in globals(), "Error: problem with name of the extra files provided"
+                    taxid = extra_taxid[id_loc]
+                    assert 'taxid' in locals() or 'taxid' in globals(), "Error: problem with the taxid of the extra files provided"
+                else:
+                    # Retrieve assembly accession number for file path
+                    assembly_accession = re.findall(r'/viral/([^(]*)/', unzip_filename)
+                    assert 'assembly_accession' in locals() or 'assembly_accession' in globals(), "Can't locate assemble accession"
+                    # retrieve taxid for file
+                    taxid_list = list(assembly_summary.loc[assembly_summary['assembly_accession'] == assembly_accession[0]]["taxid"])
+                    assert (len(taxid_list) == 1), "Taxid has " + len(taxid) + "vales. Should only have 1 value"
+                    taxid = taxid_list[0]
 
                 # Create new genomic file with rename sequence identifier to comply with tool requirements for custom database
                 renamed_file = unzip_filename[:-4] + "." + tool + unzip_filename[-4:]
@@ -99,7 +108,7 @@ def krakenDB_build(genome_download_dir, kraken_db_dir, threads, kraken_kmer, kra
     subprocess.call("kraken-build --download-taxonomy --threads " + str(threads) + " --db " + kraken_db_dir, shell = True)
 
     # Add files downloaded and ready for kraken ("<file>.tax.fna") through krakenDB_download() to kraken library
-    for root, subdirs, files in os.walk(genome_download_dir + "refseq/"):
+    for root, subdirs, files in os.walk(genome_download_dir):
         for filename in files:
             if filename.endswith("kraken.fna.gz"):
                 zip_filename = os.path.join(root,filename)
