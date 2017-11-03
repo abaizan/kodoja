@@ -168,55 +168,66 @@ def format_result_table(out_dir, data_table, data_labels, table_colNames):
 
 
 # Subset viral and unclassified sequences
-def seq_reanalysis(kraken_table, kraken_labels, out_dir, user_format, renamed_file1, renamed_file2 = False):
+def seq_reanalysis(kraken_table, kraken_labels, out_dir, user_format, renamed_file1, subset, renamed_file2 = False):
     kraken_colNames = ["kraken_classified", "Seq_ID","Tax_ID", "kraken_length", "kraken_k-mer"]
-    kraken_results = format_result_table(out_dir, "kraken_table.txt", "kraken_labels.txt", kraken_colNames)
-    kraken_results[['Seq_ID']] = kraken_results[['Seq_ID']].astype(int).astype(str)
-    kraken_results.to_csv(out_dir  + 'kraken_FormattedTable.txt', sep='\t', index= False)
-
-    # Delete unformatted kraken table
+    kraken_fullTable = format_result_table(out_dir, "kraken_table.txt", "kraken_labels.txt", kraken_colNames)
+    # Save full kraken table, compress and delete unformatted kraken table
+    kraken_fullTable.to_csv(out_dir  + "kraken_FormattedTable.txt", sep='\t', index= False)
+    subprocess.call("gzip " + out_dir  + "kraken_FormattedTable.txt", shell =True)
     subprocess.call("rm " + "kraken_table.txt kraken_labels.txt", shell = True)
+    
+    # Subset table for final results
+    kraken_results = kraken_fullTable[["kraken_classified", "Seq_ID","Tax_ID", "Seq_tax", "Div_ID"]]
 
-    # Make a list of "Seq_ID" column value if sequence is unclassified in "Classified" column or
-    #  classified as VRL (virus) in column "Div_ID". This list will be used to determine which sequences
-    #  will be further analysed by Kaiju 
-    unclassified_IDs = kraken_results.loc[(kraken_results.kraken_classified == 'U'), ['Seq_ID']]
-    VRL_IDs = kraken_results.loc[(kraken_results.Div_ID == 'VRL'), ['Seq_ID']]
-    reanalyse_IDs = unclassified_IDs['Seq_ID'].tolist() + VRL_IDs['Seq_ID'].tolist()
+    if subset:
+        # Make a list of "Seq_ID" column value if sequence is unclassified in "Classified" column or
+        #  classified as VRL (virus) in column "Div_ID". This list will be used to determine which sequences
+        #  will be further analysed by Kaiju 
+#        unclassified_IDs = kraken_results.loc[(kraken_results.kraken_classified == 'U'), ['Seq_ID']]
+#        VRL_IDs = kraken_results.loc[(kraken_results.Div_ID == 'VRL'), ['Seq_ID']]
+        kraken_VRL = kraken_results.loc[(kraken_results.Div_ID == 'VRL'),]
+        kraken_VRL.to_csv(out_dir  + 'kraken_VRL.txt', sep='\t', index= False)
+        reanalyse_IDs =  kraken_VRL['Seq_ID'].tolist()
+#        reanalyse_IDs += unclassified_IDs['Seq_ID'].tolist()
 
 
-    # Use biopython to make new fastq files of sequences to be reanalysed. 
-    def reanalyse_subset (input_file, output_file, id_list):
-        outfile = open(out_dir  + 'reanalyse_ID.txt', 'w')
-        print >> outfile, "\n".join(str(i) for i in id_list)
-        outfile.close()
-        id_file = out_dir  + "reanalyse_ID.txt"
+        # Use biopython to make new fastq files of sequences to be reanalysed. 
+        def reanalyse_subset (input_file, output_file, id_list):
+            outfile = open(out_dir  + 'reanalyse_ID.txt', 'w')
+            print >> outfile, "\n".join(str(i) for i in id_list)
+            outfile.close()
+            id_file = out_dir  + "reanalyse_ID.txt"
 
-        wanted = set(line.rstrip("\n").split(None,1)[0] for line in open(id_file))
-        print "Found %i unique identifiers in %s" % (len(wanted), id_file)
+            wanted = set(line.rstrip("\n").split(None,1)[0] for line in open(id_file))
+            print "Found %i unique identifiers in %s" % (len(wanted), id_file)
 
-        records = (r for r in SeqIO.parse(out_dir  + input_file, user_format) if r.id in wanted)
-        count = SeqIO.write(records, out_dir  + output_file, user_format)
-        print "Saved %i records from %s to %s" % (count, input_file, output_file)
-        if count < len(wanted):
-            print "Warning %i IDs not found in %s" % (len(wanted)-count, input_file)
+            records = (r for r in SeqIO.parse(out_dir  + input_file, user_format) if r.id in wanted)
+            count = SeqIO.write(records, out_dir  + output_file, user_format)
+            print "Saved %i records from %s to %s" % (count, input_file, output_file)
+            if count < len(wanted):
+                print "Warning %i IDs not found in %s" % (len(wanted)-count, input_file)
 
-    if renamed_file2:
-        reanalyse_ID1 = [s + "/1" for s in reanalyse_IDs]
-        reanalyse_ID2 = [s + "/2" for s in reanalyse_IDs]
-        reanalyse_subset(renamed_file1 + user_format, "subset_file1." + user_format, reanalyse_ID1)
-        reanalyse_subset(renamed_file2 + user_format , "subset_file2." + user_format, reanalyse_ID2)
-        # Delete "renamed" files
-        subprocess.call("rm renamed_file1." + user_format + " renamed_file2." + user_format, shell=True)
+        if renamed_file2:
+            reanalyse_ID1 = [s + "/1" for s in reanalyse_IDs]
+            reanalyse_ID2 = [s + "/2" for s in reanalyse_IDs]
+            reanalyse_subset(renamed_file1, "subset_file1." + user_format, reanalyse_ID1)
+            reanalyse_subset(renamed_file2, "subset_file2." + user_format, reanalyse_ID2)
+            # Delete "renamed" files
+            subprocess.call("rm renamed_1 renamed_2", shell=True)
+        else:
+            reanalyse_subset(renamed_file1 + user_format, "subset_file1." + user_format, reanalyse_IDs)
+
+
+        # Deleted "reanalyse.txt"
+        subprocess.call("rm reanalyse_ID.txt", shell=True)
+
     else:
-        reanalyse_subset(renamed_file1 + user_format, "subset_file1." + user_format, reanalyse_IDs)
-        subprocess.call("rm renamed_file." + user_format, shell=True)
+        kraken_results.to_csv(out_dir  + 'kraken_VRL.txt', sep='\t', index= False)
+        
 
-    # Deleted "reanalyse.txt"
-    subprocess.call("rm reanalyse_ID.txt", shell=True)
 
 # Kaiju classification of subset sequences
-def kaiju_classify(subset_file1, user_format, threads, kaiju_db, kaiju_minlen, kraken_db, subset_file2 = False, kaiju_mismatch = False, kaiju_score = False):
+def kaiju_classify(kaiju_file1, threads, kaiju_db, kaiju_minlen, kraken_db, kaiju_file2 = False, kaiju_mismatch = False, kaiju_score = False):
     kaiju_nodes = kaiju_db + "nodes.dmp"
     kaiju_fmi = kaiju_db + "kaiju_library.fmi"
     kaiju_names = kaiju_db + "names.dmp"
@@ -342,13 +353,13 @@ def result_analysis(out_dir, kraken_VRL, kaiju_table, kaiju_label, file1_IDs, fi
         # table_summary = pd.read_csv(out_dir + "virus_table.txt", header = 0, sep='\t')
 
         # Make a table of sequences of each species (including LCA potential sequences)
-        def species_tables(tax_id):
-            sp_table = kraiju_data.loc[kraiju_data['kraken_tax_ID'].isin(associated_tax[tax_id]) | kraiju_data['kaiju_tax_ID'].isin(associated_tax[tax_id])]
-            return sp_table
+        # def species_tables(tax_id):
+        #     sp_table = kraiju_data.loc[kraiju_data['kraken_tax_ID'].isin(associated_tax[tax_id]) | kraiju_data['kaiju_tax_ID'].isin(associated_tax[tax_id])]
+        #     return sp_table
 
-        for index, row in table_summary.iterrows():
-            sp_tax = species_tables(row.Tax_ID)
-            sp_tax.to_csv("sp_" + str(row.Tax_ID) + ".txt", sep = '\t', index = False)
+        # for index, row in table_summary.iterrows():
+        #     sp_tax = species_tables(row.Tax_ID)
+        #     sp_tax.to_csv("sp_" + str(row.Tax_ID) + ".txt", sep = '\t', index = False)
 
     summary_table(kraiju_vrl)
 
