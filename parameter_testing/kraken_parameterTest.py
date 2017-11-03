@@ -1,30 +1,31 @@
-
 import os
 import time
 import subprocess
 import uuid
 import sys
-from diagnostic_modules import *
 from kraken_parameterValues import kraken_parameters
 
+sys.path.insert(0, '/home/ae42909/viral_diagnostics/diagnosticTool_scripts/')
+from diagnostic_modules import *
+
 # General parameters
-file1 = "/home/ae42909/synthetic_RNAseq/mappingRNAseq/concatenated_fastaFiles/Potato_withViruses_1."
-file2 = "/home/ae42909/synthetic_RNAseq/mappingRNAseq/concatenated_fastaFiles/Potato_withViruses_2."
-# file1 = "/home/ae42909/Scratch/100_Potato_withViruses_1."
-# file2 = "/home/ae42909/Scratch/100_Potato_withViruses_2."
+file1 = '/mnt/shared/projects/virology/201609_BBSRC_Diagnostics/Data/synthetic/review-paper-test-datasets/SRR1123893Pepper.fastq'
+file2 = False
 user_format = "fastq"
 out_dir = "/home/ae42909/Scratch/parameter_test/kraken/"
 threads = 4
 user_format = "fastq"
-kraken_db_dir = "/home/ae42909/Scratch/parameter_test/kraken/"
+kraken_db_dir = "/home/ae42909/Scratch/parameter_test/kraken/databases/"
 
-run = "run2"
-if os.path.exists(out_dir + run):
+run = "run12"
+
+wdir = out_dir + run + '/'
+if os.path.exists(wdir):
     sys.exit("run number already exists")
 else:    
-    os.makedirs(out_dir + run)
+    os.makedirs(wdir)
 
-os.chdir(out_dir)
+os.chdir(wdir)
 
 for root, subdirs, files in os.walk(kraken_db_dir):
     for dirs in subdirs:
@@ -43,20 +44,20 @@ for root, subdirs, files in os.walk(kraken_db_dir):
                         text = "input1 = " + file1 + user_format + "\n" + "input2 = " + file2 + user_format + "\n"
                     else:
                         # Kraken classification
-                        kraken_classify(file1, threads, user_format, kraken_db, quick_minhits, preload)
+                        kraken_classify(file1, threads, user_format, kraken_db, quick_minhits = quick_minhits, preload = preload)
                         text = "input1 = " + file1 + "\n"
 
                         
-                    subprocess.call("mv " + out_dir + "kraken_table.txt " + out_dir + "kraken_table_" + tag + ".txt", shell = True)
-                    subprocess.call("mv " + out_dir + "kraken_labels.txt " + out_dir + "kraken_labels_" + tag + ".txt", shell = True)
+                    subprocess.call("mv " + wdir + "kraken_table.txt " + wdir + "kraken_table_" + tag + ".txt", shell = True)
+                    subprocess.call("mv " + wdir + "kraken_labels.txt " + wdir + "kraken_labels_" + tag + ".txt", shell = True)
                     t1 = time.time()
-                    with open(out_dir + tag + ".txt", 'w') as out_file:
+                    with open(wdir + 'log_file_' + tag + ".txt", 'w') as out_file:
                         text += "kraken database = " + kraken_db + "\n" + "threads = " + str(threads) + "\n"
                         text += "quick_minhits = " + str(minhits) + "\n" + "preload =" + str(preload) + "\n"
                         text += "time (min) = " + str((t1-t0)/60) + "\n"
                         out_file.write(text)
 
 
-subprocess.call("mv *.txt " + out_dir + run, shell = True)
+#subprocess.call("mv *.txt " + out_dir + run, shell = True)
 
 
