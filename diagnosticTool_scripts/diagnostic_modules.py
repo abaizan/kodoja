@@ -25,12 +25,42 @@ def test_format(file1, user_format):
 
     if small_file[0][0] == "@" and small_file[4][0] == "@":
         file_format = "fastq"
-    if small_file[0][0] == ">" and small_file[2][0] == ">":
+    if small_file[0][0] == ">":
         file_format = "fasta"
 
-    assert (file_format == "fasta") | (file_format == "fastq"), "Cannot proceed with file as it is not in fasta or fastq format."
-    assert user_format == file_format, "File has been detected to be in " + file_format + " format rather than " + user_format + " format"
+    assert (file_format == "fasta") | (file_format == "fastq"), \
+        "Cannot proceed with file as it is not in fasta or fastq format."
+    assert user_format == file_format, \
+        "File has been detected to be in " + file_format + " format rather than " + user_format + " format"
 
+    
+# strip metadata from ids (if any), assert the paired sequences have the same number of sequences and they are synchronised
+def paired_test(file1, file2, user_format, out_dir):
+    def paired_ids(fname, user_format, pair, renamed_file):
+        list_ids = []
+        renamed_file += str(pair)
+        format_num = 4
+        if user_format == "fasta":
+            format_num = 2
+        with open(out_dir + renamed_file, 'w') as out_file, open(fname, 'r') as in_file:
+            for lineNum, line in enumerate(in_file):
+                if lineNum % format_num == 0:
+                    seq_id = line.split(" ", 1)[0]
+                    list_ids.append(seq_id)
+                    if seq_id[-3:-1] == "/" + str(pair):
+                        out_file.write(seq_id)
+                    else:
+                        out_file.write(seq_id[:-1] + "/" + str(pair) + "\n")
+                else:
+                    out_file.write(line)
+        return list_ids
+
+    ids1 = paired_ids(file1, user_format, 1, "renamed_")
+    ids2 = paired_ids(file2, user_format, 2, "renamed_")
+    assert len(ids1) == len(ids2), "Paired files have different number of reads"
+    for values in range(0,50):
+        random_id = random.randint(0, len(ids1)-1)
+        assert ids1[random_id][:-3] == ids1[random_id][:-3], "Paired-end sequences don't match"
 
 # QC and trim data
 def fastqc_trim(out_dir, file1, trim_minlen, threads, adapter_file, file2 = False):
