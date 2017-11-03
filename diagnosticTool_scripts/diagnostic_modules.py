@@ -60,21 +60,29 @@ def paired_test(file1, file2, user_format, out_dir):
     assert len(ids1) == len(ids2), "Paired files have different number of reads"
     for values in range(0,50):
         random_id = random.randint(0, len(ids1)-1)
-        assert ids1[random_id][:-3] == ids1[random_id][:-3], "Paired-end sequences don't match"
+        assert ids1[random_id][:-3] == ids1[random_id][:-3], \
+            "Paired-end sequences don't match"
 
 # QC and trim data
 def fastqc_trim(out_dir, file1, trim_minlen, threads, adapter_file, file2 = False):
 
     subprocess.call("fastqc " + file1 + " -o " + out_dir, shell=True)
 
-    trimAdapt_command = "ILLUMINACLIP:" + adapter_file + ":2:30:10 LEADING:20 TRAILING:20 MINLEN:" + str(trim_minlen)
+    trimAdapt_command = "ILLUMINACLIP:" + adapter_file + \
+                        ":2:30:10 LEADING:20 TRAILING:20 MINLEN:" + \
+                        str(trim_minlen)
 
     if file2:
         subprocess.call("fastqc " + file2 + " -o " + out_dir, shell=True)
-        subprocess.call("java -jar /mnt/apps/trimmomatic/0.32/trimmomatic.jar PE -threads " + str(threads) + " " + file1 + " " + file2 + " PE_trimmed_data_1P PE_trimmed_data_1U PE_trimmed_data_2P PE_trimmed_data_2U " + trimAdapt_command, shell=True)
+        subprocess.call("java -jar /mnt/apps/trimmomatic/0.32/trimmomatic.jar PE -threads " + \
+                        str(threads) + " " + file1 + " " + file2 + \
+                        " PE_trimmed_data_1P PE_trimmed_data_1U PE_trimmed_data_2P PE_trimmed_data_2U " + \
+                        trimAdapt_command, shell=True)
         subprocess.call("rm PE_trimmed_data_1U PE_trimmed_data_2U", shell=True)
     else:
-        subprocess.call("java -jar /mnt/apps/trimmomatic/0.32/trimmomatic.jar SE -threads " + str(threads) + " " + file1 + " SE_trimmed_data " + trimAdapt_command, shell=True)
+        subprocess.call("java -jar /mnt/apps/trimmomatic/0.32/trimmomatic.jar SE -threads " + \
+                        str(threads) + " " + file1 + " SE_trimmed_data " + \
+                        trimAdapt_command, shell=True)
 
 
 # Order and replace sequence IDs with numberic IDs
@@ -128,12 +136,14 @@ def rename_seq(trim_file, out_dir, user_format, paired=False):
 
 
 # Kraken classification
-def kraken_classify(renamed_file1, threads, user_format, kraken_db, renamed_file2 = False, quick_minhits = False, preload = False):
+def kraken_classify(renamed_file1, threads, user_format, kraken_db, renamed_file2 = False,
+                    quick_minhits = False, preload = False):
     if user_format == "fastq":
         format_switch = " --fastq-input"
     elif user_format == "fasta":
         format_switch = " --fasta-input"
-    assert (format_switch == " --fastq-input") | (format_switch == " --fasta-input"), "Incorrect format - check correct format assigned."
+    assert (format_switch == " --fastq-input") | (format_switch == " --fasta-input"), \
+        "Incorrect format - check correct format assigned."
 
     if preload:
         kraken_command = "kraken --preload "
@@ -210,7 +220,8 @@ def seq_reanalysis(kraken_table, kraken_labels, ncbi_file, out_dir, user_format,
             wanted = set(line.rstrip("\n").split(None,1)[0] for line in open(id_file))
             print "Found %i unique identifiers in %s" % (len(wanted), id_file)
 
-            records = (r for r in SeqIO.parse(out_dir  + input_file, user_format) if r.id in wanted)
+            records = (r for r in SeqIO.parse(out_dir  + input_file, user_format) \
+                       if r.id in wanted)
             count = SeqIO.write(records, out_dir  + output_file, user_format)
             print "Saved %i records from %s to %s" % (count, input_file, output_file)
             if count < len(wanted):
@@ -224,7 +235,8 @@ def seq_reanalysis(kraken_table, kraken_labels, ncbi_file, out_dir, user_format,
             # Delete "renamed" files
             subprocess.call("rm renamed_1 renamed_2", shell=True)
         else:
-            reanalyse_subset(renamed_file1 + user_format, "subset_file1." + user_format, reanalyse_IDs)
+            reanalyse_subset(renamed_file1 + user_format, "subset_file1." + user_format,
+                             reanalyse_IDs)
 
 
         # Deleted "reanalyse.txt"
@@ -236,7 +248,8 @@ def seq_reanalysis(kraken_table, kraken_labels, ncbi_file, out_dir, user_format,
 
 
 # Kaiju classification of subset sequences
-def kaiju_classify(kaiju_file1, threads, kaiju_db, kaiju_minlen, kraken_db, kaiju_file2 = False, kaiju_mismatch = False, kaiju_score = False):
+def kaiju_classify(kaiju_file1, threads, kaiju_db, kaiju_minlen, kraken_db,
+                   kaiju_file2 = False, kaiju_mismatch = False, kaiju_score = False):
     kaiju_nodes = kaiju_db + "nodes.dmp"
     kaiju_fmi = kaiju_db + "kaiju_library.fmi"
     kaiju_names = kaiju_db + "names.dmp"
@@ -247,13 +260,16 @@ def kaiju_classify(kaiju_file1, threads, kaiju_db, kaiju_minlen, kraken_db, kaij
     else:
         mode = "mem"
 
-    kaiju_command = "kaiju -z " + str(threads) + " -t " + kaiju_nodes + " -f " + kaiju_fmi + " -i " + kaiju_file1 + " -o kaiju_table.txt -x -v -a " + mode + " -m " + str(kaiju_minlen)
+    kaiju_command = "kaiju -z " + str(threads) + " -t " + kaiju_nodes + " -f " + kaiju_fmi + \
+                    " -i " + kaiju_file1 + " -o kaiju_table.txt -x -v -a " + mode + " -m " + \
+                    str(kaiju_minlen)
     
     if kaiju_file2:
         kaiju_command += " -j " + kaiju_file2
 
     subprocess.call(kaiju_command, shell = True)
-    subprocess.call("kraken-translate --mpa-format --db " + kraken_db + " " + "kaiju_table.txt > kaiju_labels.txt", shell = True)
+    subprocess.call("kraken-translate --mpa-format --db " + kraken_db + " " +
+                    "kaiju_table.txt > kaiju_labels.txt", shell = True)
 
     # Delete subset files
 #    subprocess.call("rm " + kaiju_file1, shell=True)
@@ -288,10 +304,13 @@ def result_analysis(out_dir, kraken_VRL, kaiju_table, kaiju_label, ncbi_file, fi
 
     # Merge Kaiju and kraken results, sort, reindex and rename two columns
     kraiju = pd.merge(kraken_results, kaiju_results, on='Seq_ID', how='outer')
-    assert len(kraken_results) == len(kraiju), 'ERROR: Kraken and Kaiju reults not merged properly' 
+    assert len(kraken_results) == len(kraiju), \
+        'ERROR: Kraken and Kaiju reults not merged properly' 
     kraiju = kraiju.sort_values(['Seq_ID'])
     kraiju = kraiju.reset_index(drop=True)
-    kraiju.rename(columns={'Div_ID_x':'kraken_div_ID', 'Div_ID_y':'kaiju_div_ID', "Seq_tax_x":"kraken_seq_tax", "Seq_tax_y":"kaiju_seq_tax", 'Tax_ID_x':'kraken_tax_ID', 'Tax_ID_y':'kaiju_tax_ID'}, inplace=True)
+    kraiju.rename(columns={'Div_ID_x':'kraken_div_ID', 'Div_ID_y':'kaiju_div_ID',
+                           "Seq_tax_x":"kraken_seq_tax", "Seq_tax_y":"kaiju_seq_tax",
+                           'Tax_ID_x':'kraken_tax_ID', 'Tax_ID_y':'kaiju_tax_ID'}, inplace=True)
 
 
     # Delete unnecessary files
@@ -329,15 +348,18 @@ def result_analysis(out_dir, kraken_VRL, kaiju_table, kaiju_label, ncbi_file, fi
 
     def summary_table(kraiju_data):
         kraken_class = dict(kraiju_data['kraken_tax_ID'].value_counts())
-        kraken_levels = pd.Series(kraiju_data.kraken_seq_tax.values,index=kraiju_data.kraken_tax_ID).to_dict()
+        kraken_levels = pd.Series(kraiju_data.kraken_seq_tax.values,
+                                  index=kraiju_data.kraken_tax_ID).to_dict()
         kaiju_class = dict(kraiju_data['kaiju_tax_ID'].value_counts())
-        kaiju_levels = pd.Series(kraiju_data.kaiju_seq_tax.values,index=kraiju_data.kaiju_tax_ID).to_dict()
+        kaiju_levels = pd.Series(kraiju_data.kaiju_seq_tax.values,
+                                 index=kraiju_data.kaiju_tax_ID).to_dict()
         combined_class = dict(kraiju_data['combined_result'].value_counts())
 
         levels_dict = kraken_levels.copy()
         levels_dict.update(kaiju_levels)
         levels_dict.pop(0, None)
-        levels_tax = {key: list(map(str, value.split('|'))) for key, value in levels_dict.items()}
+        levels_tax = {key: list(map(str, value.split('|')))
+                      for key, value in levels_dict.items()}
         LCA_tax = {}
         for key, tax in levels_tax.items():
             if tax[-1][0] != 's':
