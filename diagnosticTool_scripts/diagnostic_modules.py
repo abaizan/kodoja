@@ -182,7 +182,7 @@ def seq_reanalysis(kraken_table, kraken_labels, out_dir, user_format, renamed_fi
     if subset:
         # Make a list of "Seq_ID" column value if sequence is unclassified in "Classified" column or
         #  classified as VRL (virus) in column "Div_ID". This list will be used to determine which sequences
-        #  will be further analysed by Kaiju 
+        #  will be further analysed by Kaiju
 #        unclassified_IDs = kraken_results.loc[(kraken_results.kraken_classified == 'U'), ['Seq_ID']]
 #        VRL_IDs = kraken_results.loc[(kraken_results.Div_ID == 'VRL'), ['Seq_ID']]
         kraken_VRL = kraken_results.loc[(kraken_results.Div_ID == 'VRL'),]
@@ -191,7 +191,7 @@ def seq_reanalysis(kraken_table, kraken_labels, out_dir, user_format, renamed_fi
 #        reanalyse_IDs += unclassified_IDs['Seq_ID'].tolist()
 
 
-        # Use biopython to make new fastq files of sequences to be reanalysed. 
+        # Use biopython to make new fastq files of sequences to be reanalysed
         def reanalyse_subset (input_file, output_file, id_list):
             outfile = open(out_dir  + 'reanalyse_ID.txt', 'w')
             print >> outfile, "\n".join(str(i) for i in id_list)
