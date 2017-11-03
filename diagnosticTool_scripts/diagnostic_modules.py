@@ -146,20 +146,25 @@ def kraken_classify(renamed_file1, threads, user_format, kraken_db, renamed_file
         kraken_command += " --quick --min-hits " + str(quick_minhits)
     
     if renamed_file2:
-        kraken_command += " --paired " +  renamed_file1 + " " + renamed_file2 + " > kraken_table.txt"
+        kraken_command += " --paired " +  renamed_file1 + " " + \
+                          renamed_file2 + " > kraken_table.txt"
     else:
         kraken_command += " " + renamed_file1 + " > kraken_table.txt"
         
     subprocess.call(kraken_command, shell = True)
-    subprocess.call("kraken-translate --mpa-format --db " + kraken_db + " kraken_table.txt > kraken_labels.txt", shell = True)
+    subprocess.call("kraken-translate --mpa-format --db " + kraken_db + \
+                    " kraken_table.txt > kraken_labels.txt", shell = True)
 
-def format_result_table(out_dir, data_table, data_labels, table_colNames):
-    label_colNames=["Seq_ID", "Seq_tax"] #Seq_tax: d__superkingdom, k__kingdom, p__phylum, c__class, o__order, f__family, g__genus, s__species
-    seq_data = pd.read_csv(out_dir + data_table, sep="\t", header = None, names= table_colNames, index_col=False)
-    seq_labelData = pd.read_csv(out_dir + data_labels, sep="\t", header = None, names= label_colNames)
+def format_result_table(out_dir, data_table, data_labels, table_colNames, ncbi_file):
+    label_colNames=["Seq_ID", "Seq_tax"]
+    # Seq_tax: d__superkingdom, k__kingdom, p__phylum, c__class, o__order, f__family, g__genus, s__species
+    seq_data = pd.read_csv(out_dir + data_table, sep="\t", header = None, names= table_colNames,
+                           index_col=False)
+    seq_labelData = pd.read_csv(out_dir + data_labels, sep="\t", header = None,
+                                names= label_colNames)
     seq_result = pd.merge(seq_data, seq_labelData, on='Seq_ID', how='outer')
 
-    ncbi_tax = pd.read_csv('/home/ae42909/Scratch/kraken/kraken_analysis/customDatabase/NCBI_taxonomy.csv', sep=",")
+    ncbi_tax = pd.read_csv(ncbi_file, sep=",")
     ncbi_slice = ncbi_tax.iloc[:,[1,2]]
     seq_final =  pd.merge(seq_result, ncbi_slice, on='Tax_ID', how='outer')
     seq_final = seq_final.dropna(subset = ['Seq_ID']) # Remove entries from the NCBI table that do not correspond to result
@@ -168,16 +173,20 @@ def format_result_table(out_dir, data_table, data_labels, table_colNames):
 
 
 # Subset viral and unclassified sequences
-def seq_reanalysis(kraken_table, kraken_labels, out_dir, user_format, renamed_file1, subset, renamed_file2 = False):
-    kraken_colNames = ["kraken_classified", "Seq_ID","Tax_ID", "kraken_length", "kraken_k-mer"]
-    kraken_fullTable = format_result_table(out_dir, "kraken_table.txt", "kraken_labels.txt", kraken_colNames)
+def seq_reanalysis(kraken_table, kraken_labels, ncbi_file, out_dir, user_format, renamed_file1,
+                   subset, renamed_file2 = False):
+    kraken_colNames = ["kraken_classified", "Seq_ID","Tax_ID", "kraken_length",
+                       "kraken_k-mer"]
+    kraken_fullTable = format_result_table(out_dir, "kraken_table.txt",
+                                           "kraken_labels.txt", kraken_colNames, ncbi_file)
     # Save full kraken table, compress and delete unformatted kraken table
     kraken_fullTable.to_csv(out_dir  + "kraken_FormattedTable.txt", sep='\t', index= False)
     subprocess.call("gzip " + out_dir  + "kraken_FormattedTable.txt", shell =True)
     subprocess.call("rm " + "kraken_table.txt kraken_labels.txt", shell = True)
     
     # Subset table for final results
-    kraken_results = kraken_fullTable[["kraken_classified", "Seq_ID","Tax_ID", "Seq_tax", "Div_ID"]]
+    kraken_results = kraken_fullTable[["kraken_classified", "Seq_ID","Tax_ID", "Seq_tax",
+                                       "Div_ID"]]
 
     if subset:
         # Make a list of "Seq_ID" column value if sequence is unclassified in "Classified" column or
@@ -253,17 +262,22 @@ def kaiju_classify(kaiju_file1, threads, kaiju_db, kaiju_minlen, kraken_db, kaij
 
 
 # Import kraken and kaiju results, merge and summarise
-def result_analysis(out_dir, kraken_VRL, kaiju_table, kaiju_label, file1_IDs, file2_IDs = False):
+def result_analysis(out_dir, kraken_VRL, kaiju_table, kaiju_label, ncbi_file, file1_IDs,
+                    file2_IDs = False):
     # Import kraken table
     kraken_results = pd.read_csv(out_dir + kraken_VRL, header = 0, sep='\t',
-                                 dtype={"kraken_classified":str, "Seq_ID": str,"Tax_ID": float, "Seq_tax": str, "Div_ID": str})
+                                 dtype={"kraken_classified":str, "Seq_ID": str,
+                                        "Tax_ID": float, "Seq_tax": str, "Div_ID": str})
 
     # Import and format kaiju table
-    kaiju_colNames =["kaiju_classified", "Seq_ID","Tax_ID", "kaiju_lenBest", "kaiju_tax_AN","kaiju_accession", "kaiju_fragment"]
-    kaiju_fullTable = format_result_table(out_dir, "kaiju_table.txt", "kaiju_labels.txt", kaiju_colNames)
+    kaiju_colNames =["kaiju_classified", "Seq_ID","Tax_ID", "kaiju_lenBest",
+                     "kaiju_tax_AN","kaiju_accession", "kaiju_fragment"]
+    kaiju_fullTable = format_result_table(out_dir, "kaiju_table.txt", "kaiju_labels.txt",
+                                          kaiju_colNames, ncbi_file)
     
     # When single-end data is used, illumina adds the '/1' (as if read 1 of a pair). kraken leaves the sequence IDs with the '/1' but Kaiju removes it, making the Sequence ids incompatible for merging
-    if kraken_results['Seq_ID'].str.endswith('/1')[0] and not kaiju_fullTable['Seq_ID'].str.endswith('/1')[0]:
+    if kraken_results['Seq_ID'].str.endswith('/1')[0] \
+       and not kaiju_fullTable['Seq_ID'].str.endswith('/1')[0]:
         kaiju_fullTable['Seq_ID'] = kaiju_fullTable['Seq_ID'] + '/1'
         
     kaiju_fullTable.to_csv(out_dir  + 'kaiju_FormattedTable.txt', sep='\t', index= False)

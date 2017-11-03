@@ -4,16 +4,17 @@ from diagnostic_modules import *
 
 # General parameters
 file2 = False
-# file1 = "/home/ae42909/synthetic_RNAseq/mappingRNAseq/concatenated_fastaFiles/Potato_withViruses_1.fastq"
-# file2 = "/home/ae42909/synthetic_RNAseq/mappingRNAseq/concatenated_fastaFiles/Potato_withViruses_2.fastq"
+file1 = "/home/ae42909/Scratch/100_Potato_withViruses_1.fastq"
+file2 = "/home/ae42909/Scratch/100_Potato_withViruses_2.fastq"
 # file1 = "/mnt/shared/projects/virology/201702_Stuart_local_raspvirus/static/Dee-B5_S1_R1.fastq"
 # file2 = "/mnt/shared/projects/virology/201702_Stuart_local_raspvirus/static/Dee-B5_S1_R2.fastq"
-file1 = '/home/ae42909/data_forTesting/Barerro_data/PB64-S7_clean.fq.gz_trim.fastq'
+# file1 = '/home/ae42909/data_forTesting/Barerro_data/PB64-S7_clean.fq.gz_trim.fastq'
 user_format = "fastq"
-rna_type = "sRNA"
-out_dir = "/home/ae42909/Scratch/Barrero_data_results/PB64-S7_1/"
+rna_type = "RNA"
+out_dir = "/home/ae42909/Scratch/100Seq_krakenDB_viral/"
 threads = 4
 subset = False
+ncbi_file = '/home/ae42909/Scratch/kraken/kraken_analysis/customDatabase/NCBI_taxonomy.csv'
 
 # Trimmomatic paramters
 if rna_type == "RNA":
@@ -76,7 +77,7 @@ if file2:
     t4 = time.time()
 
     # Format kraken data and subset viral and unclassified sequences
-    seq_reanalysis("kraken_table.txt", "kraken_labels.txt", out_dir, user_format, "PE_trimmed_data_1P", subset, "PE_trimmed_data_2P")
+    seq_reanalysis("kraken_table.txt", "kraken_labels.txt", ncbi_file, out_dir, user_format, "PE_trimmed_data_1P", subset, "PE_trimmed_data_2P")
     t5 = time.time()
 
     # Set data for kaiju analysis
@@ -93,7 +94,7 @@ if file2:
     t6 = time.time()     
 
     # Merege results
-    result_analysis(out_dir, "kraken_VRL.txt", "kaiju_table.txt", "kaiju_labels.txt", "ID1.txt", "ID2.txt")
+    result_analysis(out_dir, "kraken_VRL.txt", "kaiju_table.txt", "kaiju_labels.txt", ncbi_file, "ID1.txt", "ID2.txt")
     t7 = time.time()
 else:
     # fasta files cannot be QC'd - only for fastq files
@@ -111,7 +112,7 @@ else:
     t4 = time.time()
 
     # Subset viral and unclassified sequences
-    seq_reanalysis("kraken_table.txt", "kraken_labels.txt", out_dir, user_format, "SE_trimmed_data", subset)
+    seq_reanalysis("kraken_table.txt", "kraken_labels.txt", ncbi_file, out_dir, user_format, "SE_trimmed_data", subset)
     t5 = time.time()
 
         # Set data for kaiju analysis
@@ -126,7 +127,7 @@ else:
     t6 = time.time()
 
     # Merege results
-    result_analysis(out_dir, "kraken_VRL.txt", "kaiju_table.txt", "kaiju_labels.txt", "ID.txt")
+    result_analysis(out_dir, "kraken_VRL.txt", "kaiju_table.txt", "kaiju_labels.txt", ncbi_file, "ID.txt")
     t7 = time.time()
 
 # Creating a log file	
