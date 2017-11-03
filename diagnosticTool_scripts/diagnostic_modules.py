@@ -1,17 +1,21 @@
 # python 2.7.13
 import subprocess
 import pandas as pd
-import numpy as np
-import os
 from Bio import SeqIO
+import random
 
-# Check directory paths have "/" at end
+
 def check_path(dirs):
+    """Check if directory path has '/' at the end.
+
+    Return value is either '/' or empty string ''.
+    """
     if dirs[-1] != "/":
         return "/"
     else:
         return ""
 
+    
 # Test input data format
 def test_format(file1, user_format):
     with open(file1) as myfile:
@@ -112,9 +116,9 @@ def kraken_classify(renamed_file1, threads, user_format, kraken_db, renamed_file
         kraken_command += " --quick --min-hits " + str(quick_minhits)
     
     if renamed_file2:
-        kraken_command += " --paired " +  renamed_file1 + user_format + " " + renamed_file2 + user_format + " > kraken_table.txt"
+        kraken_command += " --paired " +  renamed_file1 + " " + renamed_file2 + " > kraken_table.txt"
     else:
-        kraken_command += " " + renamed_file1 + user_format + " > kraken_table.txt"
+        kraken_command += " " + renamed_file1 + " > kraken_table.txt"
         
     subprocess.call(kraken_command, shell = True)
     subprocess.call("kraken-translate --mpa-format --db " + kraken_db + " kraken_table.txt > kraken_labels.txt", shell = True)
@@ -193,67 +197,80 @@ def kaiju_classify(subset_file1, user_format, threads, kaiju_db, kaiju_minlen, k
     else:
         mode = "mem"
 
-    kaiju_command = "kaiju -z " + str(threads) + " -t " + kaiju_nodes + " -f " + kaiju_fmi + " -i " + subset_file1 + user_format + " -o kaiju_table.txt -x -v -a " + mode + " -m " + str(kaiju_minlen)
+    kaiju_command = "kaiju -z " + str(threads) + " -t " + kaiju_nodes + " -f " + kaiju_fmi + " -i " + kaiju_file1 + " -o kaiju_table.txt -x -v -a " + mode + " -m " + str(kaiju_minlen)
     
-    if subset_file2:
-         kaiju_command += " -j " + subset_file2 + user_format
-
+    if kaiju_file2:
+        kaiju_command += " -j " + kaiju_file2
 
     subprocess.call(kaiju_command, shell = True)
     subprocess.call("kraken-translate --mpa-format --db " + kraken_db + " " + "kaiju_table.txt > kaiju_labels.txt", shell = True)
 
     # Delete subset files
-    subprocess.call("rm subset_file1." + user_format, shell=True)
-    if subset_file2:
-        subprocess.call("rm subset_file2." + user_format, shell=True)
+#    subprocess.call("rm " + kaiju_file1, shell=True)
+    if kaiju_file2:
+        subprocess.call("rm " + kaiju_file2, shell=True)
 
 
 # Import kraken and kaiju results, merge and summarise
-def result_analysis(out_dir, kraken_Formattedtable, kaiju_table, kaiju_label, file1_IDs, file2_IDs = False):
+def result_analysis(out_dir, kraken_VRL, kaiju_table, kaiju_label, file1_IDs, file2_IDs = False):
     # Import kraken table
-    kraken_results = pd.read_csv(out_dir + kraken_Formattedtable, header = 0, sep='\t',
-                                dtype={"Classified":str, "Seq_ID": int,"Tax_ID": float, "length": float, "k-mer classification":str, "Seq_tax": str, "Div_ID": str})
+    kraken_results = pd.read_csv(out_dir + kraken_VRL, header = 0, sep='\t',
+                                 dtype={"kraken_classified":str, "Seq_ID": str,"Tax_ID": float, "Seq_tax": str, "Div_ID": str})
 
+    # Import and format kaiju table
     kaiju_colNames =["kaiju_classified", "Seq_ID","Tax_ID", "kaiju_lenBest", "kaiju_tax_AN","kaiju_accession", "kaiju_fragment"]
-    kaiju_results = format_result_table(out_dir, "kaiju_table.txt", "kaiju_labels.txt", kaiju_colNames) 
+    kaiju_fullTable = format_result_table(out_dir, "kaiju_table.txt", "kaiju_labels.txt", kaiju_colNames)
+    
+    # When single-end data is used, illumina adds the '/1' (as if read 1 of a pair). kraken leaves the sequence IDs with the '/1' but Kaiju removes it, making the Sequence ids incompatible for merging
+    if kraken_results['Seq_ID'].str.endswith('/1')[0] and not kaiju_fullTable['Seq_ID'].str.endswith('/1')[0]:
+        kaiju_fullTable['Seq_ID'] = kaiju_fullTable['Seq_ID'] + '/1'
+        
+    kaiju_fullTable.to_csv(out_dir  + 'kaiju_FormattedTable.txt', sep='\t', index= False)
+    # Save kaiju full table
+    subprocess.call('gzip ' + out_dir  + 'kaiju_FormattedTable.txt', shell =True)
+    # Remove columns not needed in kaiju table
+    kaiju_results = kaiju_fullTable[["kaiju_classified", "Seq_ID","Tax_ID", "Seq_tax", "Div_ID"]]
 
     # Merge Kaiju and kraken results, sort, reindex and rename two columns
     kraiju = pd.merge(kraken_results, kaiju_results, on='Seq_ID', how='outer')
+    assert len(kraken_results) == len(kraiju), 'ERROR: Kraken and Kaiju reults not merged properly' 
     kraiju = kraiju.sort_values(['Seq_ID'])
     kraiju = kraiju.reset_index(drop=True)
-    kraiju.rename(columns={'Div_ID_x':'kraken_div_ID', 'Div_ID_y':'kaiju_div_ID', 'Tax_ID_x':'kraken_tax_ID', 'Tax_ID_y':'kaiju_tax_ID', "Seq_tax_x":"kraken_seq_tax", "Seq_tax_y":"kaiju_seq_tax"}, inplace=True)
+    kraiju.rename(columns={'Div_ID_x':'kraken_div_ID', 'Div_ID_y':'kaiju_div_ID', "Seq_tax_x":"kraken_seq_tax", "Seq_tax_y":"kaiju_seq_tax", 'Tax_ID_x':'kraken_tax_ID', 'Tax_ID_y':'kaiju_tax_ID'}, inplace=True)
+
 
     # Delete unnecessary files
-    subprocess.call("rm kaiju_table.txt kaiju_labels.txt kraken_FormattedTable.txt ", shell=True)
+    subprocess.call("rm kaiju_table.txt kaiju_labels.txt kraken_VRL.txt ", shell=True)
 
     # Get results where they are in agreement
     kraiju['combined_result'] = kraiju.kraken_tax_ID[kraiju['kraken_tax_ID'] == kraiju['kaiju_tax_ID']]
 
     # Replace numeric IDs with real IDs
-    num_ids = list(kraiju.Seq_ID)
+    # num_ids = list(kraiju.Seq_ID)
 
-    if file2_IDs:
-        with open('ID.txt', 'w') as ID_file, open('ID1.txt') as f1, open('ID2.txt') as f2:
-            for line1, line2 in zip(f1, f2):
-                ID_file.write("{} {}\n".format(line1.rstrip(), line2.rstrip()))
-        subprocess.call("rm ID1.txt ID2.txt", shell=True)
+    # if file2_IDs:
+    #     with open('ID.txt', 'w') as ID_file, open('ID1.txt') as f1, open('ID2.txt') as f2:
+    #         for line1, line2 in zip(f1, f2):
+    #             ID_file.write("{} {}\n".format(line1.rstrip(), line2.rstrip()))
+    #     subprocess.call("rm ID1.txt ID2.txt", shell=True)
 
-    real_ids = []
-    with open(out_dir + "ID.txt", 'r') as f:
-        for line in f:
-            real_ids.append(line.rstrip())
+    # real_ids = []
+    # with open(out_dir + "ID.txt", 'r') as f:
+    #     for line in f:
+    #         real_ids.append(line.rstrip())
 
-    id_dict = dict(zip(num_ids, real_ids))
-    seq_col = kraiju["Seq_ID"]
-    id_col = seq_col.map(id_dict)
-    kraiju["Seq_ID"] = id_col
+    # id_dict = dict(zip(num_ids, real_ids))
+    # seq_col = kraiju["Seq_ID"]
+    # id_col = seq_col.map(id_dict)
+    # kraiju["Seq_ID"] = id_col
 
-    kraiju.to_csv(out_dir  + 'kraiju_FormattedTable.txt', sep='\t', index= False)
+    kraiju.to_csv(out_dir  + 'kraiju_VRL.txt', sep='\t', index= False)
 
     # Separate reads which are classified as VRL, make a table with all identified viruses and count number of intances for each
-    kraiju_vrl = kraiju[(kraiju.kraken_div_ID == 'VRL') | (kraiju.kaiju_div_ID == 'VRL')]
+    kraiju_vrl = kraiju[(kraiju['kraken_div_ID'] == 'VRL')|(kraiju['kaiju_div_ID'] == 'VRL')]
 
-# Create a summary table - Species, genus, phylum, number of reads classified kraken/kaiju/agreed by both 
+    
+    # Create a summary table - Species, genus, phylum, number of reads classified kraken/kaiju/agreed by both 
 
     def summary_table(kraiju_data):
         kraken_class = dict(kraiju_data['kraken_tax_ID'].value_counts())
@@ -284,7 +301,7 @@ def result_analysis(out_dir, kraken_Formattedtable, kaiju_table, kaiju_label, fi
                     associated_tax_list.append(key_lca)
             associated_tax[key_species] = associated_tax_list
 
-        table_summary = pd.DataFrame(columns=['Species', 'Tax_ID', 'kraken', 'kaiju','combined', 'associated_seq'])
+        table_summary = pd.DataFrame(columns=['Species', 'Tax_ID', 'kraken', 'kaiju','combined'])
         table_summary['Tax_ID'] =  map(int, levels_tax.keys())
         table_summary['kraken'] = table_summary['Tax_ID'].map(kraken_class)
         table_summary['kaiju'] = table_summary['Tax_ID'].map(kaiju_class)
