@@ -63,30 +63,37 @@ def paired_test(file1, file2, user_format, out_dir):
         assert ids1[random_id][:-3] == ids1[random_id][:-3], \
             "Paired-end sequences don't match"
 
-# QC and trim data
+
 def fastqc_trim(out_dir, file1, trim_minlen, threads, adapter_file, file2 = False):
+    """Takes fastq data (either single or paired), trims sequences using trimmomatic
+    (in the case of paried end reads, it deletes extra files) and uses fastqc to
+    show the user what the sequence quality looks like after trimming.
 
-    subprocess.call("fastqc " + file1 + " -o " + out_dir, shell=True)
-
+    Returns trimmed sequence files and fastq analysis files
+    """
     trimAdapt_command = "ILLUMINACLIP:" + adapter_file + \
                         ":2:30:10 LEADING:20 TRAILING:20 MINLEN:" + \
                         str(trim_minlen)
 
     if file2:
-        subprocess.call("fastqc " + file2 + " -o " + out_dir, shell=True)
         subprocess.call("java -jar /mnt/apps/trimmomatic/0.32/trimmomatic.jar PE -threads " + \
                         str(threads) + " " + file1 + " " + file2 + \
                         " PE_trimmed_data_1P PE_trimmed_data_1U PE_trimmed_data_2P PE_trimmed_data_2U " + \
                         trimAdapt_command, shell=True)
         subprocess.call("rm PE_trimmed_data_1U PE_trimmed_data_2U", shell=True)
+        subprocess.call("fastqc " + file1 + " -o " + out_dir, shell=True)
+        subprocess.call("fastqc " + file2 + " -o " + out_dir, shell=True)
+        
     else:
         subprocess.call("java -jar /mnt/apps/trimmomatic/0.32/trimmomatic.jar SE -threads " + \
                         str(threads) + " " + file1 + " SE_trimmed_data " + \
                         trimAdapt_command, shell=True)
+        subprocess.call("fastqc " + file1 + " -o " + out_dir, shell=True)
 
 
 # Order and replace sequence IDs with numberic IDs
 def rename_seq(trim_file, out_dir, user_format, paired=False):
+
     # Make a new file with for alphabetically ordered sequence IDs
     ids = sorted(rec.id for rec in SeqIO.parse(trim_file, user_format))
     if not paired:
