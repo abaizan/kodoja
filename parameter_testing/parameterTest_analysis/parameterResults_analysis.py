@@ -13,13 +13,14 @@ runs = ['run' + str(nums) for nums in run_nums]
 sample_names = []
 parameter_names = []
 parameter_values = []
-virus_numbers = []
+find_tag = []
 for run in runs:
     run_dir = os.path.join(wdir, run)
     for root, subdirs, files in os.walk(run_dir):
         for filename in files:
             if 'log_file_' in filename:
                 tag = filename.split('log_file_',1)[1]
+                find_tag.append(tag)
                 with open(os.path.join(root, filename), 'r') as in_file:
                     for lines in in_file:
                         if 'input1 =' in lines:
@@ -47,6 +48,12 @@ for position, values in enumerate(parameter_values):
     col = list(results.columns).index(sample_names[position])
     row = list(results.index).index(parameter_names[position])
     results.ix[row,col] = values
-
 results.to_csv(wdir + result_filename, sep='\t')
-    
+
+which_tag = pd.DataFrame(columns=set(sample_names), index=set(parameter_names))
+for position, values in enumerate(find_tag):
+    col = list(which_tag.columns).index(sample_names[position])
+    row = list(which_tag.index).index(parameter_names[position])
+    which_tag.ix[row,col] = values
+which_tag.to_csv(wdir + result_filename[:-4] + '_tag', sep='\t')
+
