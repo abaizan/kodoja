@@ -313,26 +313,6 @@ def result_analysis(out_dir, kraken_VRL, kaiju_table, kaiju_label, ncbi_file, fi
     subprocess.call("rm kaiju_table.txt kaiju_labels.txt kraken_VRL.txt ", shell=True)
 
     kodoja['combined_result'] = kodoja.kraken_tax_ID[kodoja['kraken_tax_ID'] == kodoja['kaiju_tax_ID']]
-
-    # Replace numeric IDs with real IDs
-    # num_ids = list(kodoja.Seq_ID)
-
-    # if file2_IDs:
-    #     with open('ID.txt', 'w') as ID_file, open('ID1.txt') as f1, open('ID2.txt') as f2:
-    #         for line1, line2 in zip(f1, f2):
-    #             ID_file.write("{} {}\n".format(line1.rstrip(), line2.rstrip()))
-    #     subprocess.call("rm ID1.txt ID2.txt", shell=True)
-
-    # real_ids = []
-    # with open(out_dir + "ID.txt", 'r') as f:
-    #     for line in f:
-    #         real_ids.append(line.rstrip())
-
-    # id_dict = dict(zip(num_ids, real_ids))
-    # seq_col = kodoja["Seq_ID"]
-    # id_col = seq_col.map(id_dict)
-    # kodoja["Seq_ID"] = id_col
-
     kodoja.to_csv(out_dir  + 'kodoja_VRL.txt', sep='\t', index= False)
 
     kodoja_vrl = kodoja[(kodoja['kraken_div_ID'] == 'VRL')|(kodoja['kaiju_div_ID'] == 'VRL')] 
