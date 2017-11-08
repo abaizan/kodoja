@@ -4,10 +4,11 @@ import pandas as pd
 from Bio import SeqIO
 import random
 
+ncbi_file = '/home/ae42909/Scratch/kraken/kraken_analysis/customDatabase/NCBI_taxonomy.csv'
 
 def check_path(dirs):
     """Check if directory path has '/' at the end.
-
+    
     Return value is either '/' or empty string ''.
     """
     if dirs[-1] != "/":
@@ -17,7 +18,7 @@ def check_path(dirs):
 
 
 def test_format(file1, user_format):
-    """Check if data is in the fasta or fastq format and 
+    """Check if data is in the fasta or fastq format and
     assert the user has specified the correct format for
     the data provided.
 
@@ -42,7 +43,7 @@ def test_format(file1, user_format):
 
 def paired_test(file1, file2, user_format, out_dir):
     """Change sequence identifiers for paired data so they can be
-    identified as paired by kraken and kaiju using paired_ids() 
+    identified as paired by kraken and kaiju using paired_ids()
     function.
     
     Return two text files written to working directory with the 
