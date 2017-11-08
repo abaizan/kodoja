@@ -117,56 +117,6 @@ def fastqc_trim(out_dir, file1, trim_minlen, threads, adapter_file, file2 = Fals
         subprocess.call("fastqc SE_trimmed_data -o " + out_dir, shell=True)
 
 
-# Order and replace sequence IDs with numberic IDs
-def rename_seq(trim_file, out_dir, user_format, paired=False):
-    # Make a new file with for alphabetically ordered sequence IDs
-    ids = sorted(rec.id for rec in SeqIO.parse(trim_file, user_format))
-    if not paired:
-        id_file = open(out_dir + "ID.txt", 'w')
-    else:
-        id_file = open(out_dir + "ID" + paired + ".txt", 'w')
-
-    for item in ids:
-        id_file.write("%s\n" % item)
-
-    # Reorder the sequence file based on odered IDs
-    record_index = SeqIO.index(trim_file, user_format)
-    records = (record_index[id] for id in ids)
-    SeqIO.write(records, out_dir + "sorted", user_format)
-
-    sorted_file = out_dir + "sorted"
-    if not paired:
-        renamed_file = open(out_dir + "renamed_file." + user_format, "w")
-        paired_str = ""
-    else:
-        renamed_file = open(out_dir + "renamed_file" + str(paired) + "." + user_format, "w")
-        paired_str = "/" + str(paired)
-
-    # Write a new file where seqc sequence ID is replaced with the correct symbol (">" or "@")
-    # followed by a number (1::N), and if it's a paired read followd by "/1" or "/2"
-    with open(sorted_file, 'r') as in_file:
-        seqNum = 1
-        if user_format == "fasta":
-            symb = ">"
-            for line in in_file:
-                if line[0] == symb:
-                    renamed_file.write(symb + str(seqNum) + paired_str + "\n")
-                    seqNum = seqNum + 1
-                else:
-                    renamed_file.write(line)
-        elif user_format == "fastq":
-            symb = "@"
-            for lineNum, line in enumerate(in_file):
-                if lineNum % 4 == 0:
-                    renamed_file.write(symb + str(seqNum) + paired_str + "\n")
-                    seqNum = seqNum + 1
-                else:
-                    renamed_file.write(line)
-                
-        # Once you have the renamed file you don't need the sorted file - delete
-        subprocess.call("rm " + out_dir + "sorted", shell=True)
-
-
 def kraken_classify(kraken_file1, threads, user_format, kraken_db, kraken_file2 = False,
                     quick_minhits = False, preload = False):
     """Uses kraken to classify sequences. Add appropiate switches for kraken
