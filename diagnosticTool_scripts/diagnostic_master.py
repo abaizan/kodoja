@@ -4,35 +4,30 @@ from diagnostic_modules import *
 
 # General parameters
 file2 = False
-file1 = "/home/ae42909/Scratch/100_Potato_withViruses_1.fastq"
-file2 = "/home/ae42909/Scratch/100_Potato_withViruses_2.fastq"
+file1 = "/mnt/shared/projects/virology/201609_BBSRC_Diagnostics/Data/synthetic/review-paper-test-datasets/SRR1269627Pear.fastq"
 # file1 = "/mnt/shared/projects/virology/201702_Stuart_local_raspvirus/static/Dee-B5_S1_R1.fastq"
 # file2 = "/mnt/shared/projects/virology/201702_Stuart_local_raspvirus/static/Dee-B5_S1_R2.fastq"
 # file1 = '/home/ae42909/data_forTesting/Barerro_data/PB64-S7_clean.fq.gz_trim.fastq'
 user_format = "fastq"
-rna_type = "RNA"
-out_dir = "/home/ae42909/Scratch/100Seq_krakenDB_viral/"
+out_dir = "/home/ae42909/Scratch/RNA-seq_data_results/SRR1269627Pear/"
 threads = 4
 subset = False
 ncbi_file = '/home/ae42909/Scratch/kraken/kraken_analysis/customDatabase/NCBI_taxonomy.csv'
+subset = False
 
 # Trimmomatic paramters
-if rna_type == "RNA":
-    trim_minlen = 50
-elif rna_type == "sRNA":
-    trim_minlen = 18
-
+trim_minlen = 50
 adapter_file = "/mnt/apps/trimmomatic/IlluminaAdapters.fasta"
 
 # Kraken parameters
-kraken_db = "/home/ae42909/Scratch/krakenDB_k18_m5/"
+kraken_db = "/home/ae42909/Scratch/krakenDB_k31_m15/"
 quick_minhits = False
 preload = False
 
 # Kaiju parameters
 kaiju_db = "/home/ae42909/Scratch/kaijuDB_viral_2/"
-kaiju_minlen = 3
-kaiju_score = 45
+kaiju_minlen = 11
+kaiju_score = 65
 kaiju_mismatch = 1
 
 # Check that dirs have "/" at the end
@@ -77,7 +72,8 @@ if file2:
     t4 = time.time()
 
     # Format kraken data and subset viral and unclassified sequences
-    seq_reanalysis("kraken_table.txt", "kraken_labels.txt", ncbi_file, out_dir, user_format, "PE_trimmed_data_1P", subset, "PE_trimmed_data_2P")
+    seq_reanalysis("kraken_table.txt", "kraken_labels.txt", ncbi_file, out_dir,
+                   user_format, "PE_trimmed_data_1P", subset, "PE_trimmed_data_2P")
     t5 = time.time()
 
     # Set data for kaiju analysis
@@ -90,11 +86,13 @@ if file2:
         kaiju_file2 = "PE_trimmed_data_2P"
 
     # Kaiju classification of all sequences or subset sequences
-    kaiju_classify(kaiju_file1, threads, kaiju_db, kaiju_minlen, kraken_db, kaiju_file2, kaiju_mismatch, kaiju_score)
+    kaiju_classify(kaiju_file1, threads, kaiju_db, kaiju_minlen, kraken_db,
+                   kaiju_file2, kaiju_mismatch, kaiju_score)
     t6 = time.time()     
 
     # Merege results
-    result_analysis(out_dir, "kraken_VRL.txt", "kaiju_table.txt", "kaiju_labels.txt", ncbi_file, "ID1.txt", "ID2.txt")
+    result_analysis(out_dir, "kraken_VRL.txt", "kaiju_table.txt", "kaiju_labels.txt",
+                    ncbi_file, "ID1.txt", "ID2.txt")
     t7 = time.time()
 else:
     # fasta files cannot be QC'd - only for fastq files
