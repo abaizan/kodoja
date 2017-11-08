@@ -6,6 +6,7 @@ import random
 
 ncbi_file = '/home/ae42909/Scratch/kraken/kraken_analysis/customDatabase/NCBI_taxonomy.csv'
 
+
 def check_path(dirs):
     """Check if directory path has '/' at the end.
     
@@ -38,7 +39,7 @@ def test_format(file1, user_format):
         "Cannot proceed with file as it is not in fasta or fastq format."
     assert user_format == file_format, \
         "File has been detected to be in " + file_format + \
-        " format rather than " + user_format + " format"
+        " format rather than " + user_format + " format."
 
 
 def paired_test(file1, file2, user_format, out_dir):
@@ -68,7 +69,8 @@ def paired_test(file1, file2, user_format, out_dir):
         format_num = 4
         if user_format == "fasta":
             format_num = 2
-        with open(out_dir + renamed_file, 'w') as out_file, open(fname, 'r') as in_file:
+        with open(out_dir + renamed_file, 'w') as out_file, \
+             open(fname, 'r') as in_file:
             for lineNum, line in enumerate(in_file):
                 if lineNum % format_num == 0:
                     seq_id = line.split(" ", 1)[0]
@@ -403,6 +405,3 @@ def result_analysis(out_dir, kraken_VRL, kaiju_table, kaiju_label, ncbi_file, fi
         #     sp_tax.to_csv("sp_" + str(row.Tax_ID) + ".txt", sep = '\t', index = False)
 
     virusSummary(kodoja_vrl)
-
-# def retrive_viralSequences(virusSummary):
-
