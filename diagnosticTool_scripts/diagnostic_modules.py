@@ -248,21 +248,19 @@ def seq_reanalysis(kraken_table, kraken_labels, ncbi_file, out_dir, user_format,
     # Subset table for final results
     kraken_results = kraken_fullTable[["kraken_classified", "Seq_ID","Tax_ID", "Seq_tax",
                                        "Div_ID"]]
+    kraken_results.to_csv(out_dir  + 'kraken_VRL.txt', sep='\t', index= False)
 
     if subset:
-        # Make a list of "Seq_ID" column value if sequence is unclassified in "Classified" column or
-        #  classified as VRL (virus) in column "Div_ID". This list will be used to determine which sequences
-        #  will be further analysed by Kaiju
-#        unclassified_IDs = kraken_results.loc[(kraken_results.kraken_classified == 'U'), ['Seq_ID']]
-#        VRL_IDs = kraken_results.loc[(kraken_results.Div_ID == 'VRL'), ['Seq_ID']]
-        kraken_VRL = kraken_results.loc[(kraken_results.Div_ID == 'VRL'),]
-        kraken_VRL.to_csv(out_dir  + 'kraken_VRL.txt', sep='\t', index= False)
-        reanalyse_IDs =  kraken_VRL['Seq_ID'].tolist()
-#        reanalyse_IDs += unclassified_IDs['Seq_ID'].tolist()
-
+        unclassified_IDs = kraken_results.loc[(kraken_results.kraken_classified == 'U'), ['Seq_ID']]
+        VRL_IDs = kraken_results.loc[(kraken_results.Div_ID == 'VRL'), ['Seq_ID']]
+        reanalyse_IDs = unclassified_IDs['Seq_ID'].tolist() + VRL_IDs['Seq_ID'].tolist()
 
         # Use biopython to make new fastq files of sequences to be reanalysed
         def reanalyse_subset (input_file, output_file, id_list):
+            """Create a subset of sequences based on seuqnce IDs in id_list.
+
+            Return subset of sequences.
+            """
             outfile = open(out_dir  + 'reanalyse_ID.txt', 'w')
             print >> outfile, "\n".join(str(i) for i in id_list)
             outfile.close()
