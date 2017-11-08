@@ -4,7 +4,7 @@ import sys
 sys.path.insert(0,'/home/ae42909/viral_diagnostics/parameter_testing/parameterTest_analysis/')
 from parameterResults_modules import *
 
-wdir = '/home/ae42909/Scratch/parameter_test/kaiju/run8/'
+wdir = '/home/ae42909/Scratch/parameter_test/kaiju/run10/'
 os.chdir(wdir)
 
 # PB64-S1 (Grape) sRNA-seq
@@ -23,14 +23,16 @@ os.chdir(wdir)
 # expected_viruses = {'SPSMV-1':603333}
 
 # PB64-S7 (Strawberry) RNA-seq
-expected_viruses = {'SMoV': 167161}
+# expected_viruses = {'SMoV': 167161}
 
 # SRR1269627 (Pear) RNA-seq
-# expected_viruses = {'ASGV': 28347, 'AGCAV': 1211388, 'ASPV': 35350, 'PrVT': 1472425}
+expected_viruses = {'ASGV': 28347, 'AGCAV': 1211388, 'ASPV': 35350, 'PrVT': 1472425}
 
 # SRR112893 (Pepper)
-# expected_viruses = {'ALPV': 209529, 'BPEV': 354328, 'CLCuV':53010 , 'CYVMVA':79236, 'PepLCV': 83839,'PepLCBV': 223305, 'PeSV': 157777,
-#                     'ToLCRnV': 938276,'ToLCBDB': 223344, 'ToLCJoV': 28350, 'GaILV': 1468172, 'ToICGV':219299,'TVCV':107324 }
+# expected_viruses = {'ALPV': 209529, 'BPEV': 354328, 'CLCuV':53010 , 'CYVMVA':79236,
+#                     'PepLCV': 83839,'PepLCBV': 223305, 'PeSV': 157777,'ToLCRnV': 938276,
+#                      'ToLCBDB': 223344, 'ToLCJoV': 28350, 'GaILV': 1468172,'ToICGV':219299,
+#                      'TVCV':107324 }
                      # PepLCV and ToLCBDB - betasatellite?
 
 

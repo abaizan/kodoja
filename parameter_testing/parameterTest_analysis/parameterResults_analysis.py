@@ -1,9 +1,10 @@
+# run on ipython
 import pandas as pd
 import os
 
-tool = 'kraken'
-run_nums = [10, 11]
-result_filename = 'RNA_k15-18results.txt'
+tool = 'kaiju'
+run_nums = [9, 10]
+result_filename = 'RNA_m3-15results.txt'
 
 wdir = '/home/ae42909/Scratch/parameter_test/' + tool + '/'
 runs = ['run' + str(nums) for nums in run_nums]
@@ -35,8 +36,9 @@ for run in runs:
                                 kaiju_parameter += '/mM_' + lines.partition('kaiju_mismatch =')[2].rstrip()
                             if 'kaiju_score =' in lines:
                                 kaiju_parameter += '/s_' + lines.partition('kaiju_score =')[2].rstrip()
+                                parameter_names.append(kaiju_parameter)
 
-                            parameter_names.append(kaiju_parameter)
+                        
                             
     
 

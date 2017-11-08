@@ -1,10 +1,11 @@
+# NOTE: diagnostic modules needs a defult ncbi_file for this script to work (ncbi_file defined within modules)
 import os
 import sys
 
 sys.path.insert(0,'/home/ae42909/viral_diagnostics/parameter_testing/parameterTest_analysis/')
 from parameterResults_modules import *
 
-wdir = '/home/ae42909/Scratch/parameter_test/kraken/run11/'
+wdir = '/home/ae42909/Scratch/parameter_test/kraken/run12/'
 os.chdir(wdir)
 
 # PB64-S1 (Grape)
@@ -26,11 +27,13 @@ os.chdir(wdir)
 # expected_viruses = {'SMoV': 167161}
 
 # SRR1269627 (Pear)
-expected_viruses = {'ASGV': 28347, 'AGCAV': 1211388, 'ASPV': 35350, 'PrVT': 1472425}
+# expected_viruses = {'ASGV': 28347, 'AGCAV': 1211388, 'ASPV': 35350, 'PrVT': 1472425}
 
 # SRR112893 (Pepper)
-# expected_viruses = {'ALPV': 209529, 'BPEV': 354328, 'CLCuV':53010 , 'CYVMVA':79236, 'PepLCV': 83839,'PepLCBV': 223305, 'PeSV': 157777,
-                    # 'ToLCRnV': 938276,'ToLCBDB': 223344, 'ToLCJoV': 28350, 'GaILV': 1468172, 'ToICGV':219299,'TVCV':107324 }
+expected_viruses = {'ALPV': 209529, 'BPEV': 354328, 'CLCuV':53010 , 'CYVMVA':79236,
+                    'PepLCV': 83839,'PepLCBV': 223305, 'PeSV': 157777,
+                    'ToLCRnV': 938276,'ToLCBDB': 223344, 'ToLCJoV': 28350, 'GaILV': 1468172,
+                    'ToICGV':219299,'TVCV':107324 }
                      # PepLCV and ToLCBDB - betasatellite?
 
 
