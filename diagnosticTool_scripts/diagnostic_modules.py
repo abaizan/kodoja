@@ -60,25 +60,11 @@ def paired_test(file1, file2, user_format, out_dir):
         # renamed = True
         if user_format == "fasta":
             format_num = 2
-        # with open(out_dir + renamed_file, 'w') as out_file:
         with open(fname, 'r') as in_file:
             for lineNum, line in enumerate(in_file):
-                # if lineNum == 0:
-                #     if line[-3:-1] == "/" + str(pair):
-                #         renamed = False
-                #         break # File already in the right format
                 if lineNum % format_num == 0:
                     seq_id = line.split(" ", 1)[0]
                     list_ids.append(seq_id)
-        #             if seq_id[-3:-1] == "/" + str(pair):
-        #                 out_file.write(seq_id)
-        #             else:
-        #                 out_file.write(seq_id[:-1] + "/" + str(pair) + "\n")
-        #         else:
-        #             out_file.write(line)
-
-        # if not renamed:
-        #     subprocess.call("rm " + renamed_file, shell = True)
 
         return list_ids
 
