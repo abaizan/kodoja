@@ -259,9 +259,8 @@ def kaiju_classify(kaiju_file1, threads, kaiju_db, kaiju_minlen, kraken_db,
     if kaiju_file2:
         subprocess.call("rm " + kaiju_file2, shell=True)
 
-def result_analysis(out_dir, kraken_VRL, kaiju_table, kaiju_label, ncbi_file, file1_IDs,
-                    file2_IDs = False):
-    """Inports kraken results table, formats kaiju_table and kaiju_labels and merges 
+def result_analysis(out_dir, kraken_VRL, kaiju_table, kaiju_label, ncbi_file):
+    """Imports kraken results table, formats kaiju_table and kaiju_labels and merges 
     kraken and kaiju results into one table (kodoja). It then separates reads which 
     are classified as VRL, makes a table with all identified viruses and count number 
     of intances for each usin virusSummary().
