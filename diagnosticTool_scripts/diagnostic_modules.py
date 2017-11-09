@@ -193,7 +193,7 @@ def seq_reanalysis(kraken_table, kraken_labels, ncbi_file, out_dir, user_format,
         reanalyse_IDs = unclassified_IDs['Seq_ID'].tolist() + VRL_IDs['Seq_ID'].tolist()
 
         # Use biopython to make new fastq files of sequences to be reanalysed
-        def reanalyse_subset (input_file, output_file, id_list):
+        def reanalyse_subset (input_file, output_file, user_format, id_list):
             """Create a subset of sequences based on seuqnce IDs in id_list.
 
             Return subset of sequences.
@@ -206,9 +206,9 @@ def seq_reanalysis(kraken_table, kraken_labels, ncbi_file, out_dir, user_format,
             wanted = set(line.rstrip("\n").split(None,1)[0] for line in open(id_file))
             print "Found %i unique identifiers in %s" % (len(wanted), id_file)
 
-            records = (r for r in SeqIO.parse(out_dir  + input_file, user_format) \
+            records = (r for r in SeqIO.parse(out_dir + input_file, user_format) \
                        if r.id in wanted)
-            count = SeqIO.write(records, out_dir  + output_file, user_format)
+            count = SeqIO.write(records, out_dir  + output_file + user_format, user_format)
             print "Saved %i records from %s to %s" % (count, input_file, output_file)
             if count < len(wanted):
                 print "Warning %i IDs not found in %s" % (len(wanted)-count, input_file)
@@ -216,12 +216,11 @@ def seq_reanalysis(kraken_table, kraken_labels, ncbi_file, out_dir, user_format,
         if forSubset_file2:
             reanalyse_ID1 = [s + "/1" for s in reanalyse_IDs]
             reanalyse_ID2 = [s + "/2" for s in reanalyse_IDs]
-            reanalyse_subset(forSubset_file1, "subset_file1." + user_format, reanalyse_ID1)
-            reanalyse_subset(forSubset_file2, "subset_file2." + user_format, reanalyse_ID2)
+            reanalyse_subset(forSubset_file1, "subset_file1.", user_format, reanalyse_ID1)
+            reanalyse_subset(forSubset_file2, "subset_file2.", user_format, reanalyse_ID2)
             subprocess.call('rm ' + forSubset_file1 + ' ' + forSubset_file2, shell = True)
         else:
-            reanalyse_subset(forSubset_file1 + user_format, "subset_file1." + user_format,
-                             reanalyse_IDs)
+            reanalyse_subset(forSubset_file1, "subset_file1.", user_format, reanalyse_IDs)
             subprocess.call('rm ' + forSubset_file1, shell = True)
 
         subprocess.call("rm reanalyse_ID.txt", shell=True)
