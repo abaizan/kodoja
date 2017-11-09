@@ -43,48 +43,47 @@ def test_format(file1, user_format):
 
 
 def paired_test(file1, file2, user_format, out_dir):
-    """Change sequence identifiers for paired data so they can be
-    identified as paired by kraken and kaiju using paired_ids()
-    function.
-    
-    Return two text files written to working directory with the 
-    new ids for paired reads 1 and 2. Assert if paired files 
-    have the same number of entries and if the paired reads are
-    mached by choosing a random entry from the first file and 
-    the same entry line for the second file.
+    """Assert if paired files have the same number of entries 
+    and if the paired reads are mached by choosing a random 
+    entry from the first list of ids and the same entry line 
+    for the second list of ids.
     """
-    def paired_ids(fname, user_format, pair, renamed_file):
-        """Change sequence IDs for paired to make them more uniform
-        and to allow kraken and kaiju to identify them as paired data.
-        First metadata is removed from identifiers by removing anything 
-        after a space. At the end of the shortened identifier, '/' + 
-        pair number (1 or 2) is added. New identifier is added to 
-        list_ids list.
+    def paired_ids(fname, user_format, pair):
+        """Get list of sequence identifires for each paired file.
 
         Return list_ids and write list_ids to a text file in working
         directory (each id on a new line).
         """
         list_ids = []
-        renamed_file += str(pair)
+        # renamed_file += str(pair)
         format_num = 4
+        # renamed = True
         if user_format == "fasta":
             format_num = 2
-        with open(out_dir + renamed_file, 'w') as out_file, \
-             open(fname, 'r') as in_file:
+        # with open(out_dir + renamed_file, 'w') as out_file:
+        with open(fname, 'r') as in_file:
             for lineNum, line in enumerate(in_file):
+                # if lineNum == 0:
+                #     if line[-3:-1] == "/" + str(pair):
+                #         renamed = False
+                #         break # File already in the right format
                 if lineNum % format_num == 0:
                     seq_id = line.split(" ", 1)[0]
                     list_ids.append(seq_id)
-                    if seq_id[-3:-1] == "/" + str(pair):
-                        out_file.write(seq_id)
-                    else:
-                        out_file.write(seq_id[:-1] + "/" + str(pair) + "\n")
-                else:
-                    out_file.write(line)
+        #             if seq_id[-3:-1] == "/" + str(pair):
+        #                 out_file.write(seq_id)
+        #             else:
+        #                 out_file.write(seq_id[:-1] + "/" + str(pair) + "\n")
+        #         else:
+        #             out_file.write(line)
+
+        # if not renamed:
+        #     subprocess.call("rm " + renamed_file, shell = True)
+
         return list_ids
 
-    ids1 = paired_ids(file1, user_format, 1, "renamed_")
-    ids2 = paired_ids(file2, user_format, 2, "renamed_")
+    ids1 = paired_ids(file1, user_format, 1)
+    ids2 = paired_ids(file2, user_format, 2)
     assert len(ids1) == len(ids2), "Paired files have different number of reads"
     for values in range(0,50):
         random_id = random.randint(0, len(ids1)-1)
