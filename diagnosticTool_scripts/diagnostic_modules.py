@@ -131,11 +131,11 @@ def kraken_classify(kraken_file1, threads, user_format, kraken_db, kraken_file2 
     if quick_minhits:
         kraken_command += " --quick --min-hits " + str(quick_minhits)
     
-    if renamed_file2:
-        kraken_command += " --paired " +  renamed_file1 + " " + \
-                          renamed_file2 + " > kraken_table.txt"
+    if kraken_file2:
+        kraken_command += " --paired " +  kraken_file1 + " " + \
+                          kraken_file2 + " > kraken_table.txt"
     else:
-        kraken_command += " " + renamed_file1 + " > kraken_table.txt"
+        kraken_command += " " + kraken_file1 + " > kraken_table.txt"
         
     subprocess.call(kraken_command, shell = True)
     subprocess.call("kraken-translate --mpa-format --db " + kraken_db + \
