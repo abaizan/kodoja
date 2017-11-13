@@ -361,15 +361,4 @@ def result_analysis(out_dir, kraken_VRL, kaiju_table, kaiju_label, ncbi_file):
         table_summary['Species'] = table_summary['Tax_ID'].map(species_dict)
         table_summary.to_csv('virus_table.txt', sep = '\t', index = False)
 
-        # table_summary = pd.read_csv(out_dir + "virus_table.txt", header = 0, sep='\t')
-
-        # Make a table of sequences of each species (including LCA potential sequences)
-        # def species_tables(tax_id):
-        #     sp_table = kodoja_data.loc[kodoja_data['kraken_tax_ID'].isin(associated_tax[tax_id]) | kodoja_data['kaiju_tax_ID'].isin(associated_tax[tax_id])]
-        #     return sp_table
-
-        # for index, row in table_summary.iterrows():
-        #     sp_tax = species_tables(row.Tax_ID)
-        #     sp_tax.to_csv("sp_" + str(row.Tax_ID) + ".txt", sep = '\t', index = False)
-
     virusSummary(kodoja_vrl)
