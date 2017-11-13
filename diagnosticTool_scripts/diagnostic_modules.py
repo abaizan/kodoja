@@ -3,6 +3,7 @@ import subprocess
 import pandas as pd
 from Bio import SeqIO
 import random
+import os
 
 ncbi_file = '/home/ae42909/Scratch/kraken/kraken_analysis/customDatabase/NCBI_taxonomy.csv'
 
@@ -225,7 +226,7 @@ def seq_reanalysis(kraken_table, kraken_labels, ncbi_file, out_dir, user_format,
 
         subprocess.call("rm reanalyse_ID.txt", shell=True)
         
-def kaiju_classify(kaiju_file1, threads, kaiju_db, kaiju_minlen, kraken_db,
+def kaiju_classify(kaiju_file1, threads, out_dir, kaiju_db, kaiju_minlen, kraken_db,
                    kaiju_file2 = False, kaiju_mismatch = False, kaiju_score = False):
     """Run kaiju command for kaiju classification of sequences. It ensures if 
     mismatches are allowed that a score has also been provided. Once classification
@@ -254,10 +255,14 @@ def kaiju_classify(kaiju_file1, threads, kaiju_db, kaiju_minlen, kraken_db,
     subprocess.call(kaiju_command, shell = True)
     subprocess.call("kraken-translate --mpa-format --db " + kraken_db + " " +
                     "kaiju_table.txt > kaiju_labels.txt", shell = True)
-    subprocess.call("rm " + kaiju_file1, shell=True)
-    
-    if kaiju_file2:
-        subprocess.call("rm " + kaiju_file2, shell=True)
+
+    for dirs, sub_dirs, files in os.walk(out_dir):
+        # Only delete file when it's in out_put
+         for filenames in files:
+             if kaiju_file1 == filenames:
+                subprocess.call("rm " + kaiju_file1, shell=True)
+                if kaiju_file2:
+                    subprocess.call("rm " + kaiju_file2, shell=True)
 
 def result_analysis(out_dir, kraken_VRL, kaiju_table, kaiju_label, ncbi_file):
     """Imports kraken results table, formats kaiju_table and kaiju_labels and merges 
