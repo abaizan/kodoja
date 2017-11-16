@@ -187,7 +187,7 @@ def seq_reanalysis(kraken_table, kraken_labels, ncbi_file, out_dir, user_format,
     (delete kraken_table and kraken_label). 
     If subset = True, make a list of "Seq_ID" column value if sequence is unclassified 
     in "Classified" column or classified as VRL (virus) in column "Div_ID". This list will be 
-    used to subset sequences using reanalyse_subset(). This should be used when the host plant
+    used to subset sequences using sequence_subset(). This should be used when the host plant
     genome is used to classify sequences.
     
     Return merged kraken tableresult tables and subsetted sequence files (i subset = True).
@@ -269,11 +269,12 @@ def kaiju_classify(kaiju_file1, threads, out_dir, kaiju_db, kaiju_minlen, kraken
     subprocess.call(kaiju_command, shell = True)
     subprocess.call("kraken-translate --mpa-format --db " + kraken_db + " " +
                     "kaiju_table.txt > kaiju_labels.txt", shell = True)
-
+            
+        
     for dirs, sub_dirs, files in os.walk(out_dir):
         # Only delete file when it's in out_put
-         for filenames in files:
-             if kaiju_file1 == filenames:
+        for filenames in files:
+            if kaiju_file1 == filenames:
                 subprocess.call("rm " + kaiju_file1, shell=True)
                 if kaiju_file2:
                     subprocess.call("rm " + kaiju_file2, shell=True)
@@ -287,6 +288,7 @@ def result_analysis(out_dir, kraken_VRL, kaiju_table, kaiju_label, ncbi_file):
     kraken_results = pd.read_csv(out_dir + kraken_VRL, header = 0, sep='\t',
                                  dtype={"kraken_classified":str, "Seq_ID": str,
                                         "Tax_ID": float, "Seq_tax": str, "Div_ID": str})
+
     kaiju_colNames =["kaiju_classified", "Seq_ID","Tax_ID", "kaiju_lenBest",
                      "kaiju_tax_AN","kaiju_accession", "kaiju_fragment"]
     kaiju_fullTable = format_result_table(out_dir, "kaiju_table.txt", "kaiju_labels.txt",
