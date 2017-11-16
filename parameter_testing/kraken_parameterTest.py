@@ -9,15 +9,15 @@ sys.path.insert(0, '/home/ae42909/viral_diagnostics/diagnosticTool_scripts/')
 from diagnostic_modules import *
 
 # General parameters
-file1 = '/mnt/shared/projects/virology/201609_BBSRC_Diagnostics/Data/synthetic/review-paper-test-datasets/SRR1123893Pepper.fastq'
-file2 = False
+file1 = '/home/ae42909/data_forTesting/Plum_data/PlumClean_SRR1291169_1.fastq'
+file2 = '/home/ae42909/data_forTesting/Plum_data/PlumClean_SRR1291169_2.fastq'
 user_format = "fastq"
 out_dir = "/home/ae42909/Scratch/parameter_test/kraken/"
 threads = 4
 user_format = "fastq"
 kraken_db_dir = "/home/ae42909/Scratch/parameter_test/kraken/databases/"
 
-run = "run12"
+run = "run17"
 
 wdir = out_dir + run + '/'
 if os.path.exists(wdir):
