@@ -49,28 +49,25 @@ def paired_test(file1, file2, user_format, out_dir):
     entry from the first list of ids and the same entry line 
     for the second list of ids.
     """
-    def paired_ids(fname, user_format, pair):
+    def paired_ids(fname, user_format):
         """Get list of sequence identifires for each paired file.
 
         Return list_ids and write list_ids to a text file in working
         directory (each id on a new line).
         """
         list_ids = []
-        # renamed_file += str(pair)
         format_num = 4
-        # renamed = True
         if user_format == "fasta":
             format_num = 2
         with open(fname, 'r') as in_file:
             for lineNum, line in enumerate(in_file):
                 if lineNum % format_num == 0:
-                    seq_id = line.split(" ", 1)[0]
-                    list_ids.append(seq_id)
+                    list_ids.append(line)
 
         return list_ids
 
-    ids1 = paired_ids(file1, user_format, 1)
-    ids2 = paired_ids(file2, user_format, 2)
+    ids1 = paired_ids(file1, user_format)
+    ids2 = paired_ids(file2, user_format)
     assert len(ids1) == len(ids2), "Paired files have different number of reads"
     for values in range(0,50):
         random_id = random.randint(0, len(ids1)-1)
