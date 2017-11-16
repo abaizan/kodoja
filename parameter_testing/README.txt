@@ -98,6 +98,22 @@ kraken/
               synthetic/review-paper-test-datasets/SRR1269627Pear.fastq'
     kraken k-mers = 23 (m15), 27 (m15), 29 (m15)
     kraken_parameters = {"quick_minhits":[False], "preload":[False]}
+  run14
+    input1/2 = '/home/ae42909/data_forTesting/Plum_data/PlumVirus_SRR1291170'
+    kraken k-mers = 31 (m15)
+    kraken_parameters = {"quick_minhits":[False], "preload":[False]}
+  run15
+    input1/2 = '/home/ae42909/data_forTesting/Plum_data/PlumVirus_SRR1291171'
+    kraken k-mers = 31 (m15)
+    kraken_parameters = {"quick_minhits":[False], "preload":[False]}
+  run16
+    input1/2 = '/home/ae42909/data_forTesting/Plum_data/PlumClean_SRR1289655'
+    kraken k-mers = 31 (m15)
+    kraken_parameters = {"quick_minhits":[False], "preload":[False]}
+  run17
+    input1/2 = '/home/ae42909/data_forTesting/Plum_data/PlumClean_SRR1291169'
+    kraken k-mers = 31 (m15)
+    kraken_parameters = {"quick_minhits":[False], "preload":[False]}
 
 kaiju/
   run1
@@ -141,6 +157,34 @@ kaiju/
   run10
     input1 = '/mnt/shared/projects/virology/201609_BBSRC_Diagnostics/Data/
             synthetic/review-paper-test-datasets/SRR1269627Pear.fastq'
+    kaiju_parameters = {"kaiju_minlen":[3, 7, 11, 15],
+                        "kaiju_mismatch":[False, 1, 3, 5],
+                        "kaiju_score":[45, 65, 85]}
+  run11
+    input1/2 = '/home/ae42909/data_forTesting/Plum_data/PlumVirus_SRR1291170'
+    kaiju_parameters = {"kaiju_minlen":[3, 7, 11, 15],
+                        "kaiju_mismatch":[False, 1, 3, 5],
+                        "kaiju_score":[45, 65, 85]}
+
+  run12
+    input1/2 = '/home/ae42909/data_forTesting/Plum_data/PlumVirus_SRR1291171'
+    kaiju_parameters = {"kaiju_minlen":[3, 7, 11, 15],
+                        "kaiju_mismatch":[False, 1, 3, 5],
+                        "kaiju_score":[45, 65, 85]}
+  run13
+    input1/2 = '/home/ae42909/data_forTesting/Plum_data/PlumClean_SRR1289655'
+    kaiju_parameters = {"kaiju_minlen":[3, 7, 11, 15],
+                        "kaiju_mismatch":[False, 1, 3, 5],
+                        "kaiju_score":[45, 65, 85]}
+  run14
+    input1/2 = '/home/ae42909/data_forTesting/Plum_data/PlumClean_SRR1291169'
+    kaiju_parameters = {"kaiju_minlen":[3, 7, 11, 15],
+                        "kaiju_mismatch":[False, 1, 3, 5],
+                        "kaiju_score":[45, 65, 85]}
+                        
+  run15 (same as 9 but separate files for paired data)
+    input1 = '/mnt/shared/projects/virology/201609_BBSRC_Diagnostics/Data/
+            synthetic/review-paper-test-datasets/SRR1123893Pepper'
     kaiju_parameters = {"kaiju_minlen":[3, 7, 11, 15],
                         "kaiju_mismatch":[False, 1, 3, 5],
                         "kaiju_score":[45, 65, 85]}
