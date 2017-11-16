@@ -377,6 +377,8 @@ def result_analysis(out_dir, kraken_VRL, kaiju_table, kaiju_label, ncbi_file):
         table_summary['kaiju'] = table_summary['Tax_ID'].map(kaiju_class)
         table_summary['combined'] = table_summary['Tax_ID'].map(combined_class)
         table_summary['Species'] = table_summary['Tax_ID'].map(species_dict)
+        table_summary = table_summary.sort_values('kraken', ascending=False)
+        table_summary = table_summary.sort_values('combined', ascending=False)
         table_summary.to_csv('virus_table.txt', sep = '\t', index = False)
 
     virusSummary(kodoja_vrl)
