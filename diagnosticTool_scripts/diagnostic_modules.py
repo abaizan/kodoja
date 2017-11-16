@@ -306,8 +306,10 @@ def result_analysis(out_dir, kraken_VRL, kaiju_table, kaiju_label, ncbi_file):
     kaiju_results = kaiju_fullTable[["kaiju_classified", "Seq_ID","Tax_ID", "Seq_tax", "Div_ID"]]
 
     kodoja = pd.merge(kraken_results, kaiju_results, on='Seq_ID', how='outer')
-    assert len(kraken_results) == len(kodoja), \
-        'ERROR: Kraken and Kaiju results not merged properly' 
+    assert len(kraken_results) == len(kodoja) or len(kraken_results) + 2 == len(kodoja), \
+        'ERROR: Kraken and Kaiju results not merged properly'
+    # Kraken removes '.1' and '.2' from the first two sequences (if that is how they are
+    #  named) so those will not merge with kaiju results for sequences 1 and 2.
     kodoja = kodoja.sort_values(['Seq_ID'])
     kodoja = kodoja.reset_index(drop=True)
     kodoja.rename(columns={'Div_ID_x':'kraken_div_ID', 'Div_ID_y':'kaiju_div_ID',
