@@ -1,19 +1,17 @@
 import os
 import time
+import sys
+sys.path.insert(0, '/home/ae42909/viral_diagnostics/diagnosticTool_scripts/')
 from diagnostic_modules import *
 
 # General parameters
-file2 = False
-file1 = "/mnt/shared/projects/virology/201609_BBSRC_Diagnostics/Data/synthetic/review-paper-test-datasets/SRR1269627Pear.fastq"
-# file1 = "/mnt/shared/projects/virology/201702_Stuart_local_raspvirus/static/Dee-B5_S1_R1.fastq"
-# file2 = "/mnt/shared/projects/virology/201702_Stuart_local_raspvirus/static/Dee-B5_S1_R2.fastq"
-# file1 = '/home/ae42909/data_forTesting/Barerro_data/PB64-S7_clean.fq.gz_trim.fastq'
+file1 = "/home/ae42909/Scratch/100_Potato_withViruses_1.fastq"
+file2 = "/home/ae42909/Scratch/100_Potato_withViruses_2.fastq"
 user_format = "fastq"
-out_dir = "/home/ae42909/Scratch/RNA-seq_data_results/SRR1269627Pear/"
+out_dir = "/home/ae42909/Scratch/100Seq_krakenDB_viral/"
 threads = 4
-subset = False
 ncbi_file = '/home/ae42909/Scratch/kraken/kraken_analysis/customDatabase/NCBI_taxonomy.csv'
-subset = False
+subset = True
 
 # Trimmomatic paramters
 trim_minlen = 50
@@ -26,9 +24,9 @@ preload = False
 
 # Kaiju parameters
 kaiju_db = "/home/ae42909/Scratch/kaijuDB_viral_2/"
-kaiju_minlen = 11
-kaiju_score = 65
-kaiju_mismatch = 1
+kaiju_minlen = 15
+kaiju_score = False
+kaiju_mismatch = False
 
 # Check that dirs have "/" at the end
 out_dir += check_path(out_dir)
@@ -41,105 +39,83 @@ if not os.path.exists(out_dir):
 
 os.chdir(out_dir)
 
-# Check if data is compressed - if so uncompress
-
-
 t0 = time.time()
 
-# Test data format - fasta or fastq
 test_format(file1, user_format)
 t1 = time.time()
 
-
-if file2:    
-    # strip metadata from ids (if any), assert the paired sequences have the same number of sequences and they are synchronised
+if file2:
+    # Check paired reads are paired correctly
     paired_test(file1, file2, user_format, out_dir)
-    
-    # fasta files cannot be QC'd - only for fastq files
-    if user_format == "fastq":
-        # QC and trim data
-        fastqc_trim(out_dir, "renamed_1", trim_minlen, threads, adapter_file, "renamed_2")
-        kraken_file1 = "PE_trimmed_data_1P"
-        kraken_file2 = "PE_trimmed_data_2P"
-        t2 = time.time()
-    else:
-        kraken_file1 = file1
-        kraken_file2 = file2
-        t2 = t1
 
-    # Kraken classification
-    kraken_classify(kraken_file1, threads, user_format, kraken_db, kraken_file2)
-    t4 = time.time()
+    # Set tool files
+    kraken_file1 = kaiju_file1 = "PE_trimmed_data_1P"
+    kraken_file2 = kaiju_file2 = "PE_trimmed_data_2P"
 
-    # Format kraken data and subset viral and unclassified sequences
-    seq_reanalysis("kraken_table.txt", "kraken_labels.txt", ncbi_file, out_dir,
-                   user_format, "PE_trimmed_data_1P", subset, "PE_trimmed_data_2P")
-    t5 = time.time()
-
-    # Set data for kaiju analysis
-    if subset:
-        kaiju_file1 = "subset_file1." + user_format
-        kaiju_file2 = "subset_file2." + user_format
-    else:
-        
-        kaiju_file1 = "PE_trimmed_data_1P"
-        kaiju_file2 = "PE_trimmed_data_2P"
-
-    # Kaiju classification of all sequences or subset sequences
-    kaiju_classify(kaiju_file1, threads, kaiju_db, kaiju_minlen, kraken_db,
-                   kaiju_file2, kaiju_mismatch, kaiju_score)
-    t6 = time.time()     
-
-    # Merege results
-    result_analysis(out_dir, "kraken_VRL.txt", "kaiju_table.txt", "kaiju_labels.txt",
-                    ncbi_file, "ID1.txt", "ID2.txt")
-    t7 = time.time()
 else:
+    kraken_file1 = kaiju_file1 = "SE_trimmed_data"
+    kraken_file2 = kaiju_file2 = False
+
+if user_format == "fastq":
     # fasta files cannot be QC'd - only for fastq files
-    if user_format == "fastq":
-        # QC and trim data
-        fastqc_trim(out_dir, file1, trim_minlen, threads, adapter_file)
-        kraken_file1 = "SE_trimmed_data"
-        t2 = time.time()
-    else:
-        kraken_file1 = file1
-        t2 = t1
+    fastqc_trim(out_dir, file1, trim_minlen, threads, adapter_file, file2)
+else:
+    kraken_file1 = kaiju_file1 = file1
+    kraken_file2 = kaiju_file2 = file2
 
-    # Kraken classification
-    kraken_classify(kraken_file1, threads, user_format, kraken_db,)
-    t4 = time.time()
+if subset:
+    kaiju_file1 = "subset_file1." + user_format
+    if file2:
+        kaiju_file2 = "subset_file2." + user_format
 
-    # Subset viral and unclassified sequences
-    seq_reanalysis("kraken_table.txt", "kraken_labels.txt", ncbi_file, out_dir, user_format, "SE_trimmed_data", subset)
-    t5 = time.time()
 
-        # Set data for kaiju analysis
-    if subset:
-        kaiju_file1 = "subset_file1." + user_format
-    else:
-        
-        kaiju_file1 = "SE_trimmed_data"
+# Kraken classification
+kraken_classify(kraken_file1, threads, user_format, kraken_db, kraken_file2,
+                quick_minhits = quick_minhits, preload = preload)
+t4 = time.time()
 
-    # Kaiju classification of subset sequences
-    kaiju_classify(kaiju_file1, threads, kaiju_db, kaiju_minlen, kraken_db, kaiju_file2 = False, kaiju_mismatch = kaiju_mismatch, kaiju_score = kaiju_mismatch)
-    t6 = time.time()
+# Format kraken data and subset viral and unclassified sequences
+seq_reanalysis("kraken_table.txt", "kraken_labels.txt", ncbi_file, out_dir,
+               user_format, kraken_file1, subset, kraken_file2)
+t5 = time.time()
 
-    # Merege results
-    result_analysis(out_dir, "kraken_VRL.txt", "kaiju_table.txt", "kaiju_labels.txt", ncbi_file, "ID.txt")
-    t7 = time.time()
+# Kaiju classification of all sequences or subset sequences
+kaiju_classify(kaiju_file1, threads, out_dir, kaiju_db, kaiju_minlen, kraken_db,
+               kaiju_file2, kaiju_mismatch = kaiju_mismatch,
+               kaiju_score = kaiju_score)
+t6 = time.time()     
 
-# Creating a log file	
+# Merege results
+result_analysis(out_dir, "kraken_VRL.txt", "kaiju_table.txt", "kaiju_labels.txt",
+                ncbi_file)
+t7 = time.time()
+
+
+# Create log file
 if subset:
 	print_statment = "subset sequences = " + str((t5-t4)/60) + " min\n"
 else:
 	print_statment = "formatting kraken data = " + str((t5-t4)/60) + " min\n"
 
 log_file = open(out_dir + "log_file.txt", "w")
-log_file.write("General parameters:\n" + "file1 = " + file1 + "\n" + "file2 = " + str(file2) + "\n" + "output directory = " + out_dir + "\n" + "threads =" + str(threads) + "\n" + "subset =" + str(subset) + "\n")
+log_file.write("General parameters:\n" + "file1 = " + file1 + "\n" +
+               "file2 = " + str(file2) + "\n" + "output directory = " +
+               out_dir + "\n" + "threads =" + str(threads) + "\n" +
+               "subset =" + str(subset) + "\n")
 log_file.write("Trimmomatic parameters:\n" + "trim_minlen = " + str(trim_minlen) + "\n")
-log_file.write("Kraken parameters:\n" + "kraken database = " + kraken_db + "\n" + "quick_minhits = " + str(quick_minhits) + "\n" + "preload =" + str(preload) + "\n")
-log_file.write("Kaiju parameters:\n" + "kaiju_db =" + kaiju_db + "\n" + "kaiju_minlen = " + str(kaiju_minlen) + "\n" + "kaiju_score =" + str(kaiju_score) + "\n" + "kaiju_mismatch =" + str(kaiju_mismatch) + "\n")
-log_file.write("Script timer:\n" + "testing format = " + str((t1-t0)) + " s\n" + "fastq and trim = " + str((t2-t1)/60) + " min\n" + "kraken classification = " + str((t4-t2)/3600) + " h\n" + print_statment + "kaiju classification = " + str((t6-t5)/3600) + " h\n" + "Results = " + str((t7-t6)/3600) + " h\n" + "total = " + str((t7-t0)/3600) + " h\n")
+log_file.write("Kraken parameters:\n" + "kraken database = " + kraken_db + "\n" +
+               "quick_minhits = " + str(quick_minhits) + "\n" + "preload =" +
+               str(preload) + "\n")
+log_file.write("Kaiju parameters:\n" + "kaiju_db =" + kaiju_db + "\n" +
+               "kaiju_minlen = " + str(kaiju_minlen) + "\n" +
+               "kaiju_score =" + str(kaiju_score) + "\n" +
+               "kaiju_mismatch =" + str(kaiju_mismatch) + "\n")
+log_file.write("Script timer:\n" + "testing format = " + str((t1-t0)) + " s\n" +
+               "fastq and trim = " + str((t2-t1)/60) + " min\n" +
+               "kraken classification = " + str((t4-t2)/3600) + " h\n" +
+               print_statment + "kaiju classification = " + str((t6-t5)/3600) +
+               " h\n" + "Results = " + str((t7-t6)/3600) + " h\n" + "total = " +
+               str((t7-t0)/3600) + " h\n")
 log_file.close()
 
 
