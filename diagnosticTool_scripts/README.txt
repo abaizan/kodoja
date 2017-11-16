@@ -25,6 +25,9 @@ Scripts are written in python (run on python 2.7.13 here)
 Python packages needed: subprocess, pandas, numpy, os, urllib, re,
 ncbi-genome-download and SeqIO (from biopython).
 
+IMPORTANT: When executing the pipeline, do not put original data in the result
+file before executing script
+
 There are three main scripts to run this pipeline on the cluster:
 diagnostic_master.sh - this script is to qsub the master python script
 diagnostic_master.py - this script contains the parameters and calls the
