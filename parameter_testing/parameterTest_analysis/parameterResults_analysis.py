@@ -3,8 +3,8 @@ import pandas as pd
 import os
 
 tool = 'kaiju'
-run_nums = [9, 10]
-result_filename = 'RNA_m3-15results.txt'
+run_nums = [10, 11, 12, 13, 14]
+result_filename = 'RNA_m3-15results_2.txt'
 
 wdir = '/home/ae42909/Scratch/parameter_test/' + tool + '/'
 runs = ['run' + str(nums) for nums in run_nums]
