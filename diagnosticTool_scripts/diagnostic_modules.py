@@ -137,25 +137,26 @@ def fastqc_trim(out_dir, file1, trim_minlen, threads, adapter_file, file2=False)
     if file2:
         subprocess.call("java -jar /mnt/apps/trimmomatic/0.32/trimmomatic.jar PE -threads " + \
                         str(threads) + " " + file1 + " " + file2 + \
-                        " PE_trimmed_data_1P PE_trimmed_data_1U PE_trimmed_data_2P PE_trimmed_data_2U " + \
+                        " trimmed_read1 PE_trimmed_data_1U trimmed_read2 PE_trimmed_data_2U " + \
                         trimAdapt_command, shell=True)
         subprocess.call("rm PE_trimmed_data_1U PE_trimmed_data_2U", shell=True)
-        subprocess.call("fastqc PE_trimmed_data_1P -o " + out_dir, shell=True)
-        subprocess.call("fastqc PE_trimmed_data_2P -o " + out_dir, shell=True)
-        
+        subprocess.call("fastqc trimmed_read1 -o " + out_dir, shell=True)
+        subprocess.call("fastqc trimmed_read2 -o " + out_dir, shell=True)
+
+
     else:
         subprocess.call("java -jar /mnt/apps/trimmomatic/0.32/trimmomatic.jar SE -threads " + \
-                        str(threads) + " " + file1 + " SE_trimmed_data " + \
+                        str(threads) + " " + file1 + " trimmed_read1 " + \
                         trimAdapt_command, shell=True)
-        subprocess.call("fastqc SE_trimmed_data -o " + out_dir, shell=True)
+        subprocess.call("fastqc trimmed_read1 -o " + out_dir, shell=True)
 
 
-def kraken_classify(kraken_file1, threads, user_format, kraken_db, kraken_file2 = False,
-                    quick_minhits = False, preload = False):
+def kraken_classify(kraken_file1, threads, user_format, kraken_db, kraken_file2=False,
+                    quick_minhits=False, preload=False):
     """Uses kraken to classify sequences. Add appropiate switches for kraken
     command (format, preload, minimum hits, if paired or single end) and call
     kraken command, followed by kraken-translate to get full taxonomy for each
-    sequence based on thir sequence id (Seq_tax: d__superkingdom, k__kingdom, 
+    sequence based on thir sequence id (Seq_tax: d__superkingdom, k__kingdom,
     p__phylum, c__class, o__order, f__family, g__genus, s__species).
 
     Return kraken_table file with a row for each sequence and kraken classification
@@ -176,18 +177,18 @@ def kraken_classify(kraken_file1, threads, user_format, kraken_db, kraken_file2 
 
     if quick_minhits:
         kraken_command += " --quick --min-hits " + str(quick_minhits)
-    
+
     if kraken_file2:
         kraken_command += " --paired " +  kraken_file1 + " " + \
                           kraken_file2 + " > kraken_table.txt"
     else:
         kraken_command += " " + kraken_file1 + " > kraken_table.txt"
-        
-    subprocess.call(kraken_command, shell = True)
-    subprocess.call("kraken-translate --mpa-format --db " + kraken_db + \
-                    " kraken_table.txt > kraken_labels.txt", shell = True)
 
-def format_result_table(out_dir, data_table, data_labels, table_colNames, ncbi_file = ncbi_file):
+    subprocess.call(kraken_command, shell=True)
+    subprocess.call("kraken-translate --mpa-format --db " + kraken_db + \
+                    " kraken_table.txt > kraken_labels.txt", shell=True)
+
+def format_result_table(out_dir, data_table, data_labels, table_colNames, ncbi_file=ncbi_file):
     """Merge the classification data (either kraken or kaiju) with the 'label'
     data which has full taxonomy for the classified sequence. Also adds a column with
     the sequence type (e.g. 'VRL' for virus, 'PLN' for plant)
@@ -195,16 +196,16 @@ def format_result_table(out_dir, data_table, data_labels, table_colNames, ncbi_f
     Return merged table
     """
     label_colNames=["Seq_ID", "Seq_tax"]
-    seq_data = pd.read_csv(out_dir + data_table, sep="\t", header = None, names= table_colNames,
+    seq_data = pd.read_csv(out_dir + data_table, sep="\t", header=None, names=table_colNames,
                            index_col=False)
-    seq_labelData = pd.read_csv(out_dir + data_labels, sep="\t", header = None,
-                                names= label_colNames)
+    seq_labelData = pd.read_csv(out_dir + data_labels, sep="\t", header=None,
+                                names=label_colNames)
     seq_result = pd.merge(seq_data, seq_labelData, on='Seq_ID', how='outer')
 
     ncbi_tax = pd.read_csv(ncbi_file, sep=",")
-    ncbi_slice = ncbi_tax.iloc[:,[1,2]]
+    ncbi_slice = ncbi_tax.iloc[:, [1, 2]]
     seq_final =  pd.merge(seq_result, ncbi_slice, on='Tax_ID', how='outer')
-    seq_final = seq_final.dropna(subset = ['Seq_ID'])
+    seq_final = seq_final.dropna(subset=['Seq_ID'])
 
     return seq_final
 
@@ -218,7 +219,7 @@ def sequence_subset (out_dir, input_file, output_file, user_format, id_list, id_
     outfile.close()
     id_file = out_dir + id_list_name
 
-    wanted = set(line.rstrip("\n").split(None,1)[0] for line in open(id_file))
+    wanted = set(line.rstrip("\n").split(None, 1)[0] for line in open(id_file))
     print "Found %i unique identifiers in %s" % (len(wanted), id_file)
 
     records = (r for r in SeqIO.parse(input_file, user_format) \
@@ -291,13 +292,14 @@ def seq_reanalysis(kraken_table, kraken_labels, ncbi_file, out_dir, user_format,
         if delete_file:
             subprocess.call("rm " + forSubset_file1, shell=True)
             if subset_file2:
-                subprocess.call('rm ' + forSubset_file2, shell = True)
+                subprocess.call('rm ' + forSubset_file2, shell=True)
 
         subprocess.call("rm reanalyse_ID.txt", shell=True)
-        
+
+
 def kaiju_classify(kaiju_file1, threads, out_dir, kaiju_db, kaiju_minlen, kraken_db,
                    kaiju_file2 = False, kaiju_mismatch = False, kaiju_score = False):
-    """Run kaiju command for kaiju classification of sequences. It ensures if 
+    """Run kaiju command for kaiju classification of sequences. It ensures if
     mismatches are allowed that a score has also been provided. Once classification
     is complete, it uses kraken-translate (as in kraken_classify()) to get full
     taxonomy names for each sequence that has been classified. It deletes the files
@@ -317,15 +319,15 @@ def kaiju_classify(kaiju_file1, threads, out_dir, kaiju_db, kaiju_minlen, kraken
     kaiju_command = "kaiju -z " + str(threads) + " -t " + kaiju_nodes + " -f " + kaiju_fmi + \
                     " -i " + kaiju_file1 + " -o kaiju_table.txt -x -v -a " + mode + " -m " + \
                     str(kaiju_minlen)
-    
+
     if kaiju_file2:
         kaiju_command += " -j " + kaiju_file2
 
-    subprocess.call(kaiju_command, shell = True)
+    subprocess.call(kaiju_command, shell=True)
     subprocess.call("kraken-translate --mpa-format --db " + kraken_db + " " +
                     "kaiju_table.txt > kaiju_labels.txt", shell = True)
-            
-        
+
+
     for dirs, sub_dirs, files in os.walk(out_dir):
         # Only delete file when it's in out_put
         for filenames in files:
@@ -430,7 +432,7 @@ def result_analysis(out_dir, kraken_VRL, kaiju_table, kaiju_label, ncbi_file):
                     associated_tax_list.append(key_lca)
             associated_tax[key_species] = associated_tax_list
 
-        table_summary = pd.DataFrame(columns=['Species', 'Tax_ID', 'kraken', 'kaiju','combined'])
+        table_summary = pd.DataFrame(columns=['Species', 'Tax_ID', 'kraken', 'kaiju', 'combined'])
         table_summary['Tax_ID'] =  map(int, levels_tax.keys())
         table_summary['kraken'] = table_summary['Tax_ID'].map(kraken_class)
         table_summary['kaiju'] = table_summary['Tax_ID'].map(kaiju_class)
