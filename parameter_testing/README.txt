@@ -181,13 +181,124 @@ kaiju/
     kaiju_parameters = {"kaiju_minlen":[3, 7, 11, 15],
                         "kaiju_mismatch":[False, 1, 3, 5],
                         "kaiju_score":[45, 65, 85]}
-                        
+
   run15 (same as 9 but separate files for paired data)
     input1 = '/mnt/shared/projects/virology/201609_BBSRC_Diagnostics/Data/
             synthetic/review-paper-test-datasets/SRR1123893Pepper'
     kaiju_parameters = {"kaiju_minlen":[3, 7, 11, 15],
                         "kaiju_mismatch":[False, 1, 3, 5],
                         "kaiju_score":[45, 65, 85]}
+  run16
+      input1 = /home/ae42909/data_forTesting/Apple_data/AppleVirus_SRR1089477.fastq
+      kaiju_parameters = {'kaiju_score': [45, 65, 85], 'kaiju_minlen': [3, 7, 11, 15], 'kaiju_mismatch': [False, 1, 3, 5]}
+
+run17
+    input1 = /home/ae42909/data_forTesting/Apple_data/AppleClean_SRR1089478.fastq
+    kaiju_parameters = {'kaiju_score': [45, 65, 85], 'kaiju_minlen': [3, 7, 11, 15], 'kaiju_mismatch': [False, 1, 3, 5]}
+
+run18
+
+run19
+
+run20
+
+run21
+
+run22
+
+run23
+
+run24
+
+run25
+
+run26
+
+run27
+
+run28
+
+run29
+    input1 = /home/ae42909/data_forTesting/Goosefoot_data/GfCMV1_SRR503604.fastq
+    kaiju_parameters = {'kaiju_score': [45, 65, 85], 'kaiju_minlen': [3, 7, 11, 15], 'kaiju_mismatch': [False, 1, 3, 5]}
+run30
+    input1 = /home/ae42909/data_forTesting/Goosefoot_data/GfCMV2_SRR503605.fastq
+    kaiju_parameters = {'kaiju_score': [45, 65, 85], 'kaiju_minlen': [3, 7, 11, 15], 'kaiju_mismatch': [False, 1, 3, 5]}
+run31
+    input1 = /home/ae42909/data_forTesting/Goosefoot_data/GfClean_SRR503601.fastq
+    kaiju_parameters = {'kaiju_score': [45, 65, 85], 'kaiju_minlen': [3, 7, 11, 15], 'kaiju_mismatch': [False, 1, 3, 5]}
+run32
+    input1 = /home/ae42909/data_forTesting/Goosefoot_data/GfTMV1_SRR503602.fastq
+    kaiju_parameters = {'kaiju_score': [45, 65, 85], 'kaiju_minlen': [3, 7, 11, 15], 'kaiju_mismatch': [False, 1, 3, 5]}
+run33
+    input1 = /home/ae42909/data_forTesting/Goosefoot_data/GfTMV2_SRR503603.fastq
+    kaiju_parameters = {'kaiju_score': [45, 65, 85], 'kaiju_minlen': [3, 7, 11, 15], 'kaiju_mismatch': [False, 1, 3, 5]}
+run34
+    input1 = /home/ae42909/data_forTesting/Algae_data/AlgaeVirus20_SRR924349.fastq
+    kaiju_parameters = {'kaiju_score': [45, 65, 85], 'kaiju_minlen': [3, 7, 11, 15], 'kaiju_mismatch': [False, 1, 3, 5]}
+run35
+    input1 = /home/ae42909/data_forTesting/Algae_data/AlgaeVirus14_SRR924347.fastq
+    kaiju_parameters = {'kaiju_score': [45, 65, 85], 'kaiju_minlen': [3, 7, 11, 15], 'kaiju_mismatch': [False, 1, 3, 5]}
+run36
+    input1 = /home/ae42909/data_forTesting/Algae_data/AlgaeVirus7_SRR924343.fastq
+    kaiju_parameters = {'kaiju_score': [45, 65, 85], 'kaiju_minlen': [3, 7, 11, 15], 'kaiju_mismatch': [False, 1, 3, 5]}
+run37
+    input1 = /home/ae42909/data_forTesting/Algae_data/AlgaeClean_SRR924142.fastq
+    kaiju_parameters = {'kaiju_score': [45, 65, 85], 'kaiju_minlen': [3, 7, 11, 15], 'kaiju_mismatch': [False, 1, 3, 5]}
+run38
+    input1 = /home/ae42909/data_forTesting/Algae_data/AlgaeVirus40_SRR924350.fastq
+    kaiju_parameters = {'kaiju_score': [45, 65, 85], 'kaiju_minlen': [3, 7, 11, 15], 'kaiju_mismatch': [False, 1, 3, 5]}
+run39
+    input1 = /home/ae42909/data_forTesting/Algae_data/AlgaeVirus60_SRR924352.fastq
+    kaiju_parameters = {'kaiju_score': [45, 65, 85], 'kaiju_minlen': [3, 7, 11, 15], 'kaiju_mismatch': [False, 1, 3, 5]}
+run40
+    input1 = /home/ae42909/data_forTesting/PotatoVD_data/PotatoVirus7_SRR3152175.fastq
+    kaiju_parameters = {'kaiju_score': [45, 65, 85], 'kaiju_minlen': [2, 3, 4], 'kaiju_mismatch': [False, 1]}
+run41
+    input1 = /home/ae42909/data_forTesting/PotatoVD_data/PotatoVirus3_SRR3152188.fastq
+    kaiju_parameters = {'kaiju_score': [45, 65, 85], 'kaiju_minlen': [2, 3, 4], 'kaiju_mismatch': [False, 1]}
+run42
+    input1 = /home/ae42909/data_forTesting/PotatoVD_data/PotatoClean5_SRR3152186.fastq
+    kaiju_parameters = {'kaiju_score': [45, 65, 85], 'kaiju_minlen': [2, 3, 4], 'kaiju_mismatch': [False, 1]}
+run43
+    input1 = /home/ae42909/data_forTesting/PotatoVD_data/PotatoVirus10_SRR3152166.fastq
+    kaiju_parameters = {'kaiju_score': [45, 65, 85], 'kaiju_minlen': [2, 3, 4], 'kaiju_mismatch': [False, 1]}
+run44
+    input1 = /home/ae42909/data_forTesting/PotatoVD_data/PotatoVirus1_SRR3152214.fastq
+    kaiju_parameters = {'kaiju_score': [45, 65, 85], 'kaiju_minlen': [2, 3, 4], 'kaiju_mismatch': [False, 1]}
+run45
+    input1 = /home/ae42909/data_forTesting/PotatoVD_data/PotatoVirus9_SRR3152173.fastq
+    kaiju_parameters = {'kaiju_score': [45, 65, 85], 'kaiju_minlen': [2, 3, 4], 'kaiju_mismatch': [False, 1]}
+run46
+    input1 = /home/ae42909/data_forTesting/PotatoVD_data/PotatoVirus5_SRR3152182.fastq
+    kaiju_parameters = {'kaiju_score': [45, 65, 85], 'kaiju_minlen': [2, 3, 4], 'kaiju_mismatch': [False, 1]}
+run47
+    input1 = /home/ae42909/data_forTesting/PotatoVD_data/PotatoClean6_SRR3152187.fastq
+    kaiju_parameters = {'kaiju_score': [45, 65, 85], 'kaiju_minlen': [2, 3, 4], 'kaiju_mismatch': [False, 1]}
+run48
+    input1 = /home/ae42909/data_forTesting/PotatoVD_data/PotatoClean2_SRR3152171.fastq
+    kaiju_parameters = {'kaiju_score': [45, 65, 85], 'kaiju_minlen': [2, 3, 4], 'kaiju_mismatch': [False, 1]}
+run49
+    input1 = /home/ae42909/data_forTesting/PotatoVD_data/PotatoClean4_SRR3152212.fastq
+    kaiju_parameters = {'kaiju_score': [45, 65, 85], 'kaiju_minlen': [2, 3, 4], 'kaiju_mismatch': [False, 1]}
+run50
+    input1 = /home/ae42909/data_forTesting/PotatoVD_data/PotatoVirus4_SRR3152183.fastq
+    kaiju_parameters = {'kaiju_score': [45, 65, 85], 'kaiju_minlen': [2, 3, 4], 'kaiju_mismatch': [False, 1]}
+run51
+    input1 = /home/ae42909/data_forTesting/PotatoVD_data/PotatoVirus2_SRR3152189.fastq
+    kaiju_parameters = {'kaiju_score': [45, 65, 85], 'kaiju_minlen': [2, 3, 4], 'kaiju_mismatch': [False, 1]}
+run52
+    input1 = /home/ae42909/data_forTesting/PotatoVD_data/PotatoClean1_SRR3152184.fastq
+    kaiju_parameters = {'kaiju_score': [45, 65, 85], 'kaiju_minlen': [2, 3, 4], 'kaiju_mismatch': [False, 1]}
+run53
+    input1 = /home/ae42909/data_forTesting/PotatoVD_data/PotatoVirus8_SRR3152174.fastq
+    kaiju_parameters = {'kaiju_score': [45, 65, 85], 'kaiju_minlen': [2, 3, 4], 'kaiju_mismatch': [False, 1]}
+run54
+    input1 = /home/ae42909/data_forTesting/PotatoVD_data/PotatoClean3_SRR3152213.fastq
+    kaiju_parameters = {'kaiju_score': [45, 65, 85], 'kaiju_minlen': [2, 3, 4], 'kaiju_mismatch': [False, 1]}
+run55
+    input1 = /home/ae42909/data_forTesting/PotatoVD_data/PotatoVirus6_SRR3152180.fastq
+    kaiju_parameters = {'kaiju_score': [45, 65, 85], 'kaiju_minlen': [2, 3, 4], 'kaiju_mismatch': [False, 1]}
 
 # Parameter test analysis scripts and graphs in /home/ae42909/viral_diagnostics/
     parameter_testing/parameterTest_analysis/<tool>
@@ -205,6 +316,3 @@ The script parameterResults_analysis.py (used in ipython) can be run for either 
   for that tool. The result is a table (specify name using "result_filename"
   variable) with each sample as a column and each set of parameters as the row
   index.
-
-  kraken/sRNA_k15-18_results.txt - run4:9
-  kaiju/sRNA_m2-4_results.txt - run 3:8
