@@ -45,39 +45,85 @@ def test_format(file1, user_format):
         " format rather than " + user_format + " format."
 
 
-def paired_test(file1, file2, user_format, out_dir):
-    """Assert if paired files have the same number of entries 
-    and if the paired reads are mached by choosing a random 
-    entry from the first list of ids and the same entry line 
-    for the second list of ids.
+def check_file(file1, out_dir, user_format, file2=False):
+    """Rename sequnce ids for SE or PE files to ensure
+    consistency between kraken and kaiju (which modify
+    id names). Create dictionaries containing real IDs and 
+    renamed version and pickle. If data is PE, assert 
+    paired files have the same number of entries and if 
+    the paired reads are mached by choosing a random 
+    entry from the first list of ids (minus meatdata) and 
+    the same entry for the second list of ids (can have 
+    one character different  as could be named 1 or 2).
     """
-    def paired_ids(fname, user_format):
-        """Get list of sequence identifires for each paired file.
+    def str_overlap(str1,str2):
+        """ Determine number of matching characters between
+        two strings.
 
-        Return list_ids and write list_ids to a text file in working
-        directory (each id on a new line).
+        Returns int with number of matching characters
         """
-        list_ids = []
-        format_num = 4
-        if user_format == "fasta":
-            format_num = 2
-        with open(fname, 'r') as in_file:
+
+        count = 0
+        for i in range(min(len(str1), len(str2))):
+            if str1[i] == str2[i]:
+                count = count + 1
+        return count
+
+    def rename_seqIDs(input_file, out_dir, user_format, paired=False):
+        """ Write a new file where each sequence ID is replaced with 
+        the the first character (">" or "@") followed by a number 
+        (1::N), and if it's a paired read followd by "/1" or "/2"
+        (called 'renamed_file'), and a dictionary composed of 
+        dict[newID] = oldID.
+
+        """
+        output_file = out_dir + "renamed_file_"
+        if paired == 2:
+            output_file += str(paired) + "." + user_format
+        else:
+            output_file += "1." + user_format
+        id_dict = {}
+        with open(input_file, 'r') as in_file, open(output_file, 'w') as out_file:
+            seqNum = 1
+            seqid_line = (4 if user_format == 'fastq' else 2)
+
             for lineNum, line in enumerate(in_file):
-                if lineNum % format_num == 0:
-                    list_ids.append(line)
+                if lineNum %  seqid_line == 0:
+                    new_line = line[0] + str(seqNum)
+                    id_dict[seqNum] = line[1:].strip()
+                    if paired:
+                        new_line += '/' + str(paired)
+                    new_line += "\n"
+                    out_file.write(new_line)
+                    seqNum += 1
+                else:
+                    out_file.write(line)
+        return id_dict
 
-        return list_ids
+    if file2:
+        ids1 = rename_seqIDs(file1, out_dir, user_format, paired=1)
+        ids2 = rename_seqIDs(file2, out_dir, user_format, paired=2)
+        with open(out_dir + 'ids2.pkl', 'wb') as pkl_dict:
+            pickle.dump(ids2, pkl_dict, protocol=pickle.HIGHEST_PROTOCOL)
 
-    ids1 = paired_ids(file1, user_format)
-    ids2 = paired_ids(file2, user_format)
-    assert len(ids1) == len(ids2), "Paired files have different number of reads"
-    for values in range(0,50):
-        random_id = random.randint(0, len(ids1)-1)
-        assert ids1[random_id][:-3] == ids1[random_id][:-3], \
-            "Paired-end sequences don't match"
+        assert len(ids1) == len(ids2), \
+            "Paired files have different number of reads"
+
+        for values in range(1,50):
+            random_id = random.randint(1, len(ids1)-1)
+            id_1 = ids1[random_id].split()[0]
+            id_2 = ids2[random_id].split()[0]
+            id_overlap = str_overlap(id_1, id_2)
+            assert  id_overlap == len(id_1) or id_overlap == len(id_1)- 1, \
+                "Paired-end sequences don't match"
+    else:
+        ids1 = rename_seqIDs(file1, out_dir, user_format, paired=False)
+
+    with open(out_dir + 'ids1.pkl', 'wb') as pkl_dict:
+        pickle.dump(ids1, pkl_dict, protocol=pickle.HIGHEST_PROTOCOL)
 
 
-def fastqc_trim(out_dir, file1, trim_minlen, threads, adapter_file, file2 = False):
+def fastqc_trim(out_dir, file1, trim_minlen, threads, adapter_file, file2=False):
     """Takes fastq data (either single or paired), trims sequences using trimmomatic
     (in the case of paried end reads, it deletes extra files) and uses fastqc to
     show the user what the sequence quality looks like after trimming.
@@ -221,6 +267,8 @@ def seq_reanalysis(kraken_table, kraken_labels, ncbi_file, out_dir, user_format,
         delete_file = False
         if forSubset_file2:
             subset_file2 = forSubset_file2
+        else:
+            subset_file2 = False
 
         for dirs, sub_dirs, files in os.walk(out_dir):
             if forSubset_file1 in files:
@@ -390,6 +438,7 @@ def result_analysis(out_dir, kraken_VRL, kaiju_table, kaiju_label, ncbi_file):
         table_summary['Species'] = table_summary['Tax_ID'].map(species_dict)
         table_summary = table_summary.sort_values('kraken', ascending=False)
         table_summary = table_summary.sort_values('combined', ascending=False)
-        table_summary.to_csv('virus_table.txt', sep = '\t', index = False)
+        table_summary.to_csv(out_dir + 'virus_table.txt', sep='\t', index=False)
+
 
     virusSummary(kodoja_vrl)
