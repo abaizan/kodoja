@@ -10,10 +10,9 @@ from diagnostic_modules import *
 
 # General parameters
 # CHECK KAIJU RUN NUMBERS! ll ~/Scratch/parameter_test/kaiju/
-run_list = ['run40', 'run41', 'run42', 'run43', 'run44', 'run45', 'run46', 'run47', 'run48', 'run49',
-            'run50', 'run51', 'run52', 'run53', 'run54', 'run55']
-fileDir = '/home/ae42909/data_forTesting/PotatoVD_data/'
-data_type = 'SE'
+run_list = ['run28']
+fileDir = '/home/ae42909/data_forTesting/GrapevineJo_data/set4/'
+data_type = 'PE'
 
 # Static parameters
 user_format = "fastq"
@@ -67,7 +66,7 @@ for dirs, sub_dirs, files in os.walk(fileDir):
                         tag = str(uuid.uuid4())
                         kaiju_param()
             log_file = open(out_dir + runs + "_file.txt", "w")
-            log_file.write("input1 = " + fileDir + file1 + "\n" +
+            log_file.write("input1 = " + str(file1) + "\n" + "input2 = " + str(file2) + "\n"
                            "kaiju_parameters = " + str(kaiju_parameters) + "\n")
             log_file.close()
     else:
@@ -98,7 +97,7 @@ for dirs, sub_dirs, files in os.walk(fileDir):
                         tag = str(uuid.uuid4())
                         kaiju_param()
             log_file = open(out_dir + runs + "_file.txt", "w")
-            log_file.write("input1 = " + fileDir + file1 + "\n" +
+            log_file.write("input1 = " + str(file1) + "\n" + "input2 = " + str(file2) + "\n" +
                            "kaiju_parameters = " + str(kaiju_parameters) + "\n")
             log_file.close()
 
