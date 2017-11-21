@@ -4,13 +4,15 @@ import pandas as pd
 from Bio import SeqIO
 import random
 import os
+import pickle
+from math import isnan
 
 ncbi_file = '/home/ae42909/Scratch/kraken/kraken_analysis/customDatabase/NCBI_taxonomy.csv'
 
 
 def check_path(dirs):
     """Check if directory path has '/' at the end.
-    
+
     Return value is either '/' or empty string ''.
     """
     if dirs[-1] != "/":
@@ -183,27 +185,32 @@ def sequence_subset (out_dir, input_file, output_file, user_format, id_list, id_
 
 def seq_reanalysis(kraken_table, kraken_labels, ncbi_file, out_dir, user_format, forSubset_file1,
                    subset = False, forSubset_file2 = False):
-    """Merge kraken_table and kraken_labels using format_result_table() and write to disk 
-    (delete kraken_table and kraken_label). 
-    If subset = True, make a list of "Seq_ID" column value if sequence is unclassified 
-    in "Classified" column or classified as VRL (virus) in column "Div_ID". This list will be 
+    """Merge kraken_table and kraken_labels using format_result_table() and write to disk
+    (delete kraken_table and kraken_label).
+    If subset = True, make a list of "Seq_ID" column value if sequence is unclassified
+    in "Classified" column or classified as VRL (virus) in column "Div_ID". This list will be
     used to subset sequences using sequence_subset(). This should be used when the host plant
     genome is used to classify sequences.
-    
-    Return merged kraken tableresult tables and subsetted sequence files (i subset = True).
+
+    Return merged kraken tableresult tables and subsetted sequence files (i subset=True).
     """
-    kraken_colNames = ["kraken_classified", "Seq_ID","Tax_ID", "kraken_length",
-                       "kraken_k-mer"]
+    kraken_colNames = ["kraken_classified", "Seq_ID","Tax_ID", "kraken_length", 
+                        "kraken_k-mer"]
     kraken_fullTable = format_result_table(out_dir, "kraken_table.txt",
                                            "kraken_labels.txt", kraken_colNames, ncbi_file)
+    kraken_fullTable['Seq_ID'] = kraken_fullTable['Seq_ID'].astype(float)
+    kraken_fullTable['Seq_ID'] = kraken_fullTable['Seq_ID'].astype(int)
+
+    kraken_results = kraken_fullTable[["kraken_classified", "Seq_ID","Tax_ID", "Seq_tax", 
+                                        "Div_ID"]]
+    kraken_results.to_csv(out_dir  + 'kraken_VRL.txt', sep='\t', index= False)
+    
+    with open('ids1.pkl', 'rb') as id_dict:
+        ids1 = pickle.load(id_dict)
+    kraken_fullTable = kraken_fullTable.replace({"Seq_ID": ids1})
     kraken_fullTable.to_csv(out_dir  + "kraken_FormattedTable.txt", sep='\t', index= False)
     subprocess.call("gzip " + out_dir  + "kraken_FormattedTable.txt", shell =True)
-    subprocess.call("rm " + "kraken_table.txt kraken_labels.txt", shell = True)
-    
-    # Subset table for final results
-    kraken_results = kraken_fullTable[["kraken_classified", "Seq_ID","Tax_ID", "Seq_tax",
-                                       "Div_ID"]]
-    kraken_results.to_csv(out_dir  + 'kraken_VRL.txt', sep='\t', index= False)
+    subprocess.call("rm " + "kraken_table.txt kraken_labels.txt", shell=True)
 
     if subset:
         unclassified_IDs = kraken_results.loc[(kraken_results.kraken_classified == 'U'), ['Seq_ID']]
@@ -223,12 +230,12 @@ def seq_reanalysis(kraken_table, kraken_labels, ncbi_file, out_dir, user_format,
                     subset_file2 = out_dir + forSubset_file2
 
         if forSubset_file2:
-            reanalyse_ID1 = [s + "/1" for s in reanalyse_IDs]
-            reanalyse_ID2 = [s + "/2" for s in reanalyse_IDs]
+            reanalyse_ID1 = [str(s) + "/1" for s in reanalyse_IDs]
+            reanalyse_ID2 = [str(s) + "/2" for s in reanalyse_IDs]
             sequence_subset(out_dir, subset_file2, "subset_file2.", user_format,
                             reanalyse_ID2, 'reanalyse_ID.txt')
         else:
-            reanalyse_ID1 = reanalyse_IDs
+            reanalyse_ID1 = [str(s) for s in reanalyse_IDs]
 
         sequence_subset(out_dir, subset_file1, "subset_file1.", user_format,
                         reanalyse_ID1, 'reanalyse_ID.txt')
@@ -280,64 +287,64 @@ def kaiju_classify(kaiju_file1, threads, out_dir, kaiju_db, kaiju_minlen, kraken
                     subprocess.call("rm " + kaiju_file2, shell=True)
 
 def result_analysis(out_dir, kraken_VRL, kaiju_table, kaiju_label, ncbi_file):
-    """Imports kraken results table, formats kaiju_table and kaiju_labels and merges 
-    kraken and kaiju results into one table (kodoja). It then separates reads which 
-    are classified as VRL, makes a table with all identified viruses and count number 
+    """Imports kraken results table, formats kaiju_table and kaiju_labels and merges
+    kraken and kaiju results into one table (kodoja). It then separates reads which
+    are classified as VRL, makes a table with all identified viruses and count number
     of intances for each usin virusSummary().
     """
-    kraken_results = pd.read_csv(out_dir + kraken_VRL, header = 0, sep='\t',
-                                 dtype={"kraken_classified":str, "Seq_ID": str,
+    kraken_results = pd.read_csv(out_dir + kraken_VRL, header=0, sep='\t',
+                                 dtype={"kraken_classified": str, "Seq_ID": int,
                                         "Tax_ID": float, "Seq_tax": str, "Div_ID": str})
 
-    kaiju_colNames =["kaiju_classified", "Seq_ID","Tax_ID", "kaiju_lenBest",
-                     "kaiju_tax_AN","kaiju_accession", "kaiju_fragment"]
+    kaiju_colNames =["kaiju_classified", "Seq_ID", "Tax_ID", "kaiju_lenBest",
+                     "kaiju_tax_AN", "kaiju_accession", "kaiju_fragment"]
     kaiju_fullTable = format_result_table(out_dir, "kaiju_table.txt", "kaiju_labels.txt",
                                           kaiju_colNames, ncbi_file)
-    
-    if kraken_results['Seq_ID'].str.endswith('/1')[0] \
-       and not kaiju_fullTable['Seq_ID'].str.endswith('/1')[0]:
-        kaiju_fullTable['Seq_ID'] = kaiju_fullTable['Seq_ID'] + '/1'
-     # When single-end data is used, illumina adds the '/1' (as if read 1 of a pair).
-     #    Kraken leaves the sequence IDs with the '/1' but Kaiju removes it, making
-     #    Sequence ids incompatible for merging
-        
-    kaiju_fullTable.to_csv(out_dir  + 'kaiju_FormattedTable.txt', sep='\t', index= False)
+    kaiju_fullTable['Seq_ID'] = kaiju_fullTable['Seq_ID'].astype(float)
+    kaiju_fullTable['Seq_ID'] = kaiju_fullTable['Seq_ID'].astype(int)
+    kaiju_results = kaiju_fullTable[["kaiju_classified", "Seq_ID", "Tax_ID", "Seq_tax", "Div_ID"]]
+
+    with open('ids1.pkl', 'rb') as id_dict:
+        ids1 = pickle.load(id_dict)
+    kaiju_fullTable = kaiju_fullTable.replace({"Seq_ID": ids1})
+    kaiju_fullTable.to_csv(out_dir  + 'kaiju_FormattedTable.txt', sep='\t', index= False)  
     subprocess.call('gzip ' + out_dir  + 'kaiju_FormattedTable.txt', shell =True)
-    kaiju_results = kaiju_fullTable[["kaiju_classified", "Seq_ID","Tax_ID", "Seq_tax", "Div_ID"]]
 
     kodoja = pd.merge(kraken_results, kaiju_results, on='Seq_ID', how='outer')
-    assert len(kraken_results) == len(kodoja) or len(kraken_results) + 2 == len(kodoja), \
+    assert len(kraken_results) == len(kodoja), \
         'ERROR: Kraken and Kaiju results not merged properly'
-    # Kraken removes '.1' and '.2' from the first two sequences (if that is how they are
-    #  named) so those will not merge with kaiju results for sequences 1 and 2.
     kodoja = kodoja.sort_values(['Seq_ID'])
     kodoja = kodoja.reset_index(drop=True)
-    kodoja.rename(columns={'Div_ID_x':'kraken_div_ID', 'Div_ID_y':'kaiju_div_ID',
-                           "Seq_tax_x":"kraken_seq_tax", "Seq_tax_y":"kaiju_seq_tax",
-                           'Tax_ID_x':'kraken_tax_ID', 'Tax_ID_y':'kaiju_tax_ID'}, inplace=True)
+    kodoja.rename(columns={'Div_ID_x': 'kraken_div_ID', 'Div_ID_y': 'kaiju_div_ID', 
+                           "Seq_tax_x": "kraken_seq_tax", "Seq_tax_y": "kaiju_seq_tax", 
+                           'Tax_ID_x': 'kraken_tax_ID', 'Tax_ID_y': 'kaiju_tax_ID'}, inplace=True)
+
+    with open('ids1.pkl', 'rb') as id_dict:
+        ids1 = pickle.load(id_dict)
+    kodoja = kodoja.replace({"Seq_ID": ids1})
 
     subprocess.call("rm kaiju_table.txt kaiju_labels.txt kraken_VRL.txt ", shell=True)
 
     kodoja['combined_result'] = kodoja.kraken_tax_ID[kodoja['kraken_tax_ID'] == kodoja['kaiju_tax_ID']]
     kodoja.to_csv(out_dir  + 'kodoja_VRL.txt', sep='\t', index= False)
 
-    kodoja_vrl = kodoja[(kodoja['kraken_div_ID'] == 'VRL')|(kodoja['kaiju_div_ID'] == 'VRL')] 
+    kodoja_vrl = kodoja[(kodoja['kraken_div_ID'] == 'VRL')|(kodoja['kaiju_div_ID'] == 'VRL')]
 
     def virusSummary(kodoja_data):
         """Creates a summary table with virus species names, tax id, count of
         sequences by kraken, kaiju and sequences that were identified by both
         tools as belonging to that species.
-        
-        For each tax id, a sequence count for kraken, kaiju and the combined 
-        is made. '_levels' dict have all tax ids present in th table with the 
-        taxanomic 'labels' given by kraken-traslate. 
+
+        For each tax id, a sequence count for kraken, kaiju and the combined
+        is made. '_levels' dict have all tax ids present in th table with the
+        taxanomic 'labels' given by kraken-traslate.
 
         'associated_tax' dict, has tax ids which would be related to a species
         tax id, as they belong to taxa which are higher, and therefore if
-        they could belong to a species but cannot be identified specifically 
-        (i.e. a sequence whih has been given the following label 
-        'd__Viruses|f__Closteroviridae|g__Ampelovirus' could be an unspecifically 
-        identified 'Grapevine_leafroll-associated_virus_4' the label for which is 
+        they could belong to a species but cannot be identified specifically
+        (i.e. a sequence whih has been given the following label
+        'd__Viruses|f__Closteroviridae|g__Ampelovirus' could be an unspecifically
+        identified 'Grapevine_leafroll-associated_virus_4' the label for which is
         'd__Viruses|f__Closteroviridae|g__Ampelovirus|s__Grapevine_leafroll-associated_virus_4').
         """
         kraken_class = dict(kodoja_data['kraken_tax_ID'].value_counts())
@@ -350,9 +357,13 @@ def result_analysis(out_dir, kraken_VRL, kaiju_table, kaiju_label, ncbi_file):
 
         levels_dict = kraken_levels.copy()
         levels_dict.update(kaiju_levels)
+        print levels_dict
         levels_dict.pop(0, None)
+        levels_dict = {k: levels_dict[k] for k in levels_dict if not isnan(k)}
+        print levels_dict
         levels_tax = {key: list(map(str, value.split('|')))
                       for key, value in levels_dict.items()}
+        print levels_tax
         LCA_tax = {}
         for key, tax in levels_tax.items():
             if tax[-1][0] != 's':
