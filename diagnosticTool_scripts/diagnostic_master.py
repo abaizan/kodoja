@@ -6,7 +6,7 @@ from diagnostic_modules import *
 
 # General parameters
 file1 = "/home/ae42909/Scratch/smallTest_data/100_Potato_withViruses_1.fastq"
-file2 = "/home/ae42909/Scratch/smallTest_data/100_Potato_withViruses_2.fastq"
+file2 = False
 user_format = "fastq"
 out_dir = "/home/ae42909/Scratch/100Seq_krakenDB_viral/"
 threads = 4
