@@ -96,9 +96,9 @@ t6 = time.time()
 
 # Create log file
 if subset:
-	print_statment = "subset sequences = " + str((t4-t3)/60) + " min\n"
+    print_statment = "subset sequences = " + str((t4-t3)/60) + " min\n"
 else:
-	print_statment = "formatting kraken data = " + str((t4-t3)/60) + " min\n"
+    print_statment = "formatting kraken data = " + str((t4-t3)/60) + " min\n"
 
 log_file = open(out_dir + "log_file.txt", "w")
 log_file.write("General parameters:\n" + "file1 = " + file1 + "\n" +
@@ -120,5 +120,3 @@ log_file.write("Script timer:\n" + "testing format/replace seqID = " + str((t1-t
                " h\n" + "Results = " + str((t6-t5)/3600) + " h\n" + "total = " +
                str((t6-t0)/3600) + " h\n")
 log_file.close()
-
-
