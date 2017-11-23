@@ -5,9 +5,9 @@ sys.path.insert(0, '/home/ae42909/viral_diagnostics/diagnosticTool_scripts/')
 from diagnostic_modules import *
 
 # General parameters
-file1 = "/home/ae42909/Scratch/smallTest_data/100_Potato_withViruses_1.fastq"
+file1 = "/home/ae42909/Scratch/smallTest_data/100_Potato_withViruses_1.fasta"
 file2 = False
-user_format = "fastq"
+user_format = "fasta"
 out_dir = "/home/ae42909/Scratch/100Seq_krakenDB_viral/"
 threads = 4
 ncbi_file = '/home/ae42909/Scratch/kraken/kraken_analysis/customDatabase/NCBI_taxonomy.csv'
