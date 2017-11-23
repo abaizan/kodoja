@@ -157,7 +157,7 @@ def kaijuDB_build(genome_download_dir, kaiju_db_dir):
                                 out_file.write(line[:1] + str(count) + "_" + line[1:])
                                 count += 1
                             else:
-                                 out_file.write(line)
+                                out_file.write(line)
 
                     subprocess.call("gzip " + unzip_filename, shell = True)
 
@@ -172,4 +172,3 @@ def kaijuDB_build(genome_download_dir, kaiju_db_dir):
     subprocess.call("mkbwt -n 5 -a ACDEFGHIKLMNPQRSTVWY -o kaiju_library kaiju_library.faa", shell = True)
     subprocess.call("mkfmi kaiju_library", shell = True)
     subprocess.call("rm kaiju_library.faa kaiju_library.bwt kaiju_library.sa", shell = True)
-
