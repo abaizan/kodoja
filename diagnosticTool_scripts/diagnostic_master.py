@@ -100,10 +100,18 @@ if subset:
 else:
 	print_statment = "formatting kraken data = " + str((t4-t3)/60) + " min\n"
 
+# Get number of reads
+with open(out_dir + 'ids1.pkl', 'rb') as id_dict:
+    ids1 = pickle.load(id_dict)
+
+readNum = ids1.keys()[-1]
+
 log_file = open(out_dir + "log_file.txt", "w")
 log_file.write("General parameters:\n" + "file1 = " + file1 + "\n" +
-               "file2 = " + str(file2) + "\n" + "output directory = " +
-               out_dir + "\n" + "threads =" + str(threads) + "\n" +
+               "file2 = " + str(file2) + "\n" + 
+               "Number of reads = " + str(readNum) + "\n" +
+               "output directory = " +  out_dir + "\n" +
+               "threads =" + str(threads) + "\n" +
                "subset =" + str(subset) + "\n")
 log_file.write("Trimmomatic parameters:\n" + "trim_minlen = " + str(trim_minlen) + "\n")
 log_file.write("Kraken parameters:\n" + "kraken database = " + kraken_db + "\n" +
@@ -111,8 +119,8 @@ log_file.write("Kraken parameters:\n" + "kraken database = " + kraken_db + "\n" 
                str(preload) + "\n")
 log_file.write("Kaiju parameters:\n" + "kaiju_db =" + kaiju_db + "\n" +
                "kaiju_minlen = " + str(kaiju_minlen) + "\n" +
-               "kaiju_score =" + str(kaiju_score) + "\n" +
-               "kaiju_mismatch =" + str(kaiju_mismatch) + "\n")
+               "kaiju_score = " + str(kaiju_score) + "\n" +
+               "kaiju_mismatch = " + str(kaiju_mismatch) + "\n")
 log_file.write("Script timer:\n" + "testing format/replace seqID = " + str((t1-t0)) + " s\n" +
                "fastq and trim = " + str((t2-t1)/60) + " min\n" +
                "kraken classification = " + str((t3-t2)/3600) + " h\n" +

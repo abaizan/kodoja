@@ -22,7 +22,9 @@ def check_path(dirs):
 
 
 def test_format(file1, user_format):
-    """Check if data is in the fasta or fastq format and
+    """Check if data format.
+
+    Check if data is in the fasta or fastq format and
     assert the user has specified the correct format for
     the data provided.
 
@@ -46,7 +48,9 @@ def test_format(file1, user_format):
 
 
 def check_file(file1, out_dir, user_format, file2=False):
-    """Rename sequnce ids for SE or PE files to ensure
+    """Rename sequnce ids and check PE files.
+
+    Rename sequnce ids for SE or PE files to ensure
     consistency between kraken and kaiju (which modify
     id names). Create dictionaries containing real IDs and 
     renamed version and pickle. If data is PE, assert 
@@ -57,8 +61,7 @@ def check_file(file1, out_dir, user_format, file2=False):
     one character different  as could be named 1 or 2).
     """
     def str_overlap(str1,str2):
-        """ Determine number of matching characters between
-        two strings.
+        """Get number of matching characters between two strings.
 
         Returns int with number of matching characters
         """
@@ -70,7 +73,9 @@ def check_file(file1, out_dir, user_format, file2=False):
         return count
 
     def rename_seqIDs(input_file, out_dir, user_format, paired=False):
-        """ Write a new file where each sequence ID is replaced with 
+        """Rename sequence ids 
+        
+        Write a new file where each sequence ID is replaced with 
         the the first character (">" or "@") followed by a number 
         (1::N), and if it's a paired read followd by "/1" or "/2"
         (called 'renamed_file'), and a dictionary composed of 
@@ -407,13 +412,12 @@ def result_analysis(out_dir, kraken_VRL, kaiju_table, kaiju_label, ncbi_file):
 
         levels_dict = kraken_levels.copy()
         levels_dict.update(kaiju_levels)
-        print levels_dict
         levels_dict.pop(0, None)
         levels_dict = {k: levels_dict[k] for k in levels_dict if not isnan(k)}
         print levels_dict
         levels_tax = {key: list(map(str, value.split('|')))
                       for key, value in levels_dict.items()}
-        print levels_tax
+        
         LCA_tax = {}
         for key, tax in levels_tax.items():
             if tax[-1][0] != 's':
