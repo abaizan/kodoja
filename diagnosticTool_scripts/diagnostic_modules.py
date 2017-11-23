@@ -114,7 +114,7 @@ def check_file(file1, out_dir, user_format, file2=False):
             id_1 = ids1[random_id].split()[0]
             id_2 = ids2[random_id].split()[0]
             id_overlap = str_overlap(id_1, id_2)
-            assert  id_overlap == len(id_1) or id_overlap == len(id_1)- 1, \
+            assert id_overlap == len(id_1) or id_overlap == len(id_1)- 1, \
                 "Paired-end sequences don't match"
     else:
         ids1 = rename_seqIDs(file1, out_dir, user_format, paired=False)
@@ -308,7 +308,7 @@ def kaiju_classify(kaiju_file1, threads, out_dir, kaiju_db, kaiju_minlen, kraken
     """
     kaiju_nodes = kaiju_db + "nodes.dmp"
     kaiju_fmi = kaiju_db + "kaiju_library.fmi"
-    kaiju_names = kaiju_db + "names.dmp"
+    # kaiju_names = kaiju_db + "names.dmp"
 
     if kaiju_mismatch:
         assert(kaiju_score), "Set kaiju_score for greedy mode"
