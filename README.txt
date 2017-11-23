@@ -6,15 +6,14 @@ plant RNA-seq dataset.
 
 It takes the raw data (either fasta or fastq) and uses Kraken, a k-mer-based tool,
 and Kaiju which used the Burrows–Wheeler transform, to
-detect viral sequences within the sample. If the raw data is in fastq format,
-a QC and trimming script will be implemented. There are also scripts to make
-a custom database for kraken and kaiju, which downloads and uses all ncbi refseq
-viral data (genomic for kraken and protein for kaiju). You can also add extra files
-to the database by downloading the reference database you want to use and put it into
-a folder called "extra" in your genome_download_dir location (see database construction
-below). These files need to be  and if it
-doesn't have already, change the file extension to either ".fna" for genomic or
-".faa" for protein
+detect viral sequences within the sample. If the raw data is in fasta or fastq
+format, a QC and trimming script will be implemented in the case it is fastq.
+There are also scripts to make a custom database for kraken and kaiju, which
+downloads and uses all ncbi refseq viral data (genomic for kraken and protein
+for kaiju). You can also add extra files
+to the database by downloading the reference database you want to use and put
+it into a folder called "extra" in your genome_download_dir location (see database construction
+below). These files need to be and if it doesn't have already, change the file extension to either ".fna" for genomic or ".faa" for protein
 
 Tools used as part of the pipeline and for database construction: fastqc
 (0.10.0), trimmomatic (0.32), kraken (0.10.5-beta), kaiju (1.5.0), jellyfish
@@ -22,7 +21,7 @@ Tools used as part of the pipeline and for database construction: fastqc
 Linux tools: gzip/gunzip, tar
 
 Scripts are written in python (run on python 2.7.13 here)
-Python packages needed: subprocess, pandas, numpy, os, urllib, re,
+Python packages needed: subprocess, pandas, math, pickle, os, urllib, re,
 ncbi-genome-download and SeqIO (from biopython).
 
 IMPORTANT: When executing the pipeline, do not put original data in the result
