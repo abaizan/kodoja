@@ -257,9 +257,9 @@ def seq_reanalysis(kraken_table, kraken_labels, ncbi_file, out_dir, user_format,
                                         "Div_ID"]]
     kraken_results.to_csv(out_dir  + 'kraken_VRL.txt', sep='\t', index= False)
     
-    with open('ids1.pkl', 'rb') as id_dict:
+    with open(out_dir + 'ids1.pkl', 'rb') as id_dict:
         ids1 = pickle.load(id_dict)
-    kraken_fullTable = kraken_fullTable.replace({"Seq_ID": ids1})
+    kraken_fullTable["Seq_ID"] = kraken_fullTable["Seq_ID"].map(ids1)
     kraken_fullTable.to_csv(out_dir  + "kraken_FormattedTable.txt", sep='\t', index= False)
     subprocess.call("gzip " + out_dir  + "kraken_FormattedTable.txt", shell =True)
     subprocess.call("rm " + "kraken_table.txt kraken_labels.txt", shell=True)
@@ -359,9 +359,9 @@ def result_analysis(out_dir, kraken_VRL, kaiju_table, kaiju_label, ncbi_file):
     kaiju_fullTable['Seq_ID'] = kaiju_fullTable['Seq_ID'].astype(int)
     kaiju_results = kaiju_fullTable[["kaiju_classified", "Seq_ID", "Tax_ID", "Seq_tax", "Div_ID"]]
 
-    with open('ids1.pkl', 'rb') as id_dict:
+    with open(out_dir + 'ids1.pkl', 'rb') as id_dict:
         ids1 = pickle.load(id_dict)
-    kaiju_fullTable = kaiju_fullTable.replace({"Seq_ID": ids1})
+    kaiju_fullTable["Seq_ID"] = kaiju_fullTable["Seq_ID"].map(ids1)
     kaiju_fullTable.to_csv(out_dir  + 'kaiju_FormattedTable.txt', sep='\t', index= False)  
     subprocess.call('gzip ' + out_dir  + 'kaiju_FormattedTable.txt', shell =True)
 
@@ -374,9 +374,7 @@ def result_analysis(out_dir, kraken_VRL, kaiju_table, kaiju_label, ncbi_file):
                            "Seq_tax_x": "kraken_seq_tax", "Seq_tax_y": "kaiju_seq_tax", 
                            'Tax_ID_x': 'kraken_tax_ID', 'Tax_ID_y': 'kaiju_tax_ID'}, inplace=True)
 
-    with open('ids1.pkl', 'rb') as id_dict:
-        ids1 = pickle.load(id_dict)
-    kodoja = kodoja.replace({"Seq_ID": ids1})
+    kodoja["Seq_ID"] = kodoja["Seq_ID"].map(ids1)
 
     subprocess.call("rm kaiju_table.txt kaiju_labels.txt kraken_VRL.txt ", shell=True)
 
