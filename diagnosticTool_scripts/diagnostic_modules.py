@@ -22,7 +22,9 @@ def check_path(dirs):
 
 
 def test_format(file1, user_format):
-    """Check if data is in the fasta or fastq format and
+    """Check if data format.
+
+    Check if data is in the fasta or fastq format and
     assert the user has specified the correct format for
     the data provided.
 
@@ -46,7 +48,9 @@ def test_format(file1, user_format):
 
 
 def check_file(file1, out_dir, user_format, file2=False):
-    """Rename sequnce ids for SE or PE files to ensure
+    """Rename sequnce ids and check PE files.
+
+    Rename sequnce ids for SE or PE files to ensure
     consistency between kraken and kaiju (which modify
     id names). Create dictionaries containing real IDs and 
     renamed version and pickle. If data is PE, assert 
@@ -57,8 +61,7 @@ def check_file(file1, out_dir, user_format, file2=False):
     one character different  as could be named 1 or 2).
     """
     def str_overlap(str1,str2):
-        """ Determine number of matching characters between
-        two strings.
+        """Get number of matching characters between two strings.
 
         Returns int with number of matching characters
         """
@@ -70,7 +73,9 @@ def check_file(file1, out_dir, user_format, file2=False):
         return count
 
     def rename_seqIDs(input_file, out_dir, user_format, paired=False):
-        """ Write a new file where each sequence ID is replaced with 
+        """Rename sequence ids 
+        
+        Write a new file where each sequence ID is replaced with 
         the the first character (">" or "@") followed by a number 
         (1::N), and if it's a paired read followd by "/1" or "/2"
         (called 'renamed_file'), and a dictionary composed of 
@@ -118,6 +123,9 @@ def check_file(file1, out_dir, user_format, file2=False):
                 "Paired-end sequences don't match"
     else:
         ids1 = rename_seqIDs(file1, out_dir, user_format, paired=False)
+
+    with open(out_dir + "log_file.txt", "a") as log_file:
+        log_file.write("Number of sequences = " + str(ids1.keys()[-1]) + "\n")
 
     with open(out_dir + 'ids1.pkl', 'wb') as pkl_dict:
         pickle.dump(ids1, pkl_dict, protocol=pickle.HIGHEST_PROTOCOL)
@@ -252,9 +260,9 @@ def seq_reanalysis(kraken_table, kraken_labels, ncbi_file, out_dir, user_format,
                                         "Div_ID"]]
     kraken_results.to_csv(out_dir  + 'kraken_VRL.txt', sep='\t', index= False)
     
-    with open('ids1.pkl', 'rb') as id_dict:
+    with open(out_dir + 'ids1.pkl', 'rb') as id_dict:
         ids1 = pickle.load(id_dict)
-    kraken_fullTable = kraken_fullTable.replace({"Seq_ID": ids1})
+    kraken_fullTable["Seq_ID"] = kraken_fullTable["Seq_ID"].map(ids1)
     kraken_fullTable.to_csv(out_dir  + "kraken_FormattedTable.txt", sep='\t', index= False)
     subprocess.call("gzip " + out_dir  + "kraken_FormattedTable.txt", shell =True)
     subprocess.call("rm " + "kraken_table.txt kraken_labels.txt", shell=True)
@@ -354,9 +362,9 @@ def result_analysis(out_dir, kraken_VRL, kaiju_table, kaiju_label, ncbi_file):
     kaiju_fullTable['Seq_ID'] = kaiju_fullTable['Seq_ID'].astype(int)
     kaiju_results = kaiju_fullTable[["kaiju_classified", "Seq_ID", "Tax_ID", "Seq_tax", "Div_ID"]]
 
-    with open('ids1.pkl', 'rb') as id_dict:
+    with open(out_dir + 'ids1.pkl', 'rb') as id_dict:
         ids1 = pickle.load(id_dict)
-    kaiju_fullTable = kaiju_fullTable.replace({"Seq_ID": ids1})
+    kaiju_fullTable["Seq_ID"] = kaiju_fullTable["Seq_ID"].map(ids1)
     kaiju_fullTable.to_csv(out_dir  + 'kaiju_FormattedTable.txt', sep='\t', index= False)  
     subprocess.call('gzip ' + out_dir  + 'kaiju_FormattedTable.txt', shell =True)
 
@@ -369,9 +377,7 @@ def result_analysis(out_dir, kraken_VRL, kaiju_table, kaiju_label, ncbi_file):
                            "Seq_tax_x": "kraken_seq_tax", "Seq_tax_y": "kaiju_seq_tax", 
                            'Tax_ID_x': 'kraken_tax_ID', 'Tax_ID_y': 'kaiju_tax_ID'}, inplace=True)
 
-    with open('ids1.pkl', 'rb') as id_dict:
-        ids1 = pickle.load(id_dict)
-    kodoja = kodoja.replace({"Seq_ID": ids1})
+    kodoja["Seq_ID"] = kodoja["Seq_ID"].map(ids1)
 
     subprocess.call("rm kaiju_table.txt kaiju_labels.txt kraken_VRL.txt ", shell=True)
 
@@ -407,13 +413,12 @@ def result_analysis(out_dir, kraken_VRL, kaiju_table, kaiju_label, ncbi_file):
 
         levels_dict = kraken_levels.copy()
         levels_dict.update(kaiju_levels)
-        print levels_dict
         levels_dict.pop(0, None)
         levels_dict = {k: levels_dict[k] for k in levels_dict if not isnan(k)}
         print levels_dict
         levels_tax = {key: list(map(str, value.split('|')))
                       for key, value in levels_dict.items()}
-        print levels_tax
+        
         LCA_tax = {}
         for key, tax in levels_tax.items():
             if tax[-1][0] != 's':
