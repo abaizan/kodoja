@@ -124,6 +124,9 @@ def check_file(file1, out_dir, user_format, file2=False):
     else:
         ids1 = rename_seqIDs(file1, out_dir, user_format, paired=False)
 
+    with open(out_dir + "log_file.txt", "a") as log_file:
+        log_file.write("Number of sequences = " + str(ids1.keys()[-1]) + "\n")
+
     with open(out_dir + 'ids1.pkl', 'wb') as pkl_dict:
         pickle.dump(ids1, pkl_dict, protocol=pickle.HIGHEST_PROTOCOL)
 
