@@ -5,10 +5,10 @@ sys.path.insert(0, '/home/ae42909/viral_diagnostics/diagnosticTool_scripts/')
 from diagnostic_modules import *
 
 # General parameters
-file1 = "/home/ae42909/synthetic_RNAseq/mappingRNAseq/concatenated_fastaFiles/Potato_withViruses_1.fastq"
-file2 = "/home/ae42909/synthetic_RNAseq/mappingRNAseq/concatenated_fastaFiles/Potato_withViruses_2.fastq"
+file1 = "/home/ae42909/Scratch/smallTest_data/100_Potato_withViruses_1.fastq"
+file2 = "/home/ae42909/Scratch/smallTest_data/100_Potato_withViruses_2.fastq"
 user_format = "fastq"
-out_dir = "/home/ae42909/Scratch/synthPotato_pipeline/"
+out_dir = "/home/ae42909/Scratch/"
 threads = 4
 ncbi_file = '/home/ae42909/Scratch/kraken/kraken_analysis/customDatabase/NCBI_taxonomy.csv'
 subset = False
@@ -27,6 +27,22 @@ kaiju_db = "/home/ae42909/Scratch/kaijuDB_viral_2/"
 kaiju_minlen = 15
 kaiju_score = 85
 kaiju_mismatch = 1
+
+# Write a log_file:
+with open(out_dir + "log_file.txt", "w")as log_file:
+    log_file.write("General parameters:\n" + "file1 = " + file1 + "\n" +
+                   "file2 = " + str(file2) + "\n" + 
+                   "output directory = " +  out_dir + "\n" +
+                   "threads =" + str(threads) + "\n" +
+                   "subset =" + str(subset) + "\n" +
+                   "Trimmomatic parameters:\n" + "trim_minlen = " + str(trim_minlen) + "\n" +
+                   "Kraken parameters:\n" + "kraken database = " + kraken_db + "\n" +
+                   "quick_minhits = " + str(quick_minhits) + "\n" + "preload =" +
+                   str(preload) + "\n" +
+                   "Kaiju parameters:\n" + "kaiju_db =" + kaiju_db + "\n" +
+                   "kaiju_minlen = " + str(kaiju_minlen) + "\n" +
+                   "kaiju_score = " + str(kaiju_score) + "\n" +
+                   "kaiju_mismatch = " + str(kaiju_mismatch) + "\n")
 
 # Check that dirs have "/" at the end
 out_dir += check_path(out_dir)
@@ -100,33 +116,13 @@ if subset:
 else:
 	print_statment = "formatting kraken data = " + str((t4-t3)/60) + " min\n"
 
-# Get number of reads
-with open(out_dir + 'ids1.pkl', 'rb') as id_dict:
-    ids1 = pickle.load(id_dict)
+with open(out_dir + "log_file.txt", "a") as log_file:
+    log_file.write("Script timer:\n" + "testing format/replace seqID = " + str((t1-t0)) + " s\n" +
+                   "fastq and trim = " + str((t2-t1)/60) + " min\n" +
+                   "kraken classification = " + str((t3-t2)/3600) + " h\n" +
+                   print_statment + "kaiju classification = " + str((t5-t6)/3600) +
+                   " h\n" + "Results = " + str((t6-t5)/3600) + " h\n" + "total = " +
+                   str((t6-t0)/3600) + " h\n")
 
-readNum = ids1.keys()[-1]
-
-log_file = open(out_dir + "log_file.txt", "w")
-log_file.write("General parameters:\n" + "file1 = " + file1 + "\n" +
-               "file2 = " + str(file2) + "\n" + 
-               "Number of reads = " + str(readNum) + "\n" +
-               "output directory = " +  out_dir + "\n" +
-               "threads =" + str(threads) + "\n" +
-               "subset =" + str(subset) + "\n")
-log_file.write("Trimmomatic parameters:\n" + "trim_minlen = " + str(trim_minlen) + "\n")
-log_file.write("Kraken parameters:\n" + "kraken database = " + kraken_db + "\n" +
-               "quick_minhits = " + str(quick_minhits) + "\n" + "preload =" +
-               str(preload) + "\n")
-log_file.write("Kaiju parameters:\n" + "kaiju_db =" + kaiju_db + "\n" +
-               "kaiju_minlen = " + str(kaiju_minlen) + "\n" +
-               "kaiju_score = " + str(kaiju_score) + "\n" +
-               "kaiju_mismatch = " + str(kaiju_mismatch) + "\n")
-log_file.write("Script timer:\n" + "testing format/replace seqID = " + str((t1-t0)) + " s\n" +
-               "fastq and trim = " + str((t2-t1)/60) + " min\n" +
-               "kraken classification = " + str((t3-t2)/3600) + " h\n" +
-               print_statment + "kaiju classification = " + str((t5-t6)/3600) +
-               " h\n" + "Results = " + str((t6-t5)/3600) + " h\n" + "total = " +
-               str((t6-t0)/3600) + " h\n")
-log_file.close()
 
 
