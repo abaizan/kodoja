@@ -1,4 +1,3 @@
-# python 2.7.13
 import subprocess
 import pandas as pd
 import numpy as np
