@@ -138,9 +138,10 @@ def fastqc_trim(out_dir, file1, trim_minlen, threads, adapter_file, file2=False)
 
     Returns trimmed sequence files and fastq analysis files
     """
-    trimAdapt_command = "ILLUMINACLIP:" + adapter_file + \
-                        ":2:30:10 LEADING:20 TRAILING:20 MINLEN:" + \
+    trimAdapt_command = " LEADING:20 TRAILING:20 MINLEN:" + \
                         str(trim_minlen)
+    if adapter_file:
+        trimAdapt_command += "ILLUMINACLIP:" + adapter_file + ":2:30:10"
 
     if file2:
         subprocess.call("java -jar /mnt/apps/trimmomatic/0.32/trimmomatic.jar PE -threads " + \
