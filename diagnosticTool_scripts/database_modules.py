@@ -37,10 +37,6 @@ def ncbi_rename_customDB(tool, genome_download_dir, extra_files = False, extra_t
     else:
         file_extension = ".faa.gz"
 
-    # Download assembly summary file from ncbi ftp site and load as pandas dataframe
-    if not os.path.exists(genome_download_dir + "refseq/viral_assembly_summary.txt"):
-        os.chdir(genome_download_dir)
-        urllib.urlretrieve('ftp://ftp.ncbi.nih.gov/genomes/refseq/viral/assembly_summary.txt', 'refseq/viral_assembly_summary.txt')
     path_assembly_summary = genome_download_dir + "refseq/viral_assembly_summary.txt"
     assembly_summary = pd.read_table(path_assembly_summary, sep='\t', skiprows=1, header = 0)
     assembly_summary.rename(columns={'# assembly_accession':'assembly_accession'}, inplace=True)  # rename column to exclude "#"
@@ -103,7 +99,7 @@ def ncbi_rename_customDB(tool, genome_download_dir, extra_files = False, extra_t
  
 
 # Build the database with the renamed genome files from ncbi
-def krakenDB_build(genome_download_dir, kraken_db_dir, threads, kraken_kmer, kraken_minimizer, jellyfish_hash_size = False, kraken_max_dbSize = False):
+def krakenDB_build(genome_download_dir, kraken_db_dir, threads, kraken_kmer, kraken_minimizer, plnVir_assembly, jellyfish_hash_size = False, kraken_max_dbSize = False):
     # Make a kraken database directory
     if not os.path.exists(kraken_db_dir):
         os.makedirs(kraken_db_dir)
@@ -111,15 +107,23 @@ def krakenDB_build(genome_download_dir, kraken_db_dir, threads, kraken_kmer, kra
     # Download taxonomy for Kraken database
     subprocess.call("kraken-build --download-taxonomy --threads " + str(threads) + " --db " + kraken_db_dir, shell = True)
 
-    # Add files downloaded and ready for kraken ("<file>.tax.fna") through krakenDB_download() to kraken library
+    file_list = []
+    # Add files downloaded and ready for kraken ("<file>.kraken.fna") to kraken library
     for root, subdirs, files in os.walk(genome_download_dir):
         for filename in files:
-            if filename.endswith("kraken.fna.gz"):
-                zip_filename = os.path.join(root,filename)
-                subprocess.call("gunzip " + zip_filename,shell = True)
-                unzip_filename = zip_filename[:-3]
-                subprocess.call("kraken-build --add-to-library "  + unzip_filename + " --db " + kraken_db_dir, shell = True)
-                subprocess.call("gzip " + unzip_filename, shell = True)
+            if plnVir_assembly:
+                if root.split('/')[-1] in plnVir_assembly and filename.endswith("kraken.fna.gz"):
+                    file_list.append(os.path.join(root,filename))
+            else:
+                if filename.endswith("kraken.fna.gz"):
+                    file_list.append(os.path.join(root,filename))
+
+    for genome_file in file_list:
+        zip_filename = genome_file
+        subprocess.call("gunzip " + zip_filename,shell = True)
+        unzip_filename = zip_filename[:-3]
+        subprocess.call("kraken-build --add-to-library "  + unzip_filename + " --db " + kraken_db_dir, shell = True)
+        subprocess.call("gzip " + unzip_filename, shell = True)
 
     # Build the command to run kraken-build based on parameters specifed
     kraken_command = "kraken-build --build --threads " + str(threads) + " --db " + kraken_db_dir + " --kmer-len " + str(kraken_kmer) + " --minimizer-len " + str(kraken_minimizer)
@@ -133,32 +137,40 @@ def krakenDB_build(genome_download_dir, kraken_db_dir, threads, kraken_kmer, kra
     
     # Clear unnecessary files from kraken database directory
     subprocess.call("kraken-build --clean --db " + kraken_db_dir, shell = True)
-#    subprocess.call("tar -czvf kraken_db.tar.gz " + kraken_db_dir, shell = True)
 
-def kaijuDB_build(genome_download_dir, kaiju_db_dir):
+
+def kaijuDB_build(genome_download_dir, kaiju_db_dir, plnVir_assembly):
     # Make a kaiju database directory
     if not os.path.exists(kaiju_db_dir):
         os.makedirs(kaiju_db_dir)
 
-    # Add all .faa files to one fasta file
+    # Add files downloaded and ready for kaiju ("<file>.kaiju.faa") to one fasta file
     kaijuDB_fasta = kaiju_db_dir + "kaiju_library.faa"
     count = 0
-    with open(kaijuDB_fasta, "w") as out_file:
-        for root, subdirs, files in os.walk(genome_download_dir + "refseq/"):
-            for filename in files:
+    file_list = []
+    for root, subdirs, files in os.walk(genome_download_dir):
+        for filename in files:
+            if plnVir_assembly:
+                if root.split('/')[-1] in plnVir_assembly and filename.endswith("kaiju.faa.gz"):
+                    file_list.append(os.path.join(root,filename))
+            else:
                 if filename.endswith("kaiju.faa.gz"):
-                    zip_filename = os.path.join(root,filename)
-                    subprocess.call("gunzip " + zip_filename,shell = True)
-                    unzip_filename = zip_filename[:-3]
-                    with open(unzip_filename, 'r') as in_file:
-                        for line in in_file:
-                            if line[0] == ">":
-                                out_file.write(line[:1] + str(count) + "_" + line[1:])
-                                count += 1
-                            else:
-                                out_file.write(line)
+                    file_list.append(os.path.join(root,filename))
 
-                    subprocess.call("gzip " + unzip_filename, shell = True)
+    with open(kaijuDB_fasta, "w") as out_file:
+        for protein_file in file_list:
+            zip_filename = protein_file
+            subprocess.call("gunzip " + zip_filename,shell = True)
+            unzip_filename = zip_filename[:-3]
+            with open(unzip_filename, 'r') as in_file:
+                for line in in_file:
+                    if line[0] == ">":
+                        out_file.write(line[:1] + str(count) + "_" + line[1:])
+                        count += 1
+                    else:
+                        out_file.write(line)
+
+            subprocess.call("gzip " + unzip_filename, shell = True)
 
     os.chdir(kaiju_db_dir)
     # Fetch "nodes.dmp" and "names.dmp"
