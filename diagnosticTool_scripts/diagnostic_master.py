@@ -1,8 +1,12 @@
 import os
 import time
-import sys
-sys.path.insert(0, '/home/ae42909/viral_diagnostics/diagnosticTool_scripts/')
-from diagnostic_modules import *
+from diagnostic_modules import check_path
+from diagnostic_modules import check_file
+from diagnostic_modules import fastqc_trim
+from diagnostic_modules import kraken_classify
+from diagnostic_modules import seq_reanalysis
+from diagnostic_modules import kaiju_classify
+from diagnostic_modules import result_analysis
 import argparse
 
 parser = argparse.ArgumentParser(description='Kodoja')
