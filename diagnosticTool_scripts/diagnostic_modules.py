@@ -73,7 +73,7 @@ def check_file(file1, out_dir, user_format, file2=False):
         return count
 
     def rename_seqIDs(input_file, out_dir, user_format, paired=False):
-        """Rename sequence ids 
+        """Rename sequence ids. 
         
         Write a new file where each sequence ID is replaced with 
         the the first character (">" or "@") followed by a number 
@@ -141,7 +141,7 @@ def fastqc_trim(out_dir, file1, trim_minlen, threads, adapter_file, file2=False)
     trimAdapt_command = " LEADING:20 TRAILING:20 MINLEN:" + \
                         str(trim_minlen)
     if adapter_file:
-        trimAdapt_command += "ILLUMINACLIP:" + adapter_file + ":2:30:10"
+        trimAdapt_command += " ILLUMINACLIP:" + adapter_file + ":2:30:10"
 
     if file2:
         subprocess.call("java -jar /mnt/apps/trimmomatic/0.32/trimmomatic.jar PE -threads " + \
