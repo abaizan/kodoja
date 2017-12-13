@@ -1,6 +1,8 @@
+#!/usr/bin/env python
 import os
 import time
 from diagnostic_modules import check_path
+from diagnostic_modules import test_format
 from diagnostic_modules import check_file
 from diagnostic_modules import fastqc_trim
 from diagnostic_modules import kraken_classify
@@ -77,13 +79,13 @@ check_file(args.read1, args.output_dir, args.data_format, args.read2)
 t1 = time.time()
 
 # Set all variables
-initial_file1 = 'renamed_file_1.' + args.data_format
-kraken_file1 = kaiju_file1 = "trimmed_read1"
+initial_file1 = args.output_dir + 'renamed_file_1.' + args.data_format
+kraken_file1 = kaiju_file1 = args.output_dir + "trimmed_read1"
 
 if args.read2:
     # Set tool files
-    kraken_file2 = kaiju_file2 = "trimmed_read2"
-    initial_file2 = 'renamed_file_2.' + args.data_format
+    kraken_file2 = kaiju_file2 = args.output_dir + "trimmed_read2"
+    initial_file2 = args.output_dir + 'renamed_file_2.' + args.data_format
 
 else:
     kraken_file2 = kaiju_file2 = False
@@ -97,20 +99,20 @@ else:
     kraken_file2 = kaiju_file2 = initial_file2
 
 
-if args.subset:
-    kaiju_file1 = "subset_file1." + args.data_format
+if args.host_subset:
+    kaiju_file1 = args.output_dir + "subset_file1." + args.data_format
     if file2:
-        kaiju_file2 = "subset_file2." + args.data_format
+        kaiju_file2 = args.output_dir + "subset_file2." + args.data_format
 t2 = time.time()
 
 # Kraken classification
-kraken_classify(kraken_file1, args.threads, args.data_format, args.kraken_db, kraken_file2,
+kraken_classify(args.output_dir, kraken_file1, args.threads, args.data_format, args.kraken_db, kraken_file2,
                 quick_minhits = args.kraken_quick, preload = args.kraken_preload)
 t3 = time.time()
 
-# Format kraken data and subset viral and unclassified sequences
-seq_reanalysis("kraken_table.txt", "kraken_labels.txt", ncbi_file, args.output_dir,
-               args.data_format, kraken_file1, args.subset, kraken_file2)
+# Format kraken data and subset unclassified and non-host sequences
+seq_reanalysis("kraken_table.txt", "kraken_labels.txt", args.output_dir,
+               args.data_format, kraken_file1, args.host_subset, kraken_file2)
 t4 = time.time()
 
 # Kaiju classification of all sequences or subset sequences
@@ -120,13 +122,12 @@ kaiju_classify(kaiju_file1, args.threads, args.output_dir, args.kaiju_db, args.k
 t5 = time.time()     
 
 # Merege results
-result_analysis(args.output_dir, "kraken_VRL.txt", "kaiju_table.txt", "kaiju_labels.txt",
-                ncbi_file)
+result_analysis(args.output_dir, "kraken_VRL.txt", "kaiju_table.txt", "kaiju_labels.txt")
 t6 = time.time()
 
 
 # Create log file
-if args.subset:
+if args.host_subset:
     print_statment = "subset sequences = " + str((t4-t3)/60) + " min\n"
 else:
     print_statment = "formatting kraken data = " + str((t4-t3)/60) + " min\n"
