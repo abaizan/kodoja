@@ -26,8 +26,8 @@ parser.add_argument('-f', '--data_format', type=str, default='fastq',
                     help='Sequence data format')
 parser.add_argument('-t', '--threads', type=int, default=1,
                     help='Number of threads')
-parser.add_argument('-s', '--subset', action='store_true',
-                    help='Subset data for Kaiju')
+parser.add_argument('-s', '--host_subset', action='store_true',
+                    help='Subset host sequences before Kaiju')
 parser.add_argument('-m', '--trim_minlen', type=int, default=50,
                     help='Trimmomatic minimum length')
 parser.add_argument('-a', '--trim_adapt', type=str, default=False,
@@ -53,15 +53,15 @@ args.kaiju_db += check_path(args.kaiju_db)
 if not os.path.exists(args.output_dir):
     os.makedirs(args.output_dir)
 
-os.chdir(args.output_dir)
+# os.chdir(args.output_dir)
 
 # Write a log_file:
-with open(args.output_dir + "log_file.txt", "w")as log_file:
+with open(args.output_dir + "log_file.txt", "w") as log_file:
     log_file.write("General parameters:\n" + "file1 = " + args.read1 + "\n" +
                    "file2 = " + str(args.read2) + "\n" +
                    "output directory = " +  args.output_dir + "\n" +
                    "threads =" + str(args.threads) + "\n" +
-                   "subset =" + str(args.subset) + "\n" +
+                   "host_subset =" + str(args.host_subset) + "\n" +
                    "Trimmomatic parameters:\n" + "trim_minlen = " + str(args.trim_minlen) + "\n" +
                    "Kraken parameters:\n" + "kraken database = " + args.kraken_db + "\n" +
                    "quick_minhits = " + str(args.kraken_quick) + "\n" + "preload =" +
