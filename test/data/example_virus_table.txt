@@ -1,0 +1,4 @@
+Species	Tax_ID	kraken	kaiju	combined
+Cassava brown streak virus	137758	45	45	45
+Ugandan cassava brown streak virus	946046	29	29	29
+Tobacco etch virus	12227	23	20	20
