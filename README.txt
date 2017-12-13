@@ -28,14 +28,14 @@ IMPORTANT: When executing the pipeline, do not put original data in the result
 file before executing script
 
 There are three main scripts to run this pipeline on the cluster:
-diagnostic_master.sh - this script is to qsub the master python script
+diagnostic_master.sh - example script for submission to SGE cluster
 diagnostic_master.py - this script contains the parameters and calls the
                        modules to run the pipeline
 diagnostic_modules.py - this contains all the functions called by
                        diagnostic_master.py
 
 The scripts to make a custom database for kraken and kaiju:
-database_master.sh - this script is to qsub the master python script
+database_master.sh - example script for submission to SGE cluster
 database_master.py - this script contains the parameters and calls the
                      modules to create a new database
 database_modules.py - contains all the functions called by database_master.py
