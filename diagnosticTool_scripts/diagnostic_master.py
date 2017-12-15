@@ -101,7 +101,7 @@ else:
 
 if args.host_subset:
     kaiju_file1 = args.output_dir + "subset_file1." + args.data_format
-    if file2:
+    if args.read2:
         kaiju_file2 = args.output_dir + "subset_file2." + args.data_format
 t2 = time.time()
 
@@ -139,4 +139,3 @@ with open(args.output_dir + "log_file.txt", "a") as log_file:
                    print_statment + "kaiju classification = " + str((t5-t6)/3600) +
                    " h\n" + "Results = " + str((t6-t5)/3600) + " h\n" + "total = " +
                    str((t6-t0)/3600) + " h\n")
-
