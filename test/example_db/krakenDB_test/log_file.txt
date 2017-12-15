@@ -1,0 +1,4 @@
+output_dir = test/example_db/
+kraken_kmer = 18
+kraken_minimizer = 5
+Genomes added to db = ['GCF_000861345.1', 'GCF_000884835.1', 'GCF_000888855.1']
