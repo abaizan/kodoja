@@ -146,16 +146,16 @@ def fastqc_trim(out_dir, file1, trim_minlen, threads, adapter_file, file2=False)
             " " + out_dir + "trimmed_read1 " + out_dir + "PE_trimmed_data_1U " + \
             out_dir + "trimmed_read2 " + out_dir + "PE_trimmed_data_2U" + trimAdapt_command
 
-        subprocess.call(PE_trim_command, shell=True)
-        subprocess.call("rm " + out_dir + "PE_trimmed_data_1U " + out_dir + "PE_trimmed_data_2U", shell=True)
-        subprocess.call("fastqc " + out_dir + "trimmed_read1 -o " + out_dir, shell=True)
-        subprocess.call("fastqc " + out_dir + "trimmed_read2 -o " + out_dir, shell=True)
+        subprocess.check_call(PE_trim_command, shell=True)
+        subprocess.check_call("rm " + out_dir + "PE_trimmed_data_1U " + out_dir + "PE_trimmed_data_2U", shell=True)
+        subprocess.check_call("fastqc " + out_dir + "trimmed_read1 -o " + out_dir, shell=True)
+        subprocess.check_call("fastqc " + out_dir + "trimmed_read2 -o " + out_dir, shell=True)
 
 
     else:
-        subprocess.call("trimmomatic SE -threads " + str(threads) + " " + file1 \
+        subprocess.check_call("trimmomatic SE -threads " + str(threads) + " " + file1 \
                         + " " + out_dir + "trimmed_read1 " + trimAdapt_command, shell=True)
-        subprocess.call("fastqc " + out_dir + "trimmed_read1 -o " + out_dir, shell=True)
+        subprocess.check_call("fastqc " + out_dir + "trimmed_read1 -o " + out_dir, shell=True)
 
 
 def kraken_classify(out_dir, kraken_file1, threads, user_format, kraken_db, kraken_file2=False,
@@ -191,8 +191,8 @@ def kraken_classify(out_dir, kraken_file1, threads, user_format, kraken_db, krak
     else:
         kraken_command += " " + kraken_file1 + " > " + out_dir + "kraken_table.txt"
 
-    subprocess.call(kraken_command, shell=True)
-    subprocess.call("kraken-translate --mpa-format --db " + kraken_db + \
+    subprocess.check_call(kraken_command, shell=True)
+    subprocess.check_call("kraken-translate --mpa-format --db " + kraken_db + \
                     " " + out_dir + " kraken_table.txt > " + out_dir + "kraken_labels.txt", shell=True)
 
 
@@ -256,8 +256,8 @@ def seq_reanalysis(kraken_table, kraken_labels, out_dir, user_format, forSubset_
         ids1 = pickle.load(id_dict)
     kraken_fullTable["Seq_ID"] = kraken_fullTable["Seq_ID"].map(ids1)
     kraken_fullTable.to_csv(out_dir  + "kraken_FormattedTable.txt", sep='\t', index= False)
-    subprocess.call("gzip " + out_dir  + "kraken_FormattedTable.txt", shell =True)
-    subprocess.call("rm " + out_dir + "kraken_table.txt " + out_dir + "kraken_labels.txt", shell=True)
+    subprocess.check_call("gzip " + out_dir  + "kraken_FormattedTable.txt", shell =True)
+    subprocess.check_call("rm " + out_dir + "kraken_table.txt " + out_dir + "kraken_labels.txt", shell=True)
 
     if subset:
         unclassified_IDs = kraken_results.loc[(kraken_results.kraken_classified == 'U'), ['Seq_ID']]
@@ -290,11 +290,11 @@ def seq_reanalysis(kraken_table, kraken_labels, out_dir, user_format, forSubset_
                         reanalyse_ID1, 'reanalyse_ID.txt')
 
         if delete_file:
-            subprocess.call("rm " + forSubset_file1, shell=True)
+            subprocess.check_call("rm " + forSubset_file1, shell=True)
             if subset_file2:
-                subprocess.call('rm ' + forSubset_file2, shell=True)
+                subprocess.check_call('rm ' + forSubset_file2, shell=True)
 
-        subprocess.call("rm reanalyse_ID.txt", shell=True)
+        subprocess.check_call("rm reanalyse_ID.txt", shell=True)
 
 
 def kaiju_classify(kaiju_file1, threads, out_dir, kaiju_db, kaiju_minlen, kraken_db,
@@ -323,8 +323,8 @@ def kaiju_classify(kaiju_file1, threads, out_dir, kaiju_db, kaiju_minlen, kraken
     if kaiju_file2:
         kaiju_command += " -j " + kaiju_file2
 
-    subprocess.call(kaiju_command, shell=True)
-    subprocess.call("kraken-translate --mpa-format --db " + kraken_db + " " + 
+    subprocess.check_call(kaiju_command, shell=True)
+    subprocess.check_call("kraken-translate --mpa-format --db " + kraken_db + " " + 
                     out_dir + "kaiju_table.txt > " + out_dir + "kaiju_labels.txt", shell = True)
 
 
@@ -332,9 +332,9 @@ def kaiju_classify(kaiju_file1, threads, out_dir, kaiju_db, kaiju_minlen, kraken
         # Only delete file when it's in out_put
         for filenames in files:
             if kaiju_file1 == filenames:
-                subprocess.call("rm " + kaiju_file1, shell=True)
+                subprocess.check_call("rm " + kaiju_file1, shell=True)
                 if kaiju_file2:
-                    subprocess.call("rm " + kaiju_file2, shell=True)
+                    subprocess.check_call("rm " + kaiju_file2, shell=True)
 
 def result_analysis(out_dir, kraken_VRL, kaiju_table, kaiju_label):
     """Imports kraken results table, formats kaiju_table and kaiju_labels and merges
@@ -358,7 +358,7 @@ def result_analysis(out_dir, kraken_VRL, kaiju_table, kaiju_label):
         ids1 = pickle.load(id_dict)
     kaiju_fullTable["Seq_ID"] = kaiju_fullTable["Seq_ID"].map(ids1)
     kaiju_fullTable.to_csv(out_dir  + 'kaiju_FormattedTable.txt', sep='\t', index= False)  
-    subprocess.call('gzip ' + out_dir  + 'kaiju_FormattedTable.txt', shell =True)
+    subprocess.check_call('gzip ' + out_dir  + 'kaiju_FormattedTable.txt', shell =True)
 
     kodoja = pd.merge(kraken_results, kaiju_results, on='Seq_ID', how='outer')
     assert len(kraken_results) == len(kodoja), \
@@ -370,7 +370,7 @@ def result_analysis(out_dir, kraken_VRL, kaiju_table, kaiju_label):
 
     kodoja["Seq_ID"] = kodoja["Seq_ID"].map(ids1)
 
-    subprocess.call("rm " + out_dir + "kaiju_table.txt " + out_dir + \
+    subprocess.check_call("rm " + out_dir + "kaiju_table.txt " + out_dir + \
                     "kaiju_labels.txt " + out_dir + "kraken_VRL.txt ", shell=True)
 
     kodoja['combined_result'] = kodoja.kraken_tax_ID[kodoja['kraken_tax_ID'] == kodoja['kaiju_tax_ID']]
