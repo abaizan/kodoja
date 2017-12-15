@@ -262,7 +262,7 @@ def seq_reanalysis(kraken_table, kraken_labels, out_dir, user_format, forSubset_
     if subset:
         unclassified_IDs = kraken_results.loc[(kraken_results.kraken_classified == 'U'), ['Seq_ID']]
         # VRL_IDs = kraken_results.loc[(kraken_results.Div_ID == 'VRL'), ['Seq_ID']]
-        # reanalyse_IDs = unclassified_IDs['Seq_ID'].tolist() + VRL_IDs['Seq_ID'].tolist()
+        reanalyse_IDs = unclassified_IDs['Seq_ID'].tolist()  # + VRL_IDs['Seq_ID'].tolist()
 
         subset_file1 = forSubset_file1
         delete_file = False
