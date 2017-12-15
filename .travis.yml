@@ -8,8 +8,7 @@ before_install:
 
 script:
 - "flake8 --ignore E121,E123,E126,E226,E24,E704,W503,W504,E127,E128,E211,E221,E222,E225,E227,E231,E251,E302,E303,E402,E501,E502,F401,F403,F405,W291,W293"
-- cd test
-- ./test_script.sh
+- test/test_script.sh
 
 notifications:
   email: false
