@@ -4,6 +4,10 @@
 #$ -j yes
 #$ -pe smp 2
 
+# Enable strict bash mode - we want to abort on the first error, see also
+# http://redsymbol.net/articles/unofficial-bash-strict-mode/
+set -euo pipefail
+
 # Create test database
 # diagnosticTool_scripts/database_master.py -o test/example_db/ -t 1 -q -a 'test' -t 2
 
