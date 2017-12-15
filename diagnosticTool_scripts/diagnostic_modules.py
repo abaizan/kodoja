@@ -143,8 +143,8 @@ def fastqc_trim(out_dir, file1, trim_minlen, threads, adapter_file, file2=False)
 
     if file2:
         PE_trim_command = "trimmomatic PE -threads " + str(threads) + " " + file1 + " " + file2 + \
-        " " + out_dir + "trimmed_read1 " + out_dir + "PE_trimmed_data_1U " + \
-        out_dir + "trimmed_read2 " + out_dir + "PE_trimmed_data_2U" + trimAdapt_command
+            " " + out_dir + "trimmed_read1 " + out_dir + "PE_trimmed_data_1U " + \
+            out_dir + "trimmed_read2 " + out_dir + "PE_trimmed_data_2U" + trimAdapt_command
 
         subprocess.call(PE_trim_command, shell=True)
         subprocess.call("rm " + out_dir + "PE_trimmed_data_1U " + out_dir + "PE_trimmed_data_2U", shell=True)
@@ -253,7 +253,7 @@ def seq_reanalysis(kraken_table, kraken_labels, out_dir, user_format, forSubset_
     kraken_results.to_csv(out_dir  + 'kraken_VRL.txt', sep='\t', index= False)
     
     with open(out_dir + 'ids1.pkl', 'rb') as id_dict:
-	    ids1 = pickle.load(id_dict)
+        ids1 = pickle.load(id_dict)
     kraken_fullTable["Seq_ID"] = kraken_fullTable["Seq_ID"].map(ids1)
     kraken_fullTable.to_csv(out_dir  + "kraken_FormattedTable.txt", sep='\t', index= False)
     subprocess.call("gzip " + out_dir  + "kraken_FormattedTable.txt", shell =True)
@@ -262,7 +262,7 @@ def seq_reanalysis(kraken_table, kraken_labels, out_dir, user_format, forSubset_
     if subset:
         unclassified_IDs = kraken_results.loc[(kraken_results.kraken_classified == 'U'), ['Seq_ID']]
         # VRL_IDs = kraken_results.loc[(kraken_results.Div_ID == 'VRL'), ['Seq_ID']]
-        reanalyse_IDs = unclassified_IDs['Seq_ID'].tolist() + VRL_IDs['Seq_ID'].tolist()
+        # reanalyse_IDs = unclassified_IDs['Seq_ID'].tolist() + VRL_IDs['Seq_ID'].tolist()
 
         subset_file1 = forSubset_file1
         delete_file = False
