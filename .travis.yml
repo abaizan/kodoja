@@ -1,18 +1,50 @@
 language: python
 python:
+# We don't actually use the Travis Python, but this keeps it organized.
  - "2.7"
 
 before_install:
+ # This happens using the TravisCI copy of Python, BEFORE we install conda.
+ # Doing this here as want to abort and fail quickly if style checks break.
  - "pip install --upgrade pip"
  - "pip install flake8"
  - "flake8 --ignore E121,E123,E126,E226,E24,E704,W503,W504,E127,E128,E211,E221,E222,E225,E227,E231,E251,E302,E303,E402,E501,E502,F401,F403,F405,W291,W293"
+
+install:
+ # We want to use Conda under TravisCI for things like trimmomatic. See:
+ # https://conda.io/docs/user-guide/tasks/use-conda-with-travis-ci.html
+ - sudo apt-get update
+ # We do this conditionally because it saves us some downloading if the
+ # version is the same.
+ - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
+     wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
+   else
+     wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+   fi
+ - bash miniconda.sh -b -p $HOME/miniconda
+ - export PATH="$HOME/miniconda/bin:$PATH"
+ - hash -r
+ - conda config --set always_yes yes --set changeps1 no
+ - conda update -q conda
+ # Useful for debugging any issues with conda
+ - conda info -a
+ # We want to use the BioConda channel
+ - conda config --add channels defaults
+ - conda config --add channels conda-forge
+ - conda config --add channels bioconda
+ # ==============================================
+ # Install our conda dependencies here:
+ # - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION trimmomatic
+ # - source activate test-environment
+ # This should be fine for us, don't care about conda environments,
+ - conda install trimmomatic
+ # ==============================================
  - "echo Fetching NCBI taxonomy"
  - "cd test/taxonomy"
  - "wget ftp://ftp.ncbi.nih.gov/pub/taxonomy/taxdump.tar.gz"
  - "tar zxvf taxdump.tar.gz"
  - "cd ../.."
-
-install:
+ # ==============================================
  - "pip install numpy pandas biopython"
 
 script:
