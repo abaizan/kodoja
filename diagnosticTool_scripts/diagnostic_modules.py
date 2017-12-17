@@ -193,7 +193,7 @@ def kraken_classify(out_dir, kraken_file1, threads, user_format, kraken_db, krak
 
     subprocess.check_call(kraken_command, shell=True)
     subprocess.check_call("kraken-translate --mpa-format --db " + kraken_db + \
-                    " " + out_dir + " kraken_table.txt > " + out_dir + "kraken_labels.txt", shell=True)
+                    " " + out_dir + "kraken_table.txt > " + out_dir + "kraken_labels.txt", shell=True)
 
 
 def format_result_table(out_dir, data_table, data_labels, table_colNames):
@@ -256,6 +256,8 @@ def seq_reanalysis(kraken_table, kraken_labels, out_dir, user_format, forSubset_
         ids1 = pickle.load(id_dict)
     kraken_fullTable["Seq_ID"] = kraken_fullTable["Seq_ID"].map(ids1)
     kraken_fullTable.to_csv(out_dir  + "kraken_FormattedTable.txt", sep='\t', index= False)
+    if os.path.isfile(out_dir  + "kraken_FormattedTable.txt.gz"):
+        subprocess.check_call("rm " + out_dir  + "kraken_FormattedTable.txt.gz", shell=True)
     subprocess.check_call("gzip " + out_dir  + "kraken_FormattedTable.txt", shell =True)
     subprocess.check_call("rm " + out_dir + "kraken_table.txt " + out_dir + "kraken_labels.txt", shell=True)
 
@@ -358,6 +360,8 @@ def result_analysis(out_dir, kraken_VRL, kaiju_table, kaiju_label):
         ids1 = pickle.load(id_dict)
     kaiju_fullTable["Seq_ID"] = kaiju_fullTable["Seq_ID"].map(ids1)
     kaiju_fullTable.to_csv(out_dir  + 'kaiju_FormattedTable.txt', sep='\t', index= False)  
+    if os.path.isfile(out_dir  + "kaiju_FormattedTable.txt.gz"):
+        subprocess.check_call("rm " + out_dir  + "kaiju_FormattedTable.txt.gz", shell=True)
     subprocess.check_call('gzip ' + out_dir  + 'kaiju_FormattedTable.txt', shell =True)
 
     kodoja = pd.merge(kraken_results, kaiju_results, on='Seq_ID', how='outer')
