@@ -37,7 +37,10 @@ install:
  # - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION trimmomatic
  # - source activate test-environment
  # This should be fine for us, don't care about conda environments,
- - conda install trimmomatic
+ - conda install trimmomatic=0.36
+ - conda install kraken=1.0
+ - conda install kaiju=1.5.0
+ - conda install fastqc=0.11.5
  # ==============================================
  - "echo Fetching NCBI taxonomy"
  - "cd test/taxonomy"
