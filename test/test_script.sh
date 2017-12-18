@@ -8,8 +8,10 @@
 # http://redsymbol.net/articles/unofficial-bash-strict-mode/
 set -euo pipefail
 
-# Create test database
-# diagnosticTool_scripts/database_master.py -o test/example_db/ -t 1 -q -a 'test' -t 2
+# Create test databasex
+diagnosticTool_scripts/database_master.py -o /tmp/example_db/ -t 1 --db_tag 'test' --test
+ls /tmp/example_db/
+diff test/example_db/krakenDB_test/database.idx /tmp/example_db/krakenDB_test/database.idx
 
 # Run diagnostic tool
 diagnosticTool_scripts/diagnostic_master.py -r1 test/data/testData_1.fastq -o test/PE_test/ -d1 test/example_db/krakenDB_test/ -d2 test/example_db/kaijuDB_test/ -r2 ./test/data/testData_1.fastq -t 2
