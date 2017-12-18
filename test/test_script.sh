@@ -11,9 +11,10 @@ set -euo pipefail
 # Create test database - ought work but we run out of disk space on TravisCI
 # while downloading and unzipping the taxonomy data.
 #
-# diagnosticTool_scripts/database_master.py -o /tmp/example_db/ -t 1 --db_tag 'test' --test
-# ls /tmp/example_db/
-# diff test/example_db/krakenDB_test/database.idx /tmp/example_db/krakenDB_test/database.idx
+diagnosticTool_scripts/database_master.py -o test/building_db/ -t 1 --db_tag 'test' --test
+ls test/building_db
+diff test/example_db/krakenDB_test/database.idx test/building_db/krakenDB_test/database.idx
+# TODO: Compare more of the output files?
 
 # Run diagnostic tool
 diagnosticTool_scripts/diagnostic_master.py -r1 test/data/testData_1.fastq -o test/PE_test/ -d1 test/example_db/krakenDB_test/ -d2 test/example_db/kaijuDB_test/ -r2 ./test/data/testData_1.fastq -t 2
