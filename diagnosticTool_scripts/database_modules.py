@@ -5,15 +5,9 @@ import os
 import urllib
 import re
 
-# Check directory paths have "/" at end
-def check_path(dirs):
-    if dirs[-1] != "/":
-        return "/"
-    else:
-        return ""
 
 # Download refseq files from ncbi ftp site - use ncbi-genome-download
-def ncbi_download(tool, genome_download_dir, parallel=False):
+def ncbi_download(tool, genome_download_dir, parallel, host, test):
     assert (tool == "kraken") | (tool == "kaiju"), "Argument 'tool' must be either 'kraken' or 'kaiju'."
     if tool == "kraken":
         file_format = "fasta"
@@ -24,10 +18,19 @@ def ncbi_download(tool, genome_download_dir, parallel=False):
     if not os.path.exists(genome_download_dir):
         os.makedirs(genome_download_dir)
         
-    ngd_command = "ncbi-genome-download -F " + file_format +  " -o " + genome_download_dir + " viral "
-    if parallel:
-        ngd_command += "--parallel " + str(parallel)
-    subprocess.call(ngd_command, shell = True)
+    ngd_command = "ncbi-genome-download -F " + file_format +  " -o " + genome_download_dir
+    if test:
+        for taxid in test:
+            taxid_ngd_command = ngd_command + " --species-taxid " + str(taxid) + " viral"
+            subprocess.check_call(taxid_ngd_command, shell=True)
+    else:
+        if host:
+            for taxid in host:
+                taxid_ngd_command = ngd_command + " --species-taxid " + str(taxid) + " plant"
+                subprocess.check_call(taxid_ngd_command, shell=True)
+
+        ngd_command += " --parallel " + str(parallel) + " viral"
+        subprocess.check_call(ngd_command, shell=True)
     
 # Rename ncbi data files for custom databases
 def ncbi_rename_customDB(tool, genome_download_dir, extra_files = False, extra_taxid = False):
@@ -37,7 +40,7 @@ def ncbi_rename_customDB(tool, genome_download_dir, extra_files = False, extra_t
     else:
         file_extension = ".faa.gz"
 
-    path_assembly_summary = genome_download_dir + "refseq/viral_assembly_summary.txt"
+    path_assembly_summary = genome_download_dir + "viral_assembly_summary.txt"
     assembly_summary = pd.read_table(path_assembly_summary, sep='\t', skiprows=1, header = 0)
     assembly_summary.rename(columns={'# assembly_accession':'assembly_accession'}, inplace=True)  # rename column to exclude "#"
 
@@ -48,7 +51,7 @@ def ncbi_rename_customDB(tool, genome_download_dir, extra_files = False, extra_t
             if filename.endswith(file_extension) and not filename.endswith(tool + file_extension):
                 zip_filename = os.path.join(root, filename)
                 # Uncompress ".gz" file
-                subprocess.call("gunzip " + zip_filename, shell =True)
+                subprocess.check_call("gunzip " + zip_filename, shell =True)
                 unzip_filename = zip_filename[:-3]
 
                 if root.endswith("extra"):
@@ -82,9 +85,9 @@ def ncbi_rename_customDB(tool, genome_download_dir, extra_files = False, extra_t
                         else:
                             out_file.write(line)
                 # Delete original file
-                subprocess.call("rm " + unzip_filename, shell=True)
+                subprocess.check_call("rm " + unzip_filename, shell=True)
                 # Compress modified file
-                subprocess.call("gzip " + renamed_file, shell =True)
+                subprocess.check_call("gzip " + renamed_file, shell =True)
 
 # Count number of dirs and files ### DELETE ####
 # count_dir = 0
@@ -99,20 +102,20 @@ def ncbi_rename_customDB(tool, genome_download_dir, extra_files = False, extra_t
  
 
 # Build the database with the renamed genome files from ncbi
-def krakenDB_build(genome_download_dir, kraken_db_dir, threads, kraken_kmer, kraken_minimizer, plnVir_assembly, jellyfish_hash_size = False, kraken_max_dbSize = False):
+def krakenDB_build(genome_download_dir, kraken_db_dir, threads, kraken_kmer, kraken_minimizer, subset_vir_assembly, jellyfish_hash_size = False, kraken_max_dbSize = False):
     # Make a kraken database directory
     if not os.path.exists(kraken_db_dir):
         os.makedirs(kraken_db_dir)
     
     # Download taxonomy for Kraken database
-    subprocess.call("kraken-build --download-taxonomy --threads " + str(threads) + " --db " + kraken_db_dir, shell = True)
+    subprocess.check_call("kraken-build --download-taxonomy --threads " + str(threads) + " --db " + kraken_db_dir, shell = True)
 
     file_list = []
     # Add files downloaded and ready for kraken ("<file>.kraken.fna") to kraken library
     for root, subdirs, files in os.walk(genome_download_dir):
         for filename in files:
-            if plnVir_assembly:
-                if root.split('/')[-1] in plnVir_assembly and filename.endswith("kraken.fna.gz"):
+            if subset_vir_assembly:
+                if root.split('/')[-1] in subset_vir_assembly and filename.endswith("kraken.fna.gz"):
                     file_list.append(os.path.join(root,filename))
             else:
                 if filename.endswith("kraken.fna.gz"):
@@ -120,10 +123,10 @@ def krakenDB_build(genome_download_dir, kraken_db_dir, threads, kraken_kmer, kra
 
     for genome_file in file_list:
         zip_filename = genome_file
-        subprocess.call("gunzip " + zip_filename,shell = True)
+        subprocess.check_call("gunzip " + zip_filename,shell = True)
         unzip_filename = zip_filename[:-3]
-        subprocess.call("kraken-build --add-to-library "  + unzip_filename + " --db " + kraken_db_dir, shell = True)
-        subprocess.call("gzip " + unzip_filename, shell = True)
+        subprocess.check_call("kraken-build --add-to-library "  + unzip_filename + " --db " + kraken_db_dir, shell = True)
+        subprocess.check_call("gzip " + unzip_filename, shell = True)
 
     # Build the command to run kraken-build based on parameters specifed
     kraken_command = "kraken-build --build --threads " + str(threads) + " --db " + kraken_db_dir + " --kmer-len " + str(kraken_kmer) + " --minimizer-len " + str(kraken_minimizer)
@@ -133,13 +136,13 @@ def krakenDB_build(genome_download_dir, kraken_db_dir, threads, kraken_kmer, kra
     if jellyfish_hash_size:
         kraken_command += " --jellyfish-hash-size " + jellyfish_hash_size
 
-    subprocess.call(kraken_command, shell = True)
+    subprocess.check_call(kraken_command, shell = True)
     
     # Clear unnecessary files from kraken database directory
-    subprocess.call("kraken-build --clean --db " + kraken_db_dir, shell = True)
+    subprocess.check_call("kraken-build --clean --db " + kraken_db_dir, shell = True)
 
 
-def kaijuDB_build(genome_download_dir, kaiju_db_dir, plnVir_assembly):
+def kaijuDB_build(genome_download_dir, kaiju_db_dir, subset_vir_assembly):
     # Make a kaiju database directory
     if not os.path.exists(kaiju_db_dir):
         os.makedirs(kaiju_db_dir)
@@ -150,8 +153,8 @@ def kaijuDB_build(genome_download_dir, kaiju_db_dir, plnVir_assembly):
     file_list = []
     for root, subdirs, files in os.walk(genome_download_dir):
         for filename in files:
-            if plnVir_assembly:
-                if root.split('/')[-1] in plnVir_assembly and filename.endswith("kaiju.faa.gz"):
+            if subset_vir_assembly:
+                if root.split('/')[-1] in subset_vir_assembly and filename.endswith("kaiju.faa.gz"):
                     file_list.append(os.path.join(root,filename))
             else:
                 if filename.endswith("kaiju.faa.gz"):
@@ -160,7 +163,7 @@ def kaijuDB_build(genome_download_dir, kaiju_db_dir, plnVir_assembly):
     with open(kaijuDB_fasta, "w") as out_file:
         for protein_file in file_list:
             zip_filename = protein_file
-            subprocess.call("gunzip " + zip_filename,shell = True)
+            subprocess.check_call("gunzip " + zip_filename,shell = True)
             unzip_filename = zip_filename[:-3]
             with open(unzip_filename, 'r') as in_file:
                 for line in in_file:
@@ -170,16 +173,16 @@ def kaijuDB_build(genome_download_dir, kaiju_db_dir, plnVir_assembly):
                     else:
                         out_file.write(line)
 
-            subprocess.call("gzip " + unzip_filename, shell = True)
+            subprocess.check_call("gzip " + unzip_filename, shell = True)
 
     os.chdir(kaiju_db_dir)
     # Fetch "nodes.dmp" and "names.dmp"
     if not os.path.exists(kaiju_db_dir + "names.dmp"):
         urllib.urlretrieve('ftp://ftp.ncbi.nih.gov/pub/taxonomy/taxdump.tar.gz', 'taxdump.tar.gz')
-        subprocess.call("tar -xzvf taxdump.tar.gz", shell = True)
-        subprocess.call("rm taxdump.tar.gz citations.dmp delnodes.dmp division.dmp gc.prt gencode.dmp merged.dmp readme.txt", shell = True)
+        subprocess.check_call("tar -xzvf taxdump.tar.gz", shell = True)
+        subprocess.check_call("rm taxdump.tar.gz citations.dmp delnodes.dmp division.dmp gc.prt gencode.dmp merged.dmp readme.txt", shell = True)
         
     # Build Kaiju database
-    subprocess.call("mkbwt -n 5 -a ACDEFGHIKLMNPQRSTVWY -o kaiju_library kaiju_library.faa", shell = True)
-    subprocess.call("mkfmi kaiju_library", shell = True)
-    subprocess.call("rm kaiju_library.faa kaiju_library.bwt kaiju_library.sa", shell = True)
+    subprocess.check_call("mkbwt -n 5 -a ACDEFGHIKLMNPQRSTVWY -o kaiju_library kaiju_library.faa", shell = True)
+    subprocess.check_call("mkfmi kaiju_library", shell = True)
+    subprocess.check_call("rm kaiju_library.faa kaiju_library.bwt kaiju_library.sa", shell = True)
