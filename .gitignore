@@ -1,3 +1,10 @@
 *~
 *pyc
 .#*
+
+# Ignore the tempoary NCBI taxonomy files
+test/taxonomy/*.tar.gz
+test/taxonomy/*.dmp.gz
+test/taxonomy/*.dmp
+test/taxonomy/readme.txt
+test/taxonomy/gc.prt
