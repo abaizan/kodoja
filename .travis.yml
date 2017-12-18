@@ -48,7 +48,7 @@ install:
  - "tar zxvf taxdump.tar.gz"
  - "cd ../.."
  # ==============================================
- - "pip install numpy pandas biopython"
+ - "pip install numpy pandas biopython ncbi-genome-download"
 
 script:
 - test/test_script.sh
