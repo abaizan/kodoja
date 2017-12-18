@@ -20,7 +20,7 @@ def check_path(dirs):
 
 
 def test_format(file1, user_format):
-    """Check if data format.
+    """Check data format.
 
     Check if data is in the fasta or fastq format and
     assert the user has specified the correct format for
@@ -301,10 +301,10 @@ def seq_reanalysis(kraken_table, kraken_labels, out_dir, user_format, forSubset_
 
 def kaiju_classify(kaiju_file1, threads, out_dir, kaiju_db, kaiju_minlen, kraken_db,
                    kaiju_file2 = False, kaiju_mismatch = False, kaiju_score = False):
-    """Run kaiju command for kaiju classification of sequences. It ensures if
-    mismatches are allowed that a score has also been provided. Once classification
-    is complete, it uses kraken-translate (as in kraken_classify()) to get full
-    taxonomy names for each sequence that has been classified. It deletes the files
+    """Run kaiju command for kaiju classification of sequences.
+    It ensures that if     mismatches are allowed that a score has also been provided.
+    Once classification is complete, it uses kraken-translate (as in kraken_classify())
+    to get full taxonomy names for each sequence that has been classified. It deletes the files
     used for this analysis.
 
     """
@@ -339,7 +339,8 @@ def kaiju_classify(kaiju_file1, threads, out_dir, kaiju_db, kaiju_minlen, kraken
                     subprocess.check_call("rm " + kaiju_file2, shell=True)
 
 def result_analysis(out_dir, kraken_VRL, kaiju_table, kaiju_label):
-    """Imports kraken results table, formats kaiju_table and kaiju_labels and merges
+    """Kodoja results table.
+    Imports kraken results table, formats kaiju_table and kaiju_labels and merges
     kraken and kaiju results into one table (kodoja). It then separates reads which
     are classified as VRL, makes a table with all identified viruses and count number
     of intances for each usin virusSummary().
@@ -411,7 +412,7 @@ def result_analysis(out_dir, kraken_VRL, kaiju_table, kaiju_label):
         levels_dict = {k: levels_dict[k] for k in levels_dict if not isnan(k)}
         levels_tax = {key: list(map(str, value.split('|')))
                       for key, value in levels_dict.items()}
-        
+
         LCA_tax = {}
         for key, tax in levels_tax.items():
             if tax[-1][0] != 's':
