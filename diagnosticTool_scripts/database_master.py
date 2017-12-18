@@ -126,4 +126,3 @@ for tool in tool_list:
             text = 'output_dir = ' + args.output_dir + '\n'
             text += 'Genomes added to db = ' + str(subset_vir_assembly) + '\n'
             out_file.write(text)
-
