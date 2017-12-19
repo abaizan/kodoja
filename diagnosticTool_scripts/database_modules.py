@@ -175,14 +175,14 @@ def kaijuDB_build(genome_download_dir, kaiju_db_dir, subset_vir_assembly):
 
             subprocess.check_call("gzip " + unzip_filename, shell = True)
 
-    os.chdir(kaiju_db_dir)
+    # os.chdir(kaiju_db_dir)
     # Fetch "nodes.dmp" and "names.dmp"
     if not os.path.exists(kaiju_db_dir + "names.dmp"):
-        urllib.urlretrieve('ftp://ftp.ncbi.nih.gov/pub/taxonomy/taxdump.tar.gz', 'taxdump.tar.gz')
-        subprocess.check_call("tar -xzvf taxdump.tar.gz", shell = True)
-        subprocess.check_call("rm taxdump.tar.gz citations.dmp delnodes.dmp division.dmp gc.prt gencode.dmp merged.dmp readme.txt", shell = True)
+        urllib.urlretrieve('ftp://ftp.ncbi.nih.gov/pub/taxonomy/taxdump.tar.gz', kaiju_db_dir + 'taxdump.tar.gz')
+        subprocess.check_call("tar -xzvf " + kaiju_db_dir + "taxdump.tar.gz", shell = True)
+        # subprocess.check_call("rm taxdump.tar.gz citations.dmp delnodes.dmp division.dmp gc.prt gencode.dmp merged.dmp readme.txt", shell = True)
         
     # Build Kaiju database
-    subprocess.check_call("mkbwt -n 5 -a ACDEFGHIKLMNPQRSTVWY -o kaiju_library kaiju_library.faa", shell = True)
-    subprocess.check_call("mkfmi kaiju_library", shell = True)
-    subprocess.check_call("rm kaiju_library.faa kaiju_library.bwt kaiju_library.sa", shell = True)
+    subprocess.check_call("mkbwt -n 5 -a ACDEFGHIKLMNPQRSTVWY -o " + kaiju_db_dir + "kaiju_library " + kaiju_db_dir + "kaiju_library.faa", shell = True)
+    subprocess.check_call("mkfmi " + kaiju_db_dir + "kaiju_library", shell = True)
+    subprocess.check_call("rm "  + kaiju_db_dir + "kaiju_library.faa " + kaiju_db_dir + "kaiju_library.bwt "  + kaiju_db_dir + "kaiju_library.sa", shell = True)
