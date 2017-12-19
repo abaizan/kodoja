@@ -1,5 +1,4 @@
-import os
-import sys
+"""Retrieve viral sequences of interest."""
 import pandas as pd
 from diagnostic_modules import sequence_subset
 import argparse
@@ -18,15 +17,15 @@ parser.add_argument('-t', '--taxID', type=int, default=False,
                     metavar='', help='Virus tax ID for subsetting, default: All viral sequences')
 args = parser.parse_args()
 
-table_summary = pd.read_csv(args.out_dir + "virus_table.txt", sep="\t", header = 0,
-                       index_col=False)
-kodoja_vrl = pd.read_csv(args.out_dir + "kodoja_VRL.txt", sep="\t", header = 0,
-                       index_col=False)
+table_summary = pd.read_csv(args.out_dir + "virus_table.txt", sep="\t", header=0,
+                            index_col=False)
+kodoja_vrl = pd.read_csv(args.out_dir + "kodoja_VRL.txt", sep="\t", header=0,
+                         index_col=False)
 
 if args.taxID:
     TaxId_out = [args.taxID]
     label = 'virus_' + str(args.taxID)
-    
+
 else:
     TaxId_out = list(table_summary.Tax_ID)
     label = 'virus_all'
@@ -43,7 +42,7 @@ if args.read2:
         ids1 = pickle.load(id_dict)
     with open(args.out_dir + 'ids2.pkl', 'rb') as id_dict:
         ids2 = pickle.load(id_dict)
-    iv_ids1 = dict((v,k) for k,v in ids1.iteritems())
+    iv_ids1 = dict((v, k) for k, v in ids1.iteritems())
     kodoja_vrl["Seq_ID"] = kodoja_vrl["Seq_ID"].map(iv_ids1)
     kodoja_vrl["Seq_ID"] = kodoja_vrl["Seq_ID"].map(ids2)
     seqID_wanted = list(kodoja_vrl.loc[rows_wanted, 'Seq_ID'])
