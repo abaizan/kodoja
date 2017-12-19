@@ -1,10 +1,11 @@
 #!/usr/bin/env python
+"""Script for running Kodoja database construction modules."""
 import urllib
 import os
 import pandas as pd
 import argparse
 from diagnostic_modules import check_path
-from database_modules import ncbi_download 
+from database_modules import ncbi_download
 from database_modules import ncbi_rename_customDB
 from database_modules import krakenDB_build
 from database_modules import kaijuDB_build
@@ -69,13 +70,13 @@ if args.extra_files:
             "File extensions need to be either '.fna' for genomic data" + \
             " or '.faa' for protein data, and be compressed ('.gz')"
 
-# Download virus assembly summary for refseq 
+# Download virus assembly summary for refseq
 if not os.path.exists(args.output_dir + "viral_assembly_summary.txt"):
     urllib.urlretrieve('ftp://ftp.ncbi.nih.gov/genomes/refseq/viral/assembly_summary.txt',
                        args.output_dir + 'viral_assembly_summary.txt')
 path_assembly_summary = args.output_dir + "viral_assembly_summary.txt"
-vir_assembly = pd.read_table(path_assembly_summary, sep='\t', skiprows=1, header = 0)
-vir_assembly = vir_assembly.rename(columns = {'# assembly_accession':'assembly_accession'})
+vir_assembly = pd.read_table(path_assembly_summary, sep='\t', skiprows=1, header=0)
+vir_assembly = vir_assembly.rename(columns={'# assembly_accession': 'assembly_accession'})
 
 # Set subset_vir_assembly and vir_host
 # subset_vir_assembly - list of virus accession names which will be added to databases (used in krakenDB_build and kaijuDB_build)
