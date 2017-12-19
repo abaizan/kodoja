@@ -41,7 +41,7 @@ parser.add_argument('-c', '--kaiju_score', type=int, default=85,
                     help='Kaju alignment score')
 parser.add_argument('-l', '--kaiju_minlen', type=int, default=15,
                     help='Kaju minimum length')
-parser.add_argument('-i', '--kaiju_mismatch', type=int, default=85,
+parser.add_argument('-i', '--kaiju_mismatch', type=int, default=1,
                     help='Kaju allowed mismatches')
 args = parser.parse_args()
 
