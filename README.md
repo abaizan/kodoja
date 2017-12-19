@@ -5,8 +5,11 @@ and Kaiju, which used the Burrows–Wheeler transform, to detect viral sequences
 
 ## Overview
 There are three main scripts:
+
 diagnostic_master.py - to classify RNA-seq data
+
 database_master.py - to download viral/host genomes and create new Kraken and Kaiju databases
+
 diagnostic_seqRetrive.py
 
 diagnostic_modules.py and database_modules.py contain the fuctions called by diagnostic_master and database_master.
