@@ -1,6 +1,7 @@
 *~
 *pyc
 .#*
+*#
 
 # Ignore the tempoary NCBI taxonomy files
 test/taxonomy/*.tar.gz
