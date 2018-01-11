@@ -29,6 +29,8 @@ parser.add_argument('-x', '--extra_taxids', type=str, nargs='*',
                     help='List of taxID of extra files')
 parser.add_argument('-v', '--all_viruses', action='store_true',
                     help='Build databases with all viruses (not plant specific)')
+parser.add_argument('-b', '--kraken_tax', type=str, default=False,
+                    help='Path to taxonomy directory')
 parser.add_argument('-k', '--kraken_kmer', type=int, default=31,
                     help='Kraken kmer size, default=31')
 parser.add_argument('-m', '--kraken_minimizer', type=int, default=15,
@@ -111,8 +113,8 @@ for tool in tool_list:
     print "DONE with renaming"
     # Make Kraken database
     if tool == "kraken":
-        krakenDB_build(args.output_dir, kraken_db_dir, args.threads,
-                       args.kraken_kmer, args.kraken_minimizer, subset_vir_assembly)
+        krakenDB_build(args.output_dir, kraken_db_dir, args.threads, args.kraken_kmer,
+                       args.kraken_minimizer, subset_vir_assembly, args.kraken_tax)
         print "DONE with kraken db"
         with open(kraken_db_dir + "log_file.txt", "w") as out_file:
             text = 'output_dir = ' + args.output_dir + '\n'

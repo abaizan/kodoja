@@ -106,15 +106,18 @@ def ncbi_rename_customDB(tool, genome_download_dir, extra_files=False, extra_tax
 
 
 def krakenDB_build(genome_download_dir, kraken_db_dir, threads, kraken_kmer, kraken_minimizer,
-                   subset_vir_assembly, jellyfish_hash_size=False, kraken_max_dbSize=False):
+                   subset_vir_assembly, taxonomy, jellyfish_hash_size=False, kraken_max_dbSize=False):
     """Build kraken database with the renamed .fna files from ncbi."""
     # Make a kraken database directory
     if not os.path.exists(kraken_db_dir):
         os.makedirs(kraken_db_dir)
 
-    # Download taxonomy for Kraken database
-    subprocess.check_call("kraken-build --download-taxonomy --threads " +
-                          str(threads) + " --db " + kraken_db_dir, shell=True)
+    # Download or create symlink of taxonomy for Kraken database
+    if taxonomy:
+        subprocess.check_call("ln -s %s %staxonomy" % (taxonomy, kraken_db_dir), shell=True)
+    else:
+        subprocess.check_call("kraken-build --download-taxonomy --threads " +
+                              str(threads) + " --db " + kraken_db_dir, shell=True)
 
     file_list = []
     # Add files downloaded and ready for kraken ("<file>.kraken.fna") to kraken library
@@ -147,7 +150,7 @@ def krakenDB_build(genome_download_dir, kraken_db_dir, threads, kraken_kmer, kra
     subprocess.check_call(kraken_command, shell=True)
 
     # Clear unnecessary files from kraken database directory
-    subprocess.check_call("kraken-build --clean --db " + kraken_db_dir, shell=True)
+    # subprocess.check_call("kraken-build --clean --db " + kraken_db_dir, shell=True)
 
 
 def kaijuDB_build(genome_download_dir, kaiju_db_dir, subset_vir_assembly):
