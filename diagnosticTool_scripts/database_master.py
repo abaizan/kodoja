@@ -96,8 +96,8 @@ else:
             os.chdir(args.output_dir)
             urllib.urlretrieve('ftp://ftp.genome.jp/pub/db/virushostdb/virushostdb.tsv',
                                'virushostdb.tsv')
-        host_list = pd.read_csv(args.output_dir + "virushostdb.tsv", sep="\t").fillna('')
-        plnVir = host_list[host_list['host lineage'].str.contains("Viridiplantae")]
+        virHost_table = pd.read_csv(args.output_dir + "virushostdb.tsv", sep="\t").fillna('')
+        plnVir = virHost_table[virHost_table['host lineage'].str.contains("Viridiplantae")]
         vir_host = list(plnVir['virus tax id'])
 
     subset_vir_assembly = list(vir_assembly.assembly_accession[vir_assembly['taxid'].isin(vir_host)])
@@ -105,7 +105,7 @@ else:
 
 for tool in tool_list:
     if args.no_download:
-        # Download NCBI data
+        # Download NCBI genomes
         ncbi_download(tool, args.output_dir, args.download_parallel, args.host, args.test)
         print "DONE with downloading"
     # Rename downloaded genomic files for Kraken or protein file for Kaiju
