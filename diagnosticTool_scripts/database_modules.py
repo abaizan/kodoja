@@ -79,7 +79,7 @@ def ncbi_rename_customDB(tool, genome_download_dir, extra_files=False, extra_tax
                     # retrieve taxid for file
                     taxid_list = list(assembly_summary.loc[assembly_summary['assembly_accession'] == assembly_accession[0]]["taxid"])
                     assert (len(taxid_list) == 1),\
-                        "Taxid has " + len(taxid) + "vales. Should only have 1 value"
+                        "Taxid has " + len(taxid) + "values. Should only have 1 value"
                     taxid = taxid_list[0]
 
                 # Create new genomic file with rename sequence identifier to comply with tool
