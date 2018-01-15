@@ -13,16 +13,35 @@ There are three main scripts:
 diagnostic_modules.py and database_modules.py contain the fuctions called by diagnostic_master and database_master.
 .sh files are example script for submission to SGE cluster
 
-## Dependencies
-FastQC v0.11.5,
-Trimmomatic v0.36,
-Kraken v1.0,
-Kaiju v1.5.0
+## License
 
-Python packages: numpy, biopython, pandas, ncbi-genome-download
+Kodoja is released under the MIT licence, see file ``LICENSE.txt`` for details.
+
+## Dependencies
+
+* FastQC v0.11.5,
+* Trimmomatic v0.36,
+* Kraken v1.0,
+* Kaiju v1.5.0
+
+Python packages:
+* numpy
+* biopython
+* pandas
+* ncbi-genome-download
 
 ## Installation
-conda:
+
+A conda package has been prepared on the BioConda channel which will install Kodoja and a known
+working combination of the dependencies, all with just:
+
+```
+$ conda install -c bioconda kodoja
+```
+
+For manual installation, you must install all the dependencies by hand and then add the main
+scripts folder to your ``$PATH`` so that you can run ``kodoja_search.py`` etc at the command
+line.
 
 ## Usage
 ```
