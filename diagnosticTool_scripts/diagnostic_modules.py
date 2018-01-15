@@ -10,6 +10,7 @@ from math import isnan
 # The user-facing scripts will all report this version number via --version:
 version = "0.0.1"
 
+
 def check_path(dirs):
     """Check if directory path has '/' at the end.
 
