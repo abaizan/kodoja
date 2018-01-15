@@ -8,6 +8,15 @@
 # http://redsymbol.net/articles/unofficial-bash-strict-mode/
 set -euo pipefail
 
+if [ -f "test/test_script.sh" ]
+then
+    echo "Good, in the expected directory. Starting tests..."
+else
+    echo "ERROR. Run this from the GitHub repository root directory."
+    echo "Please don't run from the test directory itself."
+    exit 1
+fi
+
 # Create test database - ought work but we run out of disk space on TravisCI
 # while downloading and unzipping the taxonomy data.
 #
