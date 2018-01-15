@@ -6,9 +6,9 @@ and Kaiju, which used the Burrows–Wheeler transform, to detect viral sequences
 ## Overview
 There are three main scripts:
 
-diagnostic_master.py - to classify RNA-seq data
-database_master.py - to download viral/host genomes and create new Kraken and Kaiju databases  
-diagnostic_seqRetrive.py  
+* kodoja_search.py - to classify RNA-seq data.
+* kodoja_build.py - to download viral/host genomes and create new Kraken and Kaiju databases.
+* kodoja_retrieve.py - pull out sequences of interest from kodoja_search.py results file.
 
 diagnostic_modules.py and database_modules.py contain the fuctions called by diagnostic_master and database_master.
 .sh files are example script for submission to SGE cluster
@@ -87,7 +87,3 @@ TRAILING:20 Specifies the minimum quality required to keep a base
 ### ncbi-genome-download:
 --download_parallel - number of genomes to download in parallel (default=4)
 --no_download - Genomes have already been downloaded and are in output folder (default=False)
-
-
-
-
