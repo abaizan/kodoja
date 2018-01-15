@@ -62,17 +62,20 @@ if args.db_tag:
 kraken_db_dir += check_path(kraken_db_dir)
 kaiju_db_dir += check_path(kaiju_db_dir)
 
-# Ensure extra files have taxIDs and are in the right format
+# Ensure extra files have taxIDs/are in the right format and create symlinks
 if args.extra_files:
     # Check there are the same number of files as taxids
     assert len(args.extra_files) == len(args.extra_taxids), \
         "Each extra file provided needs to have a corresponding ncbi taxid"
-
     # Check extra files provided are compressed and have the right file extension
     for files in args.extra_files:
         assert files.endswith(".fna.gz" or ".faa.gz"), \
             "File extensions need to be either '.fna' for genomic data" + \
             " or '.faa' for protein data, and be compressed ('.gz')"
+    # Make a copy of each file in extra_files into 'extra' directory
+    subprocess.check_call("mkdir %sextra/" % args.output_dir, shell=True)
+    for	extraFile in args.extra_files:
+        subprocess.check_call("cp %s %s" % (extraFile, args.output_dir + 'extra/'), shell=True)
 
 # Download virus assembly summary for refseq
 if not os.path.exists(args.output_dir + "viral_assembly_summary.txt"):

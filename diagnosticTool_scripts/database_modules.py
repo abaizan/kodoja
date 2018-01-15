@@ -56,6 +56,13 @@ def ncbi_rename_customDB(tool, genome_download_dir, extra_files=False, extra_tax
     assembly_summary.rename(columns={'# assembly_accession': 'assembly_accession'},
                             inplace=True)  # rename column to exclude "#"
 
+    # If extra files, create dictionary containing file names and taxIDs
+    if extra_files:
+        new_extra = []
+        for extraFiles in extra_files:
+            new_extra.append(extraFile.split('/')[-1])
+        extra_dict = dict(zip(new_extra, extra_taxids))
+
     kaiju_count = 1  # Count for protein sequences
     for root, subdirs, files in os.walk(genome_download_dir):
         for filename in files:
@@ -65,12 +72,11 @@ def ncbi_rename_customDB(tool, genome_download_dir, extra_files=False, extra_tax
                 unzip_filename = zip_filename[:-3]
 
                 if root.endswith("extra"):
-                    id_loc = [i for i, x in enumerate(extra_files) if x == filename][0]
-                    assert 'id_loc' in locals() or 'id_loc' in globals(),\
-                        "Error: problem with name of the extra files provided"
-                    taxid = extra_taxid[id_loc]
+                    taxid = extra_dict[filename]
                     assert 'taxid' in locals() or 'taxid' in globals(),\
-                        "Error: problem with the taxid of the extra files provided"
+                        "Error: no taxid assigned for extra files provided"
+                elif root.split('/')[-2] == 'plant':
+                    taxid = host_taxid
                 else:
                     # Retrieve assembly accession number for file path
                     assembly_accession = re.findall(r'/viral/([^(]*)/', unzip_filename)
@@ -126,6 +132,10 @@ def krakenDB_build(genome_download_dir, kraken_db_dir, threads, kraken_kmer, kra
             if subset_vir_assembly:
                 if root.split('/')[-1] in subset_vir_assembly and filename.endswith("kraken.fna.gz"):
                     file_list.append(os.path.join(root, filename))
+                elif root.split('/')[-2] == 'plant' and filename.endswith("kraken.fna.gz"):
+                    file_list.append(os.path.join(root, filename))
+                elif root.endswith('extra') and filename.endswith("kraken.fna.gz"):
+                    file_list.append(os.path.join(root, filename))
             else:
                 if filename.endswith("kraken.fna.gz"):
                     file_list.append(os.path.join(root, filename))
@@ -167,6 +177,10 @@ def kaijuDB_build(genome_download_dir, kaiju_db_dir, subset_vir_assembly):
         for filename in files:
             if subset_vir_assembly:
                 if root.split('/')[-1] in subset_vir_assembly and filename.endswith("kaiju.faa.gz"):
+                    file_list.append(os.path.join(root, filename))
+                elif root.split('/')[-2] == 'plant' and filename.endswith("kaiju.faa.gz"):
+                    file_list.append(os.path.join(root, filename))
+                elif root.endswith('extra') and filename.endswith("kaiju.faa.gz"):
                     file_list.append(os.path.join(root, filename))
             else:
                 if filename.endswith("kaiju.faa.gz"):
