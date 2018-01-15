@@ -19,15 +19,15 @@ diff test/example_db/krakenDB_test/database.idx test/building_db/krakenDB_test/d
 # Run diagnostic tool
 # Paired end FASTQ
 diagnosticTool_scripts/kodoja_search.py -r1 test/data/testData_1.fastq -o test/PE_test/ -d1 test/example_db/krakenDB_test/ -d2 test/example_db/kaijuDB_test/ -r2 ./test/data/testData_2.fastq -t 2
-diff test/PE_test/virus_table.txt test/data/example_virus_table.txt
+diff test/PE_test/virus_table.txt test/data/virus_table_PE_fastq.txt
 rm -r test/PE_test/
 
 # Single end FASTQ
 diagnosticTool_scripts/kodoja_search.py -r1 test/data/testData_1.fastq -o test/SE_test/ -d1 test/example_db/krakenDB_test/ -d2 test/example_db/kaijuDB_test/ -t 2
-diff test/SE_test/virus_table.txt test/data/example_virus_table.txt
+diff test/SE_test/virus_table.txt test/data/virus_table_SE_fastq.txt
 rm -r test/SE_test/
 
 # Paired end FASTA
 diagnosticTool_scripts/kodoja_search.py -r1 test/data/testData_1.fasta -o test/fasta_test/ -d1 test/example_db/krakenDB_test/ -d2 test/example_db/kaijuDB_test/ -r2 ./test/data/testData_2.fasta -f fasta
-diff test/fasta_test/virus_table.txt test/data/fastaEx_virus_table.txt
+diff test/fasta_test/virus_table.txt test/data/virus_table_PE_fasta.txt
 rm -r test/fasta_test/
