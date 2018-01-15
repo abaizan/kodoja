@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """Retrieve viral sequences of interest."""
 import pandas as pd
 from diagnostic_modules import sequence_subset
