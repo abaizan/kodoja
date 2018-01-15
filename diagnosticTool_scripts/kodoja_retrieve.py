@@ -1,11 +1,15 @@
 #!/usr/bin/env python
 """Retrieve viral sequences of interest."""
 import pandas as pd
+from diagnostic_modules import version
 from diagnostic_modules import sequence_subset
 import argparse
 import pickle
 
 parser = argparse.ArgumentParser(description='Retrieve viral sequences of interest')
+parser.add_argument('--version',
+                    action='version',
+                    version='Kodoja v' + version)
 parser.add_argument('-r1', '--read1', type=str, required=True,
                     metavar='', help='Read 1 file path, required')
 parser.add_argument('-o', '--out_dir', type=str, required=True,

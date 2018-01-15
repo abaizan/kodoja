@@ -2,6 +2,7 @@
 """Script for running Kodoja pipeline modules."""
 import os
 import time
+from diagnostic_modules import version
 from diagnostic_modules import check_path
 from diagnostic_modules import test_format
 from diagnostic_modules import check_file
@@ -13,14 +14,17 @@ from diagnostic_modules import result_analysis
 import argparse
 
 parser = argparse.ArgumentParser(description='Kodoja')
-parser.add_argument('-r1', '--read1', type=str, required=True,
-                    help='Read 1 file path, required')
+parser.add_argument('--version',
+                    action='version',
+                    version='Kodoja v' + version)
 parser.add_argument('-o', '--output_dir', type=str, required=True,
                     help='Output directory path, required')
 parser.add_argument('-d1', '--kraken_db', type=str, required=True,
                     help='Kraken database path, required')
 parser.add_argument('-d2', '--kaiju_db', type=str, required=True,
                     help='Kaiju database path, required')
+parser.add_argument('-r1', '--read1', type=str, required=True,
+                    help='Read 1 file path, required')
 parser.add_argument('-r2', '--read2', type=str, default=False,
                     help='Read 2 file path')
 parser.add_argument('-f', '--data_format', type=str, default='fastq',

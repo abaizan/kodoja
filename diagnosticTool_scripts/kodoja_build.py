@@ -5,6 +5,7 @@ import os
 import pandas as pd
 import argparse
 import subprocess
+from diagnostic_modules import version
 from diagnostic_modules import check_path
 from database_modules import ncbi_download
 from database_modules import ncbi_rename_customDB
@@ -12,6 +13,9 @@ from database_modules import krakenDB_build
 from database_modules import kaijuDB_build
 
 parser = argparse.ArgumentParser(description='Kodoja database construction')
+parser.add_argument('--version',
+                    action='version',
+                    version='Kodoja v' + version)
 parser.add_argument('-o', '--output_dir', type=str, required=True,
                     help='Output directory path, required')
 parser.add_argument('-t', '--threads', type=int, default=1,
