@@ -60,8 +60,8 @@ def ncbi_rename_customDB(tool, genome_download_dir, host_taxid, extra_files=Fals
     if extra_files:
         new_extra = []
         for extraFiles in extra_files:
-            new_extra.append(extraFile.split('/')[-1])
-        extra_dict = dict(zip(new_extra, extra_taxids))
+            new_extra.append(extraFiles.split('/')[-1])
+        extra_dict = dict(zip(new_extra, extra_taxid))
 
     kaiju_count = 1  # Count for protein sequences
     for root, subdirs, files in os.walk(genome_download_dir):

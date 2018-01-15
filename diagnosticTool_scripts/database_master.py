@@ -4,6 +4,7 @@ import urllib
 import os
 import pandas as pd
 import argparse
+import subprocess
 from diagnostic_modules import check_path
 from database_modules import ncbi_download
 from database_modules import ncbi_rename_customDB
@@ -74,7 +75,7 @@ if args.extra_files:
             " or '.faa' for protein data, and be compressed ('.gz')"
     # Make a copy of each file in extra_files into 'extra' directory
     subprocess.check_call("mkdir %sextra/" % args.output_dir, shell=True)
-    for	extraFile in args.extra_files:
+    for extraFile in args.extra_files:
         subprocess.check_call("cp %s %s" % (extraFile, args.output_dir + 'extra/'), shell=True)
 
 # Download virus assembly summary for refseq
