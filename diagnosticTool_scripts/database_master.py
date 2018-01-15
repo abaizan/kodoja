@@ -17,7 +17,7 @@ parser.add_argument('-t', '--threads', type=int, default=1,
                     help='Number of threads, default=1')
 parser.add_argument('-q', '--test', action='store_true',
                     help='Make test database')
-parser.add_argument('-p', '--host', nargs='+', default=False,
+parser.add_argument('-p', '--host_taxid', type=int, default=False,
                     help='Host tax ID')
 parser.add_argument('-d', '--download_parallel', type=int, default=4,
                     help='Parallel genome download, default=4')
@@ -41,6 +41,8 @@ args = parser.parse_args()
 
 # extra_files = ["Rubus_occidentalis_v1.0.a1.scaffolds.fna.gz",]
 # extra_taxid = [75079,]
+# args.extra_files = ['/home/ae42909/Scratch/GCF_000147415.1_v_1.0_genomic.fna.gz']
+# args.extra_taxids = [554065]
 
 tool_list = ['kraken', 'kaiju']
 
@@ -106,26 +108,41 @@ else:
 for tool in tool_list:
     if args.no_download:
         # Download NCBI genomes
-        ncbi_download(tool, args.output_dir, args.download_parallel, args.host, args.test)
+        ncbi_download(tool, args.output_dir, args.download_parallel, args.host_taxid, args.test)
         print "DONE with downloading"
     # Rename downloaded genomic files for Kraken or protein file for Kaiju
-    ncbi_rename_customDB(tool, args.output_dir, args.extra_files, args.extra_taxids)
+    ncbi_rename_customDB(tool, args.output_dir, args.host_taxid, args.extra_files, args.extra_taxids)
     print "DONE with renaming"
     # Make Kraken database
     if tool == "kraken":
         krakenDB_build(args.output_dir, kraken_db_dir, args.threads, args.kraken_kmer,
                        args.kraken_minimizer, subset_vir_assembly, args.kraken_tax)
         print "DONE with kraken db"
+        if subset_vir_assembly:
+            if len(subset_vir_assembly) > 3:
+                vir_genomes_text = 'plant viruses'
+            else:
+                vir_genomes_text = 'test viruses'
+        else:
+            vir_genomes_text = 'all viruses'
+
+        other_genomes_text = ''
+        if args.host_taxid:
+            other_genomes_text += str(args.host_taxid) + ', '
+        if args.extra_taxids:
+            other_genomes_text += str(args.extra_taxids)
         with open(kraken_db_dir + "log_file.txt", "w") as out_file:
             text = 'output_dir = ' + args.output_dir + '\n'
             text += 'kraken_kmer = ' + str(args.kraken_kmer) + '\n'
             text += 'kraken_minimizer = ' + str(args.kraken_minimizer) + '\n'
-            text += 'Genomes added to db = ' + str(subset_vir_assembly) + '\n'
+            text += 'Viral genomes added to db = ' + vir_genomes_text + '\n'
+            text += 'Other genome added to db = ' + other_genomes_text + '\n'
             out_file.write(text)
     elif tool == "kaiju":
         # Make Kaiju database
         kaijuDB_build(args.output_dir, kaiju_db_dir, subset_vir_assembly)
         with open(kaiju_db_dir + "log_file.txt", "w") as out_file:
             text = 'output_dir = ' + args.output_dir + '\n'
-            text += 'Genomes added to db = ' + str(subset_vir_assembly) + '\n'
+            text += 'Viral genomes added to db = ' + vir_genomes_text + '\n'
+            text += 'Other genome added to db = ' + other_genomes_text + '\n'
             out_file.write(text)
