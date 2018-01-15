@@ -106,3 +106,11 @@ TRAILING:20 Specifies the minimum quality required to keep a base
 ### ncbi-genome-download:
 --download_parallel - number of genomes to download in parallel (default=4)
 --no_download - Genomes have already been downloaded and are in output folder (default=False)
+
+
+## Release History
+
+| Version | Date       | Notes                                               |
+| ------- | ---------- | --------------------------------------------------- |
+| 0.0.1   | 2018-01-15 | Initial release for BioConda packaging              |
+
