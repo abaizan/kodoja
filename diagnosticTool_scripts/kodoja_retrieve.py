@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 """Retrieve viral sequences of interest."""
+from __future__ import print_function
+
 import pandas as pd
 from diagnostic_modules import version
 from diagnostic_modules import sequence_subset
@@ -42,7 +44,7 @@ seqID_wanted = list(kodoja_vrl.loc[rows_wanted, 'Seq_ID'])
 sequence_subset(args.out_dir, args.read1, label + "_sequences1.", args.user_format,
                 seqID_wanted, label + '_sequences1.txt')
 if args.read2:
-    print 'We got to importing dict'
+    print('We got to importing dict')
     with open(args.out_dir + 'ids1.pkl', 'rb') as id_dict:
         ids1 = pickle.load(id_dict)
     with open(args.out_dir + 'ids2.pkl', 'rb') as id_dict:

@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 """Script for running Kodoja database construction modules."""
+from __future__ import print_function
+
 import urllib
 import os
 import pandas as pd
@@ -117,15 +119,15 @@ for tool in tool_list:
     if args.no_download:
         # Download NCBI genomes
         ncbi_download(tool, args.output_dir, args.download_parallel, args.host_taxid, args.test)
-        print "DONE with downloading"
+        print("DONE with downloading")
     # Rename downloaded genomic files for Kraken or protein file for Kaiju
     ncbi_rename_customDB(tool, args.output_dir, args.host_taxid, args.extra_files, args.extra_taxids)
-    print "DONE with renaming"
+    print("DONE with renaming")
     # Make Kraken database
     if tool == "kraken":
         krakenDB_build(args.output_dir, kraken_db_dir, args.threads, args.kraken_kmer,
                        args.kraken_minimizer, subset_vir_assembly, args.kraken_tax)
-        print "DONE with kraken db"
+        print("DONE with kraken db")
         if subset_vir_assembly:
             if len(subset_vir_assembly) > 3:
                 vir_genomes_text = 'plant viruses'

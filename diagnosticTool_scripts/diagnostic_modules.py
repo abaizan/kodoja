@@ -1,4 +1,6 @@
 """Kodoja pipeline."""
+from __future__ import print_function
+
 import subprocess
 import pandas as pd
 from Bio import SeqIO
@@ -225,20 +227,19 @@ def sequence_subset(out_dir, input_file, output_file, user_format, id_list, id_l
 
     Return subset of sequences file and a text file with list of sequence IDs.
     """
-    outfile = open(out_dir + id_list_name, 'w')
-    print >> outfile, "\n".join(str(i) for i in id_list)
-    outfile.close()
+    with open(out_dir + id_list_name, 'w') as outfile:
+        outfile.write("\n".join(str(i) for i in id_list) + "\n")
     id_file = out_dir + id_list_name
 
     wanted = set(line.rstrip("\n").split(None, 1)[0] for line in open(id_file))
-    print "Found %i unique identifiers in %s" % (len(wanted), id_file)
+    print("Found %i unique identifiers in %s" % (len(wanted), id_file))
 
     records = (r for r in SeqIO.parse(input_file, user_format)
                if r.id in wanted)
     count = SeqIO.write(records, out_dir + output_file + user_format, user_format)
-    print "Saved %i records from %s to %s" % (count, input_file, output_file)
+    print("Saved %i records from %s to %s" % (count, input_file, output_file))
     if count < len(wanted):
-        print "Warning %i IDs not found in %s" % (len(wanted) - count, input_file)
+        print("Warning %i IDs not found in %s" % (len(wanted) - count, input_file))
 
 
 def seq_reanalysis(kraken_table, kraken_labels, out_dir, user_format, forSubset_file1,
