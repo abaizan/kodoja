@@ -2,6 +2,7 @@ language: python
 python:
 # We don't actually use the Travis Python, but this keeps it organized.
  - "2.7"
+ - "3.6"
 
 before_install:
  # This happens using the TravisCI copy of Python, BEFORE we install conda.
