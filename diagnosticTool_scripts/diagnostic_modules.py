@@ -34,7 +34,9 @@ def test_format(file1, user_format):
     Return an assert stament and stop or continue.
     """
     with open(file1) as myfile:
-        small_file = [next(myfile) for x in xrange(8)]
+        # Would have used xrange under Python 2, but want this to work
+        # on both Python 2 and 3 and a list of 8 elements is tiny.
+        small_file = [next(myfile) for x in range(8)]
 
     file_format = "not identified"
 
