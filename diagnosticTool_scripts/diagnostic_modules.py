@@ -131,7 +131,7 @@ def check_file(file1, out_dir, user_format, file2=False):
         ids1 = rename_seqIDs(file1, out_dir, user_format, paired=False)
 
     with open(out_dir + "log_file.txt", "a") as log_file:
-        log_file.write("Number of sequences = " + str(ids1.keys()[-1]) + "\n")
+        log_file.write("Number of sequences = " + str(list(ids1.keys())[-1]) + "\n")
 
     with open(out_dir + 'ids1.pkl', 'wb') as pkl_dict:
         pickle.dump(ids1, pkl_dict, protocol=pickle.HIGHEST_PROTOCOL)
@@ -451,7 +451,7 @@ def result_analysis(out_dir, kraken_VRL, kaiju_table, kaiju_label):
             associated_tax[key_species] = associated_tax_list
 
         table_summary = pd.DataFrame(columns=['Species', 'Tax_ID', 'kraken', 'kaiju', 'combined'])
-        table_summary['Tax_ID'] = map(int, levels_tax.keys())
+        table_summary['Tax_ID'] = [int(key) for key in levels_tax]
         table_summary['kraken'] = table_summary['Tax_ID'].map(kraken_class)
         table_summary['kaiju'] = table_summary['Tax_ID'].map(kaiju_class)
         table_summary['combined'] = table_summary['Tax_ID'].map(combined_class)
