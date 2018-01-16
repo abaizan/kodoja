@@ -9,7 +9,7 @@ before_install:
  # Doing this here as want to abort and fail quickly if style checks break.
  - "pip install --upgrade pip"
  - "pip install flake8"
- - "flake8 --ignore=E501,D202"
+ - "flake8 --max-line-length 140"
 
 install:
  # We want to use Conda under TravisCI for things like trimmomatic. See:
