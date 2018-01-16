@@ -30,8 +30,10 @@ ncbi-genome-download --version
 echo "Do we have kraken?"
 kraken-build --version
 
-# echo "Do we have kaiju?"
-# TODO...
+echo "Do we have kaiju?"
+# Hiding kaiju call in a subprocess because it will give non-zero return code
+# First grep is to get just one line of output; second is to fail if missing
+echo `kaiju 2>&1 | grep Kaiju` | grep Kaiju
 
 echo "Do we have trimmomatic?"
 trimmomatic -version
