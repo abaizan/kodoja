@@ -1,3 +1,11 @@
+#!/usr/bin/env python
+"""Quick script for filtering NCBI taxonomy files.
+
+The full NCBI files for mapping nucleotide accessions to
+taxonomy identifiers are massive - for this test dataset
+we only care about three specific viruses.
+"""
+
 import os
 
 old_path = os.path.join(os.environ["HOME"], "Scratch/kraken_taxonomy/")
