@@ -8,14 +8,38 @@
 # http://redsymbol.net/articles/unofficial-bash-strict-mode/
 set -euo pipefail
 
-if [ -f "test/test_script.sh" ]
+if [ ! -f "test/test_script.sh" ]
 then
-    echo "Good, in the expected directory. Starting tests..."
-else
     echo "ERROR. Run this from the GitHub repository root directory."
     echo "Please don't run from the test directory itself."
     exit 1
 fi
+
+# Confirm taxonomy files present
+if [ ! -f "test/taxonomy/nodes.dmp" ] || [ ! -f "test/taxonomy/names.dmp" ]
+then
+    echo "ERROR. Please cache the NCBI taxonomy files before running tests."
+    echo "Please consult instuctions in file test/taxonomy/README.txt"
+    exit 1
+fi
+
+# Confirm binary dependencies present (strict bash mode will abort on failure)
+echo "Do we have ncbi-genome-download?"
+ncbi-genome-download --version
+
+echo "Do we have kraken?"
+kraken-build --version
+
+# echo "Do we have kaiju?"
+# TODO...
+
+echo "Do we have trimmomatic?"
+trimmomatic -version
+
+echo "Do we have fastqc?"
+fastqc --version
+
+echo "Begining tests..."
 
 # Create test database - ought work but we run out of disk space on TravisCI
 # while downloading and unzipping the taxonomy data.
