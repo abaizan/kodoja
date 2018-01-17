@@ -17,3 +17,5 @@ test/taxonomy/nucl_gss.accession2taxid
 test/taxonomy/nucl_wgs.accession2taxid
 test/taxonomy/taxdump.dlflag
 test/taxonomy/taxdump.untarflag
+# Ignore files created during test
+test/building_db/*
