@@ -100,8 +100,10 @@ vir_assembly = pd.read_table(path_assembly_summary, sep='\t', skiprows=1, header
 vir_assembly = vir_assembly.rename(columns={'# assembly_accession': 'assembly_accession'})
 
 # Set subset_vir_assembly and vir_host
-# subset_vir_assembly - list of virus accession names which will be added to databases (used in krakenDB_build and kaijuDB_build)
-# vir_host - list of viral taxIDs for plant viruses. A subset of the genomes in refseq, be added to datbase by setting 'subset_vir_assembly'.
+# subset_vir_assembly - list of virus accession names which will be added to
+#                       databases (used in krakenDB_build and kaijuDB_build)
+# vir_host - list of viral taxIDs for plant viruses. A subset of the genomes
+#            in refseq, be added to datbase by setting 'subset_vir_assembly'.
 if args.all_viruses:
     subset_vir_assembly = False
     vir_host = False
