@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/abaizan/kodoja.svg?branch=master)](https://travis-ci.org/abaizan/kodoja)
+
 # Kodoja: A workflow for virus detection in plants using k-mer analysis of RNA-sequencing data
 
 Kodoja takes the raw data (either fasta or fastq) and uses Kraken, a k-mer-based tool,
@@ -114,3 +116,8 @@ TRAILING:20 Specifies the minimum quality required to keep a base
 | ------- | ---------- | --------------------------------------------------- |
 | 0.0.1   | 2018-01-15 | Initial release for BioConda packaging              |
 
+## Development
+
+Kodoja is on GitHub, and has auotmated testing running on TravisCI, see special
+file ``.travis.yml`` and webpage https://travis-ci.org/abaizan/kodoja/builds
+for details.
