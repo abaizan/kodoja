@@ -115,6 +115,7 @@ TRAILING:20 Specifies the minimum quality required to keep a base
 | Version | Date       | Notes                                               |
 | ------- | ---------- | --------------------------------------------------- |
 | 0.0.1   | 2018-01-15 | Initial release for BioConda packaging              |
+| 0.0.2   | 2018-01-22 | Now tested under Python 3.6 as well as Python 2.7   |
 
 ## Development
 

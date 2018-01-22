@@ -10,7 +10,7 @@ import pickle
 from math import isnan
 
 # The user-facing scripts will all report this version number via --version:
-version = "0.0.1"
+version = "0.0.2"
 
 
 def check_path(dirs):
