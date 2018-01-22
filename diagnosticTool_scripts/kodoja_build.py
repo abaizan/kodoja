@@ -101,7 +101,7 @@ vir_assembly = vir_assembly.rename(columns={'# assembly_accession': 'assembly_ac
 
 # Set subset_vir_assembly and vir_host
 # subset_vir_assembly - list of virus accession names which will be added to databases (used in krakenDB_build and kaijuDB_build)
-# vir_host - list of viral taxIDs for plant viruses. A subset of these are in refseq, be added to datbase by setting 'subset_vir_assembly'.
+# vir_host - list of viral taxIDs for plant viruses. A subset of the genomes in refseq, be added to datbase by setting 'subset_vir_assembly'.
 if args.all_viruses:
     subset_vir_assembly = False
     vir_host = False
@@ -112,9 +112,9 @@ else:
         args.kraken_minimizer = 5
     else:
         if not os.path.exists(args.output_dir + "virushostdb.tsv"):
-            os.chdir(args.output_dir)
+            # os.chdir(args.output_dir)
             urlretrieve('ftp://ftp.genome.jp/pub/db/virushostdb/virushostdb.tsv',
-                        'virushostdb.tsv')
+                        args.output_dir + 'virushostdb.tsv')
         virHost_table = pd.read_csv(args.output_dir + "virushostdb.tsv", sep="\t").fillna('')
         plnVir = virHost_table[virHost_table['host lineage'].str.contains("Viridiplantae")]
         vir_host = list(plnVir['virus tax id'])
