@@ -207,11 +207,11 @@ def kaijuDB_build(genome_download_dir, kaiju_db_dir, subset_vir_assembly):
 
             subprocess.check_call("gzip " + unzip_filename, shell=True)
 
-    # Fetch "nodes.dmp" and "names.dmp"
-    if not os.path.exists(kaiju_db_dir + "names.dmp"):
-        urlretrieve('ftp://ftp.ncbi.nih.gov/pub/taxonomy/taxdump.tar.gz',
-                    kaiju_db_dir + 'taxdump.tar.gz')
-        subprocess.check_call("tar -xzvf " + kaiju_db_dir + "taxdump.tar.gz -C" + kaiju_db_dir, shell=True)
+    # Get "nodes.dmp" and "names.dmp" from taxonomy in kraken directory
+    # if not os.path.exists(kaiju_db_dir + "names.dmp"):
+    #     urlretrieve('ftp://ftp.ncbi.nih.gov/pub/taxonomy/taxdump.tar.gz',
+    #                 kaiju_db_dir + 'taxdump.tar.gz')
+    #     subprocess.check_call("tar -xzvf " + kaiju_db_dir + "taxdump.tar.gz -C" + kaiju_db_dir, shell=True)
 
     # Build Kaiju database
     subprocess.check_call("mkbwt -n 5 -a ACDEFGHIKLMNPQRSTVWY -o " + kaiju_db_dir +

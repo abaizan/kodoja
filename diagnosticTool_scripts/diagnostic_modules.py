@@ -323,7 +323,7 @@ def kaiju_classify(kaiju_file1, threads, out_dir, kaiju_db, kaiju_minlen, kraken
     used for this analysis.
 
     """
-    kaiju_nodes = kaiju_db + "nodes.dmp"
+    kaiju_nodes = kraken_db + "taxonomy/nodes.dmp"
     kaiju_fmi = kaiju_db + "kaiju_library.fmi"
     # kaiju_names = kaiju_db + "names.dmp"
 
