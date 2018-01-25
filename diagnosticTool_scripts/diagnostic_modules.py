@@ -244,7 +244,7 @@ def sequence_subset(out_dir, input_file, output_file, user_format, id_list, id_l
 
 
 def seq_reanalysis(kraken_table, kraken_labels, out_dir, user_format, forSubset_file1,
-                   subset=False, forSubset_file2=False):
+                   forSubset_file2=False):
     """Format table and subset sequences for kaiju analysis.
 
     Merge kraken_table and kraken_labels using format_result_table() and write to disk
@@ -275,42 +275,42 @@ def seq_reanalysis(kraken_table, kraken_labels, out_dir, user_format, forSubset_
     subprocess.check_call("gzip " + out_dir + "kraken_FormattedTable.txt", shell=True)
     subprocess.check_call("rm " + out_dir + "kraken_table.txt " + out_dir + "kraken_labels.txt", shell=True)
 
-    if subset:
-        unclassified_IDs = kraken_results.loc[(kraken_results.kraken_classified == 'U'), ['Seq_ID']]
+    # if subset:
+        # unclassified_IDs = kraken_results.loc[(kraken_results.kraken_classified == 'U'), ['Seq_ID']]
         # VRL_IDs = kraken_results.loc[(kraken_results.Div_ID == 'VRL'), ['Seq_ID']]
-        reanalyse_IDs = unclassified_IDs['Seq_ID'].tolist()  # + VRL_IDs['Seq_ID'].tolist()
+        # reanalyse_IDs = unclassified_IDs['Seq_ID'].tolist()  # + VRL_IDs['Seq_ID'].tolist()
 
-        subset_file1 = forSubset_file1
-        delete_file = False
-        if forSubset_file2:
-            subset_file2 = forSubset_file2
-        else:
-            subset_file2 = False
+        # subset_file1 = forSubset_file1
+        # delete_file = False
+        # if forSubset_file2:
+        #     subset_file2 = forSubset_file2
+        # else:
+        #     subset_file2 = False
 
-        for dirs, sub_dirs, files in os.walk(out_dir):
-            if forSubset_file1 in files:
-                subset_file1 = out_dir + forSubset_file1
-                delete_file = True
-                if forSubset_file2:
-                    subset_file2 = out_dir + forSubset_file2
+        # for dirs, sub_dirs, files in os.walk(out_dir):
+            # if forSubset_file1 in files:
+                # subset_file1 = out_dir + forSubset_file1
+                # delete_file = True
+                # if forSubset_file2:
+                    # subset_file2 = out_dir + forSubset_file2
 
-        if forSubset_file2:
-            reanalyse_ID1 = [str(s) + "/1" for s in reanalyse_IDs]
-            reanalyse_ID2 = [str(s) + "/2" for s in reanalyse_IDs]
-            sequence_subset(out_dir, subset_file2, "subset_file2.", user_format,
-                            reanalyse_ID2, 'reanalyse_ID.txt')
-        else:
-            reanalyse_ID1 = [str(s) for s in reanalyse_IDs]
+        # if forSubset_file2:
+            # reanalyse_ID1 = [str(s) + "/1" for s in reanalyse_IDs]
+            # reanalyse_ID2 = [str(s) + "/2" for s in reanalyse_IDs]
+            # sequence_subset(out_dir, subset_file2, "subset_file2.", user_format,
+                            # reanalyse_ID2, 'reanalyse_ID.txt')
+        # else:
+            # reanalyse_ID1 = [str(s) for s in reanalyse_IDs]
 
-        sequence_subset(out_dir, subset_file1, "subset_file1.", user_format,
-                        reanalyse_ID1, 'reanalyse_ID.txt')
+        # sequence_subset(out_dir, subset_file1, "subset_file1.", user_format,
+                        # reanalyse_ID1, 'reanalyse_ID.txt')
 
-        if delete_file:
-            subprocess.check_call("rm " + forSubset_file1, shell=True)
-            if subset_file2:
-                subprocess.check_call('rm ' + forSubset_file2, shell=True)
+        # if delete_file:
+            # subprocess.check_call("rm " + forSubset_file1, shell=True)
+            # if subset_file2:
+                # subprocess.check_call('rm ' + forSubset_file2, shell=True)
 
-        subprocess.check_call("rm reanalyse_ID.txt", shell=True)
+        # subprocess.check_call("rm reanalyse_ID.txt", shell=True)
 
 
 def kaiju_classify(kaiju_file1, threads, out_dir, kaiju_db, kaiju_minlen, kraken_db,
@@ -353,17 +353,16 @@ def kaiju_classify(kaiju_file1, threads, out_dir, kaiju_db, kaiju_minlen, kraken
                     subprocess.check_call("rm " + kaiju_file2, shell=True)
 
 
-def result_analysis(out_dir, kraken_VRL, kaiju_table, kaiju_label):
+def result_analysis(out_dir, kraken_VRL, kaiju_table, kaiju_label, host_subset):
     """Kodoja results table.
 
     Imports kraken results table, formats kaiju_table and kaiju_labels and merges
-    kraken and kaiju results into one table (kodoja). It then separates reads which
-    are classified as VRL, makes a table with all identified viruses and count number
-    of intances for each usin virusSummary().
+    kraken and kaiju results into one table (kodoja). It then makes a table with 
+    all identified species and count number of intances for each usin virusSummary().
     """
     kraken_results = pd.read_csv(out_dir + kraken_VRL, header=0, sep='\t',
                                  dtype={"kraken_classified": str, "Seq_ID": int,
-                                        "Tax_ID": float, "Seq_tax": str})
+                                        "Tax_ID": int, "Seq_tax": str})
 
     kaiju_colNames = ["kaiju_classified", "Seq_ID", "Tax_ID", "kaiju_lenBest",
                       "kaiju_tax_AN", "kaiju_accession", "kaiju_fragment"]
@@ -395,6 +394,9 @@ def result_analysis(out_dir, kraken_VRL, kaiju_table, kaiju_label):
                           "kaiju_labels.txt " + out_dir + "kraken_VRL.txt ", shell=True)
 
     kodoja['combined_result'] = kodoja.kraken_tax_ID[kodoja['kraken_tax_ID'] == kodoja['kaiju_tax_ID']]
+    if host_subset:
+        kodoja = kodoja[(kodoja['kraken_tax_ID'] != float(host_subset)) &
+                        (kodoja['kaiju_tax_ID'] != float(host_subset))]
     kodoja.to_csv(out_dir + 'kodoja_VRL.txt', sep='\t', index=False)
 
     def virusSummary(kodoja_data):

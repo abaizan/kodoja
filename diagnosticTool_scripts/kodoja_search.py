@@ -31,8 +31,8 @@ parser.add_argument('-f', '--data_format', type=str, default='fastq',
                     help='Sequence data format')
 parser.add_argument('-t', '--threads', type=int, default=1,
                     help='Number of threads')
-parser.add_argument('-s', '--host_subset', action='store_true',
-                    help='Subset host sequences before Kaiju')
+parser.add_argument('-s', '--host_subset', type=int, default=False,
+                    help='Subset sequences with this tax id from results')
 parser.add_argument('-m', '--trim_minlen', type=int, default=50,
                     help='Trimmomatic minimum length')
 parser.add_argument('-a', '--trim_adapt', type=str, default=False,
@@ -104,10 +104,10 @@ else:
     kraken_file2 = kaiju_file2 = initial_file2
 
 
-if args.host_subset:
-    kaiju_file1 = args.output_dir + "subset_file1." + args.data_format
-    if args.read2:
-        kaiju_file2 = args.output_dir + "subset_file2." + args.data_format
+# if args.host_subset:
+    # kaiju_file1 = args.output_dir + "subset_file1." + args.data_format
+    # if args.read2:
+        # kaiju_file2 = args.output_dir + "subset_file2." + args.data_format
 t2 = time.time()
 
 # Kraken classification
@@ -117,7 +117,7 @@ t3 = time.time()
 
 # Format kraken data and subset unclassified and non-host sequences
 seq_reanalysis("kraken_table.txt", "kraken_labels.txt", args.output_dir,
-               args.data_format, kraken_file1, args.host_subset, kraken_file2)
+               args.data_format, kraken_file1, kraken_file2)
 t4 = time.time()
 
 # Kaiju classification of all sequences or subset sequences
@@ -127,7 +127,7 @@ kaiju_classify(kaiju_file1, args.threads, args.output_dir, args.kaiju_db, args.k
 t5 = time.time()
 
 # Merege results
-result_analysis(args.output_dir, "kraken_VRL.txt", "kaiju_table.txt", "kaiju_labels.txt")
+result_analysis(args.output_dir, "kraken_VRL.txt", "kaiju_table.txt", "kaiju_labels.txt", args.host_subset)
 t6 = time.time()
 
 
