@@ -25,9 +25,9 @@ parser.add_argument('-f', '--user_format', type=str, default='fastq',
 parser.add_argument('-t', '--taxID', type=int, default=False,
                     help='Virus tax ID for subsetting, default: All viral sequences')
 parser.add_argument('-g', '--genus', action='store_true',
-	            help='Include sequences classified at genus')
+                    help='Include sequences classified at genus')
 parser.add_argument('-s', '--stringent', action='store_true',
-	            help='Only subset sequences identified by both tools')
+                    help='Only subset sequences identified by both tools')
 args = parser.parse_args()
 
 table_summary = pd.read_csv(args.file_dir + "virus_table.txt", sep="\t", header=0,

@@ -4,13 +4,6 @@ import pandas as pd
 import os
 import re
 
-try:
-    # Python 3
-    from urllib.request import urlretrieve
-except ImportError:
-    # Python 2
-    from urllib import urlretrieve
-
 
 # Download refseq files from ncbi ftp site - use ncbi-genome-download
 def ncbi_download(tool, genome_download_dir, parallel, host_taxid, test):
@@ -206,12 +199,6 @@ def kaijuDB_build(genome_download_dir, kaiju_db_dir, subset_vir_assembly):
                         out_file.write(line)
 
             subprocess.check_call("gzip " + unzip_filename, shell=True)
-
-    # Get "nodes.dmp" and "names.dmp" from taxonomy in kraken directory
-    # if not os.path.exists(kaiju_db_dir + "names.dmp"):
-    #     urlretrieve('ftp://ftp.ncbi.nih.gov/pub/taxonomy/taxdump.tar.gz',
-    #                 kaiju_db_dir + 'taxdump.tar.gz')
-    #     subprocess.check_call("tar -xzvf " + kaiju_db_dir + "taxdump.tar.gz -C" + kaiju_db_dir, shell=True)
 
     # Build Kaiju database
     subprocess.check_call("mkbwt -n 5 -a ACDEFGHIKLMNPQRSTVWY -o " + kaiju_db_dir +

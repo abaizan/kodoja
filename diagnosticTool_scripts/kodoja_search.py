@@ -107,7 +107,7 @@ else:
 # if args.host_subset:
     # kaiju_file1 = args.output_dir + "subset_file1." + args.data_format
     # if args.read2:
-        # kaiju_file2 = args.output_dir + "subset_file2." + args.data_format
+    #     kaiju_file2 = args.output_dir + "subset_file2." + args.data_format
 t2 = time.time()
 
 # Kraken classification
