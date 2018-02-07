@@ -424,7 +424,24 @@ def result_analysis(out_dir, kraken_VRL, kaiju_table, kaiju_label, host_subset):
         kaiju_class = dict(kodoja_data['kaiju_tax_ID'].value_counts())
         kaiju_levels = pd.Series(kodoja_data.kaiju_seq_tax.values,
                                  index=kodoja_data.kaiju_tax_ID).to_dict()
+
+        # Number of sequences classified to taxID by both tools
         combined_class = dict(kodoja_data['combined_result'].value_counts())
+
+        # Number of sequences classified to taxID by either tool
+        either_class = kraken_class.copy()
+        either_class.update(kaiju_class)
+        either_class.pop(0, None)
+        for key, value in either_class.items():
+            if key in list(kraken_class.keys()):
+                if key in list(kaiju_class.keys()):
+                    either_class[key] = kraken_class[key] + kaiju_class[key]
+                    if key in list(combined_class.keys()):
+                        either_class[key] = either_class[key] - combined_class[key]
+                else:
+                    either_class[key] = kraken_class[key]
+            else:
+                either_class[key] = kaiju_class[key]
 
         levels_dict = kraken_levels.copy()
         levels_dict.update(kaiju_levels)
@@ -443,22 +460,55 @@ def result_analysis(out_dir, kraken_VRL, kaiju_table, kaiju_label, host_subset):
         for key in levels_tax:
             species_dict[key] = " ".join(levels_tax[key][-1][3:].split("_"))
 
-        associated_tax = {}
-        for key_species in levels_tax:
-            associated_tax_list = [key_species]
-            for key_lca in LCA_tax:
-                if LCA_tax[key_lca] in levels_tax[key_species]:
-                    associated_tax_list.append(key_lca)
-            associated_tax[key_species] = associated_tax_list
+        # Find the genus for each species
+        genus_per_species = {}
+        for key, value in levels_dict.items():
+            if len(value.split('g__')) > 1:
+                genus_per_species[key] = value.split('g__')[1].split('|')[0]
+            else:
+                genus_per_species[key] = ''
 
-        table_summary = pd.DataFrame(columns=['Species', 'Tax_ID', 'kraken', 'kaiju', 'combined'])
-        table_summary['Tax_ID'] = [int(key) for key in levels_tax]
-        table_summary['kraken'] = table_summary['Tax_ID'].map(kraken_class)
-        table_summary['kaiju'] = table_summary['Tax_ID'].map(kaiju_class)
-        table_summary['combined'] = table_summary['Tax_ID'].map(combined_class)
-        table_summary['Species'] = table_summary['Tax_ID'].map(species_dict)
-        table_summary = table_summary.sort_values('kraken', ascending=False)
-        table_summary = table_summary.sort_values('combined', ascending=False)
+        # TaxID for genus
+        genus_taxid = {}
+        for key, value in LCA_tax.items():
+            if value[0:3] == 'g__':
+                genus = value[3:]
+                if genus in list(genus_taxid.keys()):
+                    genus_taxid[genus].append(key)
+                else:
+                    genus_taxid[genus] = [key]
+        with open(out_dir + 'genus_taxid.pkl', 'wb') as pkl_dict:
+            pickle.dump(genus_taxid, pkl_dict, protocol=pickle.HIGHEST_PROTOCOL)
+
+        # Number of sequences classified to genus level
+        def genus_seq_count(dict_class):
+            genus_dict = genus_taxid.copy()
+            for key, value in genus_taxid.items():
+                seq_sum = 0
+                for taxid in value:
+                    if taxid in list(dict_class.keys()):
+                        seq_sum += dict_class[taxid]
+                genus_dict[key] = seq_sum
+            return genus_dict
+
+        genus_either = genus_seq_count(either_class)
+        genus_combined = genus_seq_count(combined_class)
+
+        table_summary = pd.DataFrame(columns=['Species', 'Species TaxID',
+                                              'Species sequences',
+                                              'Species sequences (stringent)',
+                                              'Genus',
+                                              'Genus sequences',
+                                              'Genus sequences (stringent)'])
+        table_summary['Species TaxID'] = [int(key) for key in levels_tax]
+        table_summary['Species sequences'] = table_summary['Species TaxID'].map(either_class)
+        table_summary['Species sequences (stringent)'] = table_summary['Species TaxID'].map(combined_class)
+        table_summary['Species'] = table_summary['Species TaxID'].map(species_dict)
+        table_summary['Genus'] = table_summary['Species TaxID'].map(genus_per_species)
+        table_summary['Genus sequences'] = table_summary['Genus'].map(genus_either)
+        table_summary['Genus sequences (stringent)'] = table_summary['Genus'].map(genus_combined)
+        table_summary = table_summary.sort_values('Species sequences', ascending=False)
+        table_summary = table_summary.sort_values('Species sequences (stringent)', ascending=False)
         table_summary.to_csv(out_dir + 'virus_table.txt', sep='\t', index=False)
 
     virusSummary(kodoja)
