@@ -53,7 +53,7 @@ python -c "from pandas import __version__; print(__version__)"
 echo "Do we have biopython?"
 python -c "from Bio import __version__; print(__version__)"
 
-echo "Begining tests..."
+echo "Beginning tests..."
 
 # Create test database - ought work but we run out of disk space on TravisCI
 # while downloading and unzipping the taxonomy data.
