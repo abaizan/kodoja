@@ -23,6 +23,9 @@ then
     exit 1
 fi
 
+echo "Which version of Python do we have?"
+python --version
+
 # Confirm binary dependencies present (strict bash mode will abort on failure)
 echo "Do we have ncbi-genome-download?"
 ncbi-genome-download --version
@@ -40,6 +43,15 @@ trimmomatic -version
 
 echo "Do we have fastqc?"
 fastqc --version
+
+echo "Do we have numpy?"
+python -c "from numpy import __version__; print(__version__)"
+
+echo "Do we have pandas?"
+python -c "from pandas import __version__; print(__version__)"
+
+echo "Do we have biopython?"
+python -c "from Bio import __version__; print(__version__)"
 
 echo "Begining tests..."
 
