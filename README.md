@@ -1,3 +1,4 @@
+[![BioConda package](https://img.shields.io/conda/vn/bioconda/kodoja.svg)](https://anaconda.org/bioconda/kodoja)
 [![Build Status](https://travis-ci.org/abaizan/kodoja.svg?branch=master)](https://travis-ci.org/abaizan/kodoja)
 
 # Kodoja: A workflow for virus detection in plants using k-mer analysis of RNA-sequencing data
