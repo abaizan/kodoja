@@ -9,12 +9,12 @@ and Kaiju, which used the Burrows–Wheeler transform, to detect viral sequences
 ## Overview
 There are three main scripts:
 
-* kodoja_search.py - to classify RNA-seq data.
-* kodoja_build.py - to download viral/host genomes and create new Kraken and Kaiju databases.
-* kodoja_retrieve.py - pull out sequences of interest from kodoja_search.py results file.
+* ``kodoja_search.py`` - to classify RNA-seq data.
+* ``kodoja_build.py`` - to download viral/host genomes and create new Kraken and Kaiju databases.
+* ``kodoja_retrieve.py`` - pull out sequences of interest from kodoja_search.py results file.
 
-diagnostic_modules.py and database_modules.py contain the fuctions called by diagnostic_master and database_master.
-.sh files are example script for submission to SGE cluster
+Python files ``diagnostic_modules.py`` and ``database_modules.py`` contain the fuctions called by diagnostic_master and database_master.
+The ``.sh`` files are example script for submission to SGE cluster
 
 ## License
 
@@ -47,9 +47,6 @@ scripts folder to your ``$PATH`` so that you can run ``kodoja_search.py`` etc at
 line.
 
 ## Usage
-```
-here
-```
 
 IMPORTANT: When executing the pipeline, do not put original data in the result
 file before executing script
@@ -57,21 +54,23 @@ file before executing script
 
 ## Classification pipeline parameters:
 ### General:
---read1 - path to the single-end or first paired-end file (required)
---data_format - specify the file-type for file1 ("fasta" or "fastq" - default='fastq')
---output_dir - path to the results folder (required)
---threads - number of threads on cluster (default=1)
---read2 - path to second paired-end file (default=False)
+* ``--read1`` - path to the single-end or first paired-end file (required)
+* ``--data_format`` - specify the file-type for file1 ("fasta" or "fastq" - default='fastq')
+* ``--output_dir`` - path to the results folder (required)
+* ``--threads`` - number of threads on cluster (default=1)
+* ``--read2`` - path to second paired-end file (default=False)
 
 ### Kraken:
---kraken_db - path to kraken database (required)
---kraken_quick - Quick operation mode of Kraken, where instead of querying all k-mers in the
-                    database, it stops at nth k-mer hit preload (default=False)
+* --``kraken_db`` - path to kraken database (required)
+* --``kraken_quick`` - Quick operation mode of Kraken, where instead of querying all
+  k-mers in the database, it stops at nth k-mer hit preload (default=False)
+
 ### Kaiju:
---kaiju_db - path to kaiju database, nodes.dmp and names.dmp files (required)
---kaiju_minlen - minimun required fragment length length (default=15)
---kaiju_mismatch - number of mismatches allowed by kaiju (default=1)
---kaiju_score - minimum required match if mismatches introduced (default=85)
+* ``--kaiju_db`` - path to kaiju database, nodes.dmp and names.dmp files (required)
+* ``--kaiju_minlen`` - minimun required fragment length length (default=15)
+* ``--kaiju_mismatch`` - number of mismatches allowed by kaiju (default=1)
+* ``--kaiju_score`` - minimum required match if mismatches introduced (default=85)
+
 Set parameters:
 -x: used to enable filtering of query sequences
     containing low-complexity regions by using the SEG algorithm from the blast+
@@ -80,8 +79,9 @@ Set parameters:
     other sequencing noise.
 
 ### Trimmomatic:
---trim_minlen - minimum length read after trimming (default=50)
---trim_adapt - fasta file with Illumina adaptor sequences to allow trimming (default=False)
+* ``--trim_minlen`` - minimum length read after trimming (default=50)
+* ``--trim_adapt`` - fasta file with Illumina adaptor sequences to allow trimming (default=False)
+
 Set parameters:
 ILUMINACLIP 2:30:10 <seed mismatches>:<palindrome threshold>:<simple clip threshold>
      seedMismatches: specifies the maximum mismatch count which will still allow a full match to be performed
@@ -93,22 +93,22 @@ LEADING:20 Specifies the minimum quality required to keep a base
 TRAILING:20 Specifies the minimum quality required to keep a base
 
 ## Database construction parameters:
---output_dir - Output directory path where kraken and kaiju databases will be written, required')
---threads - number of threads on cluster (default=1)
---test - Make database for test_script.py
---host - Host tax ID (default=False)
---extra_files - List of file names added to "extra" dir (default=False)
---extra_taxids - List of tax ids corresponding to extra files (default=False)
---all_viruses - Build databases with all viruses (defult=plant viruses only)
---db_tag - Suffix for databases (default=none)
+* ``--output_dir`` - Output directory path where kraken and kaiju databases will be written, required')
+* ``--threads`` - number of threads on cluster (default=1)
+* ``--test`` - Make database for test_script.py
+* ``--host`` - Host tax ID (default=False)
+* ``--extra_files`` - List of file names added to "extra" dir (default=False)
+* ``--extra_taxids`` - List of tax ids corresponding to extra files (default=False)
+* ``--all_viruses`` - Build databases with all viruses (defult=plant viruses only)
+* ``--db_tag`` - Suffix for databases (default=none)
 
 ### Kraken database:
---kraken_kmer - Kraken kmer size type=int, (default=31)
---kraken_minimizer - Kraken minimizer size (default=15)
+* ``--kraken_kmer`` - Kraken kmer size type=int, (default=31)
+* ``--kraken_minimizer`` - Kraken minimizer size (default=15)
 
 ### ncbi-genome-download:
---download_parallel - number of genomes to download in parallel (default=4)
---no_download - Genomes have already been downloaded and are in output folder (default=False)
+* ``--download_parallel`` - number of genomes to download in parallel (default=4)
+* ``--no_download`` - Genomes have already been downloaded and are in output folder (default=False)
 
 
 ## Release History
