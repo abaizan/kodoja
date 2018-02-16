@@ -65,13 +65,13 @@ def str_overlap(str1, str2):
 
 
 def rename_seqIDs(input_file, out_dir, user_format, paired=False):
-    """Rename sequence ids.
+    """Rename sequence identifiers to just the read number.
 
     Write a new file where each sequence ID is replaced with
-    the the first character (">" or "@") followed by a number
-    (1::N), and if it's a paired read followd by "/1" or "/2"
-    (called 'renamed_file'), and a dictionary composed of
-    dict[newID] = oldID.
+    the read number (counting from one), and for paired reads
+    include "1:" or "2:" in the description.
+
+    Returns dictionary mapping the sequence number to the old ID.
     """
     output_file = out_dir + "renamed_file_"
     if paired == 2:
@@ -88,7 +88,9 @@ def rename_seqIDs(input_file, out_dir, user_format, paired=False):
                 new_line = line[0] + str(seqNum)
                 id_dict[seqNum] = line[1:].strip()
                 if paired:
-                    new_line += ' %s:' % paired  # '/' + str(paired)
+                    # Early versions of kodoja added the suffix
+                    # /1 or /2 to the read identifier
+                    new_line += ' %s:' % paired
                 new_line += "\n"
                 out_file.write(new_line)
                 seqNum += 1
