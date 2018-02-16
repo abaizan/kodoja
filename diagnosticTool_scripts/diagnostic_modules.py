@@ -88,7 +88,7 @@ def rename_seqIDs(input_file, out_dir, user_format, paired=False):
                 new_line = line[0] + str(seqNum)
                 id_dict[seqNum] = line[1:].strip()
                 if paired:
-                    new_line += '/' + str(paired)
+                    new_line += ' %s:' % paired  # '/' + str(paired)
                 new_line += "\n"
                 out_file.write(new_line)
                 seqNum += 1
