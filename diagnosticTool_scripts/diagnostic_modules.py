@@ -3,11 +3,14 @@ from __future__ import print_function
 
 import subprocess
 import pandas as pd
-from Bio import SeqIO
 import random
 import os
 import pickle
 from math import isnan
+
+from Bio import SeqIO
+from Bio.SeqIO.FastaIO import SimpleFastaParser
+from Bio.SeqIO.QualityIO import FastqGeneralIterator
 
 # The user-facing scripts will all report this version number via --version:
 version = "0.0.2"
@@ -83,17 +86,14 @@ def rename_seqIDs(input_file, out_dir, user_format, paired=False):
         output_file += "1." + user_format
     id_dict = {}
     with open(input_file, 'r') as in_file, open(output_file, 'w') as out_file:
-        seqNum = 1
-        seqid_line = (4 if user_format == 'fastq' else 2)
-        header = ('@' if user_format == 'fastq' else '>')
-        for lineNum, line in enumerate(in_file):
-            if lineNum % seqid_line == 0:
-                assert line[0] == header, "Bad header line: %r" % line
-                id_dict[seqNum] = line[1:].strip()
-                out_file.write("%s%i\n" % (header, seqNum))
-                seqNum += 1
-            else:
-                out_file.write(line)
+        if user_format == 'fasta':
+            for index, (title, seq) in enumerate(SimpleFastaParser(in_file)):
+                id_dict[index + 1] = title
+                out_file.write(">%i\n%s\n" % (index + 1, seq))
+        else:
+            for index, (title, seq, qual) in enumerate(FastqGeneralIterator(in_file)):
+                id_dict[index + 1] = title
+                out_file.write("@%i\n%s\n+\n%s\n" % (index + 1, seq, qual))
     return id_dict
 
 
