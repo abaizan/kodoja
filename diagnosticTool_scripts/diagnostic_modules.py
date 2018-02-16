@@ -68,10 +68,13 @@ def rename_seqIDs(input_file, out_dir, user_format, paired=False):
     """Rename sequence identifiers to just the read number.
 
     Write a new file where each sequence ID is replaced with
-    the read number (counting from one), and for paired reads
-    include "1:" or "2:" in the description.
+    the read number (counting from one).
 
-    Returns dictionary mapping the sequence number to the old ID.
+    Does not attempt to include "/1" and "/2" name suffices, nor
+    include "1:" or "2:" in the description, for paired reads.
+
+    Returns dictionary mapping the sequence number to the old
+    identifier and description line.
     """
     output_file = out_dir + "renamed_file_"
     if paired == 2:
@@ -82,17 +85,12 @@ def rename_seqIDs(input_file, out_dir, user_format, paired=False):
     with open(input_file, 'r') as in_file, open(output_file, 'w') as out_file:
         seqNum = 1
         seqid_line = (4 if user_format == 'fastq' else 2)
-
+        header = ('@' if user_format == 'fastq' else '>')
         for lineNum, line in enumerate(in_file):
             if lineNum % seqid_line == 0:
-                new_line = line[0] + str(seqNum)
+                assert line[0] == header, "Bad header line: %r" % line
                 id_dict[seqNum] = line[1:].strip()
-                if paired:
-                    # Early versions of kodoja added the suffix
-                    # /1 or /2 to the read identifier
-                    new_line += ' %s:' % paired
-                new_line += "\n"
-                out_file.write(new_line)
+                out_file.write("%s%i\n" % (header, seqNum))
                 seqNum += 1
             else:
                 out_file.write(line)
