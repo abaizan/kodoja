@@ -1,4 +1,4 @@
 Species	Species TaxID	Species sequences	Species sequences (stringent)	Genus	Genus sequences	Genus sequences (stringent)
-Cassava brown streak virus	137758	45	45	Ipomovirus
-Ugandan cassava brown streak virus	946046	29	29	Ipomovirus
-Tobacco etch virus	12227	23	20	Potyvirus
+Cassava brown streak virus	137758	45	45	Ipomovirus		
+Ugandan cassava brown streak virus	946046	29	29	Ipomovirus		
+Tobacco etch virus	12227	23	20	Potyvirus		
