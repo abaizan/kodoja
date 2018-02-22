@@ -33,9 +33,10 @@ args = parser.parse_args()
 table_summary = pd.read_csv(args.file_dir + "virus_table.txt", sep="\t", header=0,
                             index_col=False)
 kodoja_vrl = pd.read_csv(args.file_dir + "kodoja_VRL.txt", sep="\t", header=0,
-                         index_col=False)
+                         index_col=False).fillna('')
 args.file_dir += check_path(args.file_dir)
 output_dir = args.file_dir + 'subset_files/'
+
 
 # Create directory
 if not os.path.exists(output_dir):
@@ -44,22 +45,26 @@ if not os.path.exists(output_dir):
 if args.taxID:
     TaxId_out = [args.taxID]
     label = 'virus_' + str(args.taxID)
+    if args.genus:
+        more_taxids = []
+        with open(args.file_dir + 'genus_taxid.pkl', 'rb') as id_dict:
+            genus_taxid = pickle.load(id_dict)
+        for sp_taxid in TaxId_out:
+            genus_name = table_summary.Genus[table_summary['Species TaxID'] == sp_taxid].values[0]
+            if genus_name in list(genus_taxid.keys()):
+                for items in genus_taxid[genus_name]:
+                    if items not in more_taxids:
+                        more_taxids.append(items)
+        for new_taxid in more_taxids:
+            TaxId_out.append(new_taxid)
 else:
-    TaxId_out = list(table_summary['Species TaxID'])
+    kraken_taxid = list(kodoja_vrl.kraken_tax_ID[kodoja_vrl['kraken_seq_tax'].str.contains("Viruses")])
+    kraken_taxid += list(kodoja_vrl.kraken_tax_ID[kodoja_vrl['kraken_seq_tax'].str.contains("Viroids")])
+    kaiju_taxid = list(kodoja_vrl.kaiju_tax_ID[kodoja_vrl['kaiju_seq_tax'].str.contains("Viruses")])
+    TaxId_out = set(kraken_taxid + kaiju_taxid)
+    TaxId_out = list(TaxId_out)
+    # TaxId_out = list(table_summary['Species TaxID'])
     label = 'virus_all'
-
-if args.genus:
-    more_taxids = []
-    with open(args.file_dir + 'genus_taxid.pkl', 'rb') as id_dict:
-        genus_taxid = pickle.load(id_dict)
-    for sp_taxid in TaxId_out:
-        genus_name = table_summary.Genus[table_summary['Species TaxID'] == sp_taxid].values[0]
-        if genus_name in list(genus_taxid.keys()):
-            for items in genus_taxid[genus_name]:
-                if items not in more_taxids:
-                    more_taxids.append(items)
-    for new_taxid in more_taxids:
-        TaxId_out.append(new_taxid)
 
 if args.stringent:
     rows_wanted = kodoja_vrl['combined_result'].isin(TaxId_out)
@@ -70,6 +75,7 @@ seqID_wanted = list(kodoja_vrl.loc[rows_wanted, 'Seq_ID'])
 
 sequence_subset(output_dir, args.read1, label + "_sequences1.", args.user_format,
                 seqID_wanted, label + '_sequences1.txt')
+
 if args.read2:
     with open(args.file_dir + 'ids1.pkl', 'rb') as id_dict:
         ids1 = pickle.load(id_dict)
