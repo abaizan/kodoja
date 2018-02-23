@@ -5,7 +5,7 @@ from __future__ import print_function
 import os
 import pandas as pd
 import argparse
-import subprocess
+import shutil
 
 from diagnostic_modules import version
 from diagnostic_modules import check_path
@@ -81,9 +81,9 @@ if args.extra_files:
             "File extensions need to be either '.fna' for genomic data" + \
             " or '.faa' for protein data, and be compressed ('.gz')"
     # Make a copy of each file in extra_files into 'extra' directory
-    subprocess.check_call("mkdir %sextra/" % args.output_dir, shell=True)
+    os.makedirs(args.output_dir + "extra/")
     for extraFile in args.extra_files:
-        subprocess.check_call("cp %s %s" % (extraFile, args.output_dir + 'extra/'), shell=True)
+        shutil.copyfile(extraFile, args.output_dir + 'extra/')
 
 # Download virus assembly summary for refseq
 if not os.path.exists(args.output_dir + "viral_assembly_summary.txt"):
