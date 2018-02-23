@@ -140,7 +140,7 @@ def krakenDB_build(genome_download_dir, kraken_db_dir, threads, kraken_kmer, kra
 
     # Download or create symlink of taxonomy for Kraken database
     if taxonomy:
-        subprocess.check_call("ln -s %s %staxonomy" % (taxonomy, kraken_db_dir), shell=True)
+        os.symlink(taxonomy, kraken_db_dir + "taxonomy")
     else:
         subprocess.check_call("kraken-build --download-taxonomy --threads " +
                               str(threads) + " --db " + kraken_db_dir, shell=True)
