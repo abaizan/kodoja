@@ -126,7 +126,7 @@ def ncbi_rename_customDB(tool, genome_download_dir, host_taxid, extra_files=Fals
                         else:
                             out_file.write(line)
                 # Delete original file
-                subprocess.check_call("rm " + unzip_filename, shell=True)
+                os.remove(unzip_filename)
                 # Compress modified file
                 subprocess.check_call("gzip " + renamed_file, shell=True)
 
@@ -225,5 +225,6 @@ def kaijuDB_build(genome_download_dir, kaiju_db_dir, subset_vir_assembly):
     subprocess.check_call("mkbwt -n 5 -a ACDEFGHIKLMNPQRSTVWY -o " + kaiju_db_dir +
                           "kaiju_library " + kaiju_db_dir + "kaiju_library.faa", shell=True)
     subprocess.check_call("mkfmi " + kaiju_db_dir + "kaiju_library", shell=True)
-    subprocess.check_call("rm " + kaiju_db_dir + "kaiju_library.faa " + kaiju_db_dir +
-                          "kaiju_library.bwt " + kaiju_db_dir + "kaiju_library.sa", shell=True)
+    os.remove(kaiju_db_dir + "kaiju_library.faa")
+    os.remove(kaiju_db_dir + "kaiju_library.bwt")
+    os.remove(kaiju_db_dir + "kaiju_library.sa")

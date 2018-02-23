@@ -156,7 +156,8 @@ def fastqc_trim(out_dir, file1, trim_minlen, threads, adapter_file, file2=False)
             out_dir + "trimmed_read2 " + out_dir + "PE_trimmed_data_2U" + trimAdapt_command
 
         subprocess.check_call(PE_trim_command, shell=True)
-        subprocess.check_call("rm " + out_dir + "PE_trimmed_data_1U " + out_dir + "PE_trimmed_data_2U", shell=True)
+        os.remove(out_dir + "PE_trimmed_data_1U")
+        os.remove(out_dir + "PE_trimmed_data_2U")
         subprocess.check_call("fastqc " + out_dir + "trimmed_read1 -o " + out_dir, shell=True)
         subprocess.check_call("fastqc " + out_dir + "trimmed_read2 -o " + out_dir, shell=True)
     else:
@@ -271,9 +272,10 @@ def seq_reanalysis(kraken_table, kraken_labels, out_dir, user_format, forSubset_
     kraken_fullTable["Seq_ID"] = kraken_fullTable["Seq_ID"].map(ids1)
     kraken_fullTable.to_csv(out_dir + "kraken_FormattedTable.txt", sep='\t', index=False)
     if os.path.isfile(out_dir + "kraken_FormattedTable.txt.gz"):
-        subprocess.check_call("rm " + out_dir + "kraken_FormattedTable.txt.gz", shell=True)
+        os.remove(out_dir + "kraken_FormattedTable.txt.gz")
     subprocess.check_call("gzip " + out_dir + "kraken_FormattedTable.txt", shell=True)
-    subprocess.check_call("rm " + out_dir + "kraken_table.txt " + out_dir + "kraken_labels.txt", shell=True)
+    os.remove(out_dir + "kraken_table.txt")
+    os.remove(out_dir + "kraken_labels.txt")
 
 
 def kaiju_classify(kaiju_file1, threads, out_dir, kaiju_db, kaiju_minlen, kraken_db,
@@ -311,9 +313,9 @@ def kaiju_classify(kaiju_file1, threads, out_dir, kaiju_db, kaiju_minlen, kraken
         # Only delete file when it's in out_put
         for filenames in files:
             if kaiju_file1 == filenames:
-                subprocess.check_call("rm " + kaiju_file1, shell=True)
+                os.remove(kaiju_file1)
                 if kaiju_file2:
-                    subprocess.check_call("rm " + kaiju_file2, shell=True)
+                    os.remove(kaiju_file2)
 
 
 def result_analysis(out_dir, kraken_VRL, kaiju_table, kaiju_label, host_subset):
@@ -340,7 +342,7 @@ def result_analysis(out_dir, kraken_VRL, kaiju_table, kaiju_label, host_subset):
     kaiju_fullTable["Seq_ID"] = kaiju_fullTable["Seq_ID"].map(ids1)
     kaiju_fullTable.to_csv(out_dir + 'kaiju_FormattedTable.txt', sep='\t', index=False)
     if os.path.isfile(out_dir + "kaiju_FormattedTable.txt.gz"):
-        subprocess.check_call("rm " + out_dir + "kaiju_FormattedTable.txt.gz", shell=True)
+        os.remove(out_dir + "kaiju_FormattedTable.txt.gz")
     subprocess.check_call('gzip ' + out_dir + 'kaiju_FormattedTable.txt', shell=True)
 
     kodoja = pd.merge(kraken_results, kaiju_results, on='Seq_ID', how='outer')
@@ -353,8 +355,9 @@ def result_analysis(out_dir, kraken_VRL, kaiju_table, kaiju_label, host_subset):
 
     kodoja["Seq_ID"] = kodoja["Seq_ID"].map(ids1)
 
-    subprocess.check_call("rm " + out_dir + "kaiju_table.txt " + out_dir +
-                          "kaiju_labels.txt " + out_dir + "kraken_VRL.txt ", shell=True)
+    os.remove(out_dir + "kaiju_table.txt")
+    os.remove(out_dir + "kaiju_labels.txt")
+    os.remove(out_dir + "kraken_VRL.txt")
 
     kodoja['combined_result'] = kodoja.kraken_tax_ID[kodoja['kraken_tax_ID'] == kodoja['kaiju_tax_ID']]
     if host_subset:
