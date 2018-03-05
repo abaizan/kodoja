@@ -43,12 +43,6 @@ install:
  - conda install kaiju=1.5.0
  - conda install fastqc=0.11.5
  # ==============================================
- - "echo Fetching NCBI taxonomy"
- - "cd test/taxonomy"
- - "wget ftp://ftp.ncbi.nih.gov/pub/taxonomy/taxdump.tar.gz"
- - "tar zxvf taxdump.tar.gz"
- - "cd ../.."
- # ==============================================
  - "pip install numpy pandas biopython ncbi-genome-download"
 
 script:
