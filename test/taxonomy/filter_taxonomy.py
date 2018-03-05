@@ -1,3 +1,6 @@
+# TODO: Proper API, including option to set paths for the input and output
+# locations to make dealing with the filenames easier
+
 import sys
 
 try:
