@@ -1,8 +1,4 @@
-The test suite will download and cache NCBI taxonomy files here for use
-with the small provided sample databases. This is to avoid including
-the relatively large NCBI taxonomy files under git version control.
-
-e.g.
+The full NCBI taxonomy files are large, but can be downloaded using
 
 $ wget ftp://ftp.ncbi.nih.gov/pub/taxonomy/taxdump.tar.gz
 $ tar zxvf taxdump.tar.gz
@@ -31,3 +27,16 @@ total 25G
 -rw-r--r-- 1 ae42909 cms    0 Dec 18 14:39 taxdump.dlflag
 -rw-r--r-- 1 ae42909 cms  40M Dec 18 14:39 taxdump.tar.gz
 -rw-r--r-- 1 ae42909 cms    0 Dec 18 14:42 taxdump.untarflag
+
+To avoid including these large files under version control, we
+instead only include a subset filtered according to the limited
+set of (viral) entries used in our test cases:
+
+$ python filter_taxonomy.py 137758 946046 12227
+Filtering NCBI taxonomy files nodes.dmp and names.dmp
+Will create nodes_.dmp and names_.dmp using just the given
+3 entries and their parent nodes.
+Loaded 1692822 entries from nodes.dmp
+Expanded 3 given TaxID to a list of 10 including ancestors
+Created nodes_.dmp
+Created names_.dmp
