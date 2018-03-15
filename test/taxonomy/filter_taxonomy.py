@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # TODO: Proper API, including option to set paths for the input and output
 # locations to make dealing with the filenames easier
 
@@ -12,18 +13,18 @@ if not wanted:
     sys.exit("ERROR: Supply one or more NCBI taxonomy identifiers, space separated.\n")
 
 
-print("Filtering NCBI taxonomy files nodes.dmp and names.dmp")
-print("Will create nodes_.dmp and names_.dmp using just the given")
+print("Filtering NCBI taxonomy files /tmp/nodes.dmp and names.dmp etc")
+print("Will create ./nodes.dmp and ./names.dmp etc using just the given")
 print("%i entries and their parent nodes." % len(wanted))
 
 tree = dict()
-with open("nodes.dmp") as handle:
+with open("/tmp/nodes.dmp") as handle:
     for line in handle:
         part = line.split("\t|\t", 2)
         taxid = int(part[0].strip())
         parent = int(part[1].strip())
         tree[taxid] = parent
-print("Loaded %i entries from nodes.dmp" % len(tree))
+print("Loaded %i entries from /tmp/nodes.dmp" % len(tree))
 
 include = set()
 for taxid in wanted:
@@ -41,21 +42,21 @@ for taxid in wanted:
 print("Expanded %i given TaxID to a list of %i including ancestors"
       % (len(wanted), len(include)))
 
-with open("nodes.dmp") as handle:
-    with open("nodes_.dmp", "w") as output:
+with open("/tmp/nodes.dmp") as handle:
+    with open("nodes.dmp", "w") as output:
         for line in handle:
             part = line.split("\t|\t", 1)
             taxid = int(part[0].strip())
             if taxid in include:
                 output.write(line)
-print("Created nodes_.dmp")
+print("Created nodes.dmp")
 
 
-with open("names.dmp") as handle:
-    with open("names_.dmp", "w") as output:
+with open("/tmp/names.dmp") as handle:
+    with open("names.dmp", "w") as output:
         for line in handle:
             part = line.split("\t|\t", 1)
             taxid = int(part[0].strip())
             if taxid in include:
                 output.write(line)
-print("Created names_.dmp")
+print("Created names.dmp")

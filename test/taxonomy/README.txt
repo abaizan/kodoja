@@ -30,13 +30,24 @@ total 25G
 
 To avoid including these large files under version control, we
 instead only include a subset filtered according to the limited
-set of (viral) entries used in our test cases:
+set of (viral) entries used in our test cases. First:
 
-$ python filter_taxonomy.py 137758 946046 12227
-Filtering NCBI taxonomy files nodes.dmp and names.dmp
-Will create nodes_.dmp and names_.dmp using just the given
+$ cd /tmp
+$ wget https://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz
+$ tar -zxvf taxdump.tar.gz
+
+Then, returning to this directory:
+
+$ ./filter_taxonomy.py 137758 946046 12227
+Filtering NCBI taxonomy files /tmp/nodes.dmp and names.dmp etc
+Will create ./nodes.dmp and ./names.dmp etc using just the given
 3 entries and their parent nodes.
-Loaded 1692822 entries from nodes.dmp
+Loaded 1700774 entries from /tmp/nodes.dmp
 Expanded 3 given TaxID to a list of 10 including ancestors
-Created nodes_.dmp
-Created names_.dmp
+Filtering citations.dmp
+Filtering division.dmp
+Filtering gencode.dmp
+Filtering merged.dmp
+Filtering names.dmp
+Filtering nodes.dmp
+Done
