@@ -2,6 +2,7 @@
 # TODO: Proper API, including option to set paths for the input and output
 # locations to make dealing with the filenames easier
 
+import os
 import sys
 
 try:
@@ -42,21 +43,19 @@ for taxid in wanted:
 print("Expanded %i given TaxID to a list of %i including ancestors"
       % (len(wanted), len(include)))
 
-with open("/tmp/nodes.dmp") as handle:
-    with open("nodes.dmp", "w") as output:
-        for line in handle:
-            part = line.split("\t|\t", 1)
-            taxid = int(part[0].strip())
-            if taxid in include:
-                output.write(line)
-print("Created nodes.dmp")
+# Can ignore delnodes.dmp
+with open("delnodes.dmp", "w"):
+    pass
 
-
-with open("/tmp/names.dmp") as handle:
-    with open("names.dmp", "w") as output:
-        for line in handle:
-            part = line.split("\t|\t", 1)
-            taxid = int(part[0].strip())
-            if taxid in include:
-                output.write(line)
-print("Created names.dmp")
+for name in ("citations.dmp", "division.dmp", "gencode.dmp", "merged.dmp", "names.dmp", "nodes.dmp"):
+    print("Filtering %s" % name)
+    # Using binary mode to handle encoding of citations.dmp
+    # Python 2 doesn't support open(..., encoding="latin1")
+    with open(os.path.join("/tmp", name), "rb") as handle:
+        with open(name, "wb") as output:
+            for line in handle:
+                part = line.decode("latin1").split("\t|\t", 1)
+                taxid = int(part[0].strip())
+                if taxid in include:
+                    output.write(line)
+print("Done")
