@@ -6,9 +6,7 @@
 # Ignore the tempoary NCBI taxonomy files
 test/taxonomy/*.tar.gz
 test/taxonomy/*.dmp.gz
-test/taxonomy/*.dmp
 test/taxonomy/readme.txt
-test/taxonomy/gc.prt
 # This includes flag files created by kraken
 test/taxonomy/accmap.dlflag
 test/taxonomy/nucl_est.accession2taxid
