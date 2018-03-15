@@ -55,12 +55,13 @@ python -c "from Bio import __version__; print(__version__)"
 
 echo "Beginning tests..."
 
-# Create test database - ought work but we run out of disk space on TravisCI
-# while downloading and unzipping the taxonomy data.
-#
 echo "=============================================================="
 echo "Testing kodoja_build.py"
 echo "=============================================================="
+# Create test database - doing this from a clean slate ought work,
+# but we run out of disk space on TravisCI while downloading and
+# unzipping the taxonomy data. Instead we provide a prepopulated
+# minimal test/building_db/krakenDB_test/taxonomy/ folder.
 diagnosticTool_scripts/kodoja_build.py -o test/building_db/ -t 1 --db_tag 'test' --test
 ls test/building_db
 diff test/example_db/krakenDB_test/database.idx test/building_db/krakenDB_test/database.idx
