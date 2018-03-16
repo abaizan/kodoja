@@ -3,6 +3,27 @@ import subprocess
 import pandas as pd
 import os
 import re
+import sys
+import time
+
+
+try:
+    # Python 3
+    from urllib.request import urlretrieve
+    from urllib.error import URLError
+except ImportError:
+    # Python 2
+    from urllib import urlretrieve
+    URLError = IOError
+
+
+def download_with_retries(url, destination, retries=3):
+    for attempt in range(retries):
+        try:
+            return urlretrieve(url, destination)
+        except URLError:
+            time.sleep(3)
+    sys.exit("Failed to download %r" % url)
 
 
 # Download refseq files from ncbi ftp site - use ncbi-genome-download

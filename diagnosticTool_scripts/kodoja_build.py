@@ -7,15 +7,9 @@ import pandas as pd
 import argparse
 import subprocess
 
-try:
-    # Python 3
-    from urllib.request import urlretrieve
-except ImportError:
-    # Python 2
-    from urllib import urlretrieve
-
 from diagnostic_modules import version
 from diagnostic_modules import check_path
+from database_modules import download_with_retries
 from database_modules import ncbi_download
 from database_modules import ncbi_rename_customDB
 from database_modules import krakenDB_build
@@ -93,8 +87,8 @@ if args.extra_files:
 
 # Download virus assembly summary for refseq
 if not os.path.exists(args.output_dir + "viral_assembly_summary.txt"):
-    urlretrieve('ftp://ftp.ncbi.nih.gov/genomes/refseq/viral/assembly_summary.txt',
-                args.output_dir + 'viral_assembly_summary.txt')
+    download_with_retries('ftp://ftp.ncbi.nih.gov/genomes/refseq/viral/assembly_summary.txt',
+                          args.output_dir + 'viral_assembly_summary.txt')
 path_assembly_summary = args.output_dir + "viral_assembly_summary.txt"
 vir_assembly = pd.read_table(path_assembly_summary, sep='\t', skiprows=1, header=0)
 vir_assembly = vir_assembly.rename(columns={'# assembly_accession': 'assembly_accession'})
@@ -115,8 +109,8 @@ else:
     else:
         if not os.path.exists(args.output_dir + "virushostdb.tsv"):
             # os.chdir(args.output_dir)
-            urlretrieve('ftp://ftp.genome.jp/pub/db/virushostdb/virushostdb.tsv',
-                        args.output_dir + 'virushostdb.tsv')
+            download_with_retries('ftp://ftp.genome.jp/pub/db/virushostdb/virushostdb.tsv',
+                                  args.output_dir + 'virushostdb.tsv')
         virHost_table = pd.read_csv(args.output_dir + "virushostdb.tsv", sep="\t").fillna('')
         plnVir = virHost_table[virHost_table['host lineage'].str.contains("Viridiplantae")]
         vir_host = list(plnVir['virus tax id'])
