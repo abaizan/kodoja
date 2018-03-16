@@ -6,6 +6,7 @@ import os
 import pandas as pd
 import argparse
 import shutil
+import sys
 
 from diagnostic_modules import version
 from diagnostic_modules import check_path
@@ -76,10 +77,11 @@ if args.extra_files:
     assert len(args.extra_files) == len(args.extra_taxids), \
         "Each extra file provided needs to have a corresponding ncbi taxid"
     # Check extra files provided are compressed and have the right file extension
-    for files in args.extra_files:
-        assert files.endswith(".fna.gz" or ".faa.gz"), \
-            "File extensions need to be either '.fna' for genomic data" + \
-            " or '.faa' for protein data, and be compressed ('.gz')"
+    for f in args.extra_files:
+        if not f.endswith((".fna.gz", ".faa.gz")):
+            sys.exit("File extensions need to be either compressed '.fna.gz' "
+                     "for genomic data, or '.faa.gz' for protein data. "
+                     "Got %r" % f)
     # Make a copy of each file in extra_files into 'extra' directory
     os.makedirs(args.output_dir + "extra/")
     for extraFile in args.extra_files:
