@@ -24,8 +24,6 @@ parser.add_argument('-o', '--output_dir', type=str, required=True,
                     help='Output directory path, required')
 parser.add_argument('-t', '--threads', type=int, default=1,
                     help='Number of threads, default=1')
-parser.add_argument('-q', '--test', action='store_true',
-                    help='Make test database')
 parser.add_argument('-p', '--host_taxid', type=int, default=False,
                     help='Host tax ID')
 parser.add_argument('-d', '--download_parallel', type=int, default=4,
@@ -104,18 +102,14 @@ if args.all_viruses:
     subset_vir_assembly = False
     vir_host = False
 else:
-    if args.test:
-        vir_host = args.test = [137758, 946046, 12227]
-        args.kraken_kmer = 18
-        args.kraken_minimizer = 5
-    else:
-        if not os.path.exists(args.output_dir + "virushostdb.tsv"):
-            # os.chdir(args.output_dir)
-            download_with_retries('ftp://ftp.genome.jp/pub/db/virushostdb/virushostdb.tsv',
-                                  args.output_dir + 'virushostdb.tsv')
-        virHost_table = pd.read_csv(args.output_dir + "virushostdb.tsv", sep="\t").fillna('')
-        plnVir = virHost_table[virHost_table['host lineage'].str.contains("Viridiplantae")]
-        vir_host = list(plnVir['virus tax id'])
+    # After downloading, will filter for plant-host virus
+    if not os.path.exists(args.output_dir + "virushostdb.tsv"):
+        # os.chdir(args.output_dir)
+        download_with_retries('ftp://ftp.genome.jp/pub/db/virushostdb/virushostdb.tsv',
+                              args.output_dir + 'virushostdb.tsv')
+    virHost_table = pd.read_csv(args.output_dir + "virushostdb.tsv", sep="\t").fillna('')
+    plnVir = virHost_table[virHost_table['host lineage'].str.contains("Viridiplantae")]
+    vir_host = list(plnVir['virus tax id'])
 
     subset_vir_assembly = list(vir_assembly.assembly_accession[vir_assembly['taxid'].isin(vir_host)])
 
@@ -123,7 +117,7 @@ else:
 for tool in tool_list:
     if args.no_download:
         # Download NCBI genomes
-        ncbi_download(tool, args.output_dir, args.download_parallel, args.host_taxid, args.test)
+        ncbi_download(tool, args.output_dir, args.download_parallel, args.host_taxid)
         print("DONE with downloading")
     # Rename downloaded genomic files for Kraken or protein file for Kaiju
     ncbi_rename_customDB(tool, args.output_dir, args.host_taxid, args.extra_files, args.extra_taxids)
@@ -134,10 +128,7 @@ for tool in tool_list:
                        args.kraken_minimizer, subset_vir_assembly, args.kraken_tax)
         print("DONE with kraken db")
         if subset_vir_assembly:
-            if len(subset_vir_assembly) > 3:
-                vir_genomes_text = 'plant viruses'
-            else:
-                vir_genomes_text = 'test viruses'
+            vir_genomes_text = 'plant viruses'
         else:
             vir_genomes_text = 'all viruses'
 

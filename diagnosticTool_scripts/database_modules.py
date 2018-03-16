@@ -39,7 +39,7 @@ def download_with_retries(url, destination, retries=5):
 
 
 # Download refseq files from ncbi ftp site - use ncbi-genome-download
-def ncbi_download(tool, genome_download_dir, parallel, host_taxid, test):
+def ncbi_download(tool, genome_download_dir, parallel, host_taxid):
     """Download genomic or protein data from NCBI ftp site using ncbi-genome-download."""
     assert (tool == "kraken") | (tool == "kaiju"),\
         "Argument 'tool' must be either 'kraken' or 'kaiju'."
@@ -55,16 +55,12 @@ def ncbi_download(tool, genome_download_dir, parallel, host_taxid, test):
     ngd_command = "ncbi-genome-download -F " + file_format + " -o " + genome_download_dir
 
     if host_taxid:
+        # Single host ID, so no need to set the parallel option
         taxid_ngd_command = ngd_command + " --species-taxid " + str(host_taxid) + " plant"
         subprocess.check_call(taxid_ngd_command, shell=True)
 
-    if test:
-        for taxid in test:
-            taxid_ngd_command = ngd_command + " --species-taxid " + str(taxid) + " viral"
-            subprocess.check_call(taxid_ngd_command, shell=True)
-    else:
-        ngd_command += " --parallel " + str(parallel) + " viral"
-        subprocess.check_call(ngd_command, shell=True)
+    ngd_command += " --parallel " + str(parallel) + " viral"
+    subprocess.check_call(ngd_command, shell=True)
 
 
 def ncbi_rename_customDB(tool, genome_download_dir, host_taxid, extra_files=False, extra_taxid=False):
