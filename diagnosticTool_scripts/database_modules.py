@@ -17,12 +17,21 @@ except ImportError:
     URLError = IOError
 
 
-def download_with_retries(url, destination, retries=3):
-    for attempt in range(retries):
+def download_with_retries(url, destination, retries=5):
+    """Download file using urlretrieve, with automatic retries.
+
+    If the n-th attempt fails, will wait for n-seconds before
+    trying again.
+
+    If the final retry fails, will abort the script with message
+    to stderr.
+    """
+    for attempt in range(1, retries + 1):
         try:
             return urlretrieve(url, destination)
         except URLError:
-            time.sleep(3)
+            if attempt < retries:
+                time.sleep(attempt)
     sys.exit("Failed to download %r" % url)
 
 
