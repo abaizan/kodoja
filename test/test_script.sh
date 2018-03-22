@@ -66,21 +66,36 @@ echo "=============================================================="
 # Download three specific viruses for a mini test database:
 export TMP=${TMP:-/tmp}
 
-
-ncbi-genome-download --verbose -o $TMP/ -F fasta -t 137758 viral
-ln -f -s $TMP/refseq/viral/GCF_000884835.1/GCF_000884835.1_ViralProj38085_genomic.fna.gz 137758.fna.gz
-ncbi-genome-download --verbose -o $TMP/ -F protein-fasta -t 137758 viral
-ln -f -s $TMP/refseq/viral/GCF_000884835.1/GCF_000884835.1_ViralProj38085_protein.faa.gz 137758.faa.gz
-
-ncbi-genome-download --verbose -o $TMP/ -F fasta -t 946046 viral
-ln -f -s $TMP/refseq/viral/GCF_000888855.1/GCF_000888855.1_ViralProj61097_genomic.fna.gz 946046.fna.gz
-ncbi-genome-download --verbose -o $TMP/ -F protein-fasta -t 946046 viral
-ln -f -s $TMP/refseq/viral/GCF_000888855.1/GCF_000888855.1_ViralProj61097_protein.faa.gz 946046.faa.gz
-
-ncbi-genome-download --verbose -o $TMP/ -F fasta -t 12227 viral
-ln -f -s $TMP/refseq/viral/GCF_000861345.1/GCF_000861345.1_ViralProj15325_genomic.fna.gz 12227.fna.gz
-ncbi-genome-download --verbose -o $TMP/ -F protein-fasta -t 12227 viral
-ln -f -s $TMP/refseq/viral/GCF_000861345.1/GCF_000861345.1_ViralProj15325_protein.faa.gz 12227.faa.gz
+if [ ! -f "137758.fna.gz" ]
+then
+    ncbi-genome-download --verbose -o $TMP/ -F fasta -t 137758 viral
+    ln -f -s $TMP/refseq/viral/GCF_000884835.1/GCF_000884835.1_ViralProj38085_genomic.fna.gz 137758.fna.gz
+fi
+if [ ! -f "137758.faa.gz" ]
+then
+    ncbi-genome-download --verbose -o $TMP/ -F protein-fasta -t 137758 viral
+    ln -f -s $TMP/refseq/viral/GCF_000884835.1/GCF_000884835.1_ViralProj38085_protein.faa.gz 137758.faa.gz
+fi
+if [ ! -f "946046.fna.gz" ]
+then
+    ncbi-genome-download --verbose -o $TMP/ -F fasta -t 946046 viral
+    ln -f -s $TMP/refseq/viral/GCF_000888855.1/GCF_000888855.1_ViralProj61097_genomic.fna.gz 946046.fna.gz
+fi
+if [ ! -f "946046.faa.gz" ]
+then
+    ncbi-genome-download --verbose -o $TMP/ -F protein-fasta -t 946046 viral
+    ln -f -s $TMP/refseq/viral/GCF_000888855.1/GCF_000888855.1_ViralProj61097_protein.faa.gz 946046.faa.gz
+fi
+if [ ! -f "12227.fna.gz" ]
+then
+    ncbi-genome-download --verbose -o $TMP/ -F fasta -t 12227 viral
+    ln -f -s $TMP/refseq/viral/GCF_000861345.1/GCF_000861345.1_ViralProj15325_genomic.fna.gz 12227.fna.gz
+fi
+if [ ! -f "12227.faa.gz" ]
+then
+    ncbi-genome-download --verbose -o $TMP/ -F protein-fasta -t 12227 viral
+    ln -f -s $TMP/refseq/viral/GCF_000861345.1/GCF_000861345.1_ViralProj15325_protein.faa.gz 12227.faa.gz
+fi
 
 echo "Running kodoja_build.py with three viruses as input"
 diagnosticTool_scripts/kodoja_build.py -o test/building_db/ -t 1 --db_tag 'test' -n -e 137758.fna.gz 946046.fna.gz 12227.fna.gz 137758.faa.gz 946046.faa.gz 12227.faa.gz -x 137758 946046 12227 137758 946046 12227 -k 18 -m 5
