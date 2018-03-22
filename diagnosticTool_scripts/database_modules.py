@@ -32,6 +32,8 @@ def download_with_retries(url, destination, retries=5):
         except URLError:
             if attempt < retries:
                 time.sleep(attempt)
+                sys.stderr.write("Will retry downloading %r attempt %i\n"
+                                 % (url, attempt + 1))
     sys.exit("Failed to download %r" % url)
 
 
