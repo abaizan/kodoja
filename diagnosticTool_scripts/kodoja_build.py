@@ -85,7 +85,7 @@ if args.extra_files:
     # Make a copy of each file in extra_files into 'extra' directory
     os.makedirs(args.output_dir + "extra/")
     for extraFile in args.extra_files:
-        shutil.copyfile(extraFile, args.output_dir + 'extra/')
+        shutil.copy(extraFile, args.output_dir + 'extra/')
 
 # Download virus assembly summary for refseq
 if not os.path.exists(args.output_dir + "viral_assembly_summary.txt"):
