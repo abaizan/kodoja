@@ -65,6 +65,7 @@ echo "=============================================================="
 diagnosticTool_scripts/kodoja_build.py -o test/building_db/ -t 1 --db_tag 'test' --test
 ls test/building_db
 diff test/example_db/krakenDB_test/database.idx test/building_db/krakenDB_test/database.idx
+diff test/example_db/krakenDB_test/database.kdb test/building_db/krakenDB_test/database.kdb
 # TODO: Compare more of the output files?
 
 echo "=============================================================="
