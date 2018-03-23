@@ -9,11 +9,11 @@ import time
 
 try:
     # Python 3
-    from urllib.request import urlretrieve
+    from urllib.request import urlretrieve, urlcleanup
     from urllib.error import URLError
 except ImportError:
     # Python 2
-    from urllib import urlretrieve
+    from urllib import urlretrieve, urlcleanup
     URLError = IOError
 
 
@@ -27,6 +27,7 @@ def download_with_retries(url, destination, retries=5):
     to stderr.
     """
     for attempt in range(1, retries + 1):
+        urlcleanup()  # Seems important with FTP on Python 2.7
         try:
             return urlretrieve(url, destination)
         except URLError:
