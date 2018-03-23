@@ -122,6 +122,7 @@ TRAILING:20 Specifies the minimum quality required to keep a base
 | 0.0.4   | *Pending*  | - Code style updates (no functional changes)        |
 |         |            | - Provide cut-down NCBI taxonomy for tests cases    |
 |         |            | - Additional database build testing                 |
+|         |            | - Downloads virus files with HTTPS rather than FTP  |
 
 
 ## Development
