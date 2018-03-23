@@ -111,7 +111,7 @@ else:
     else:
         if not os.path.exists(args.output_dir + "virushostdb.tsv"):
             # os.chdir(args.output_dir)
-            download_with_retries('https://ftp.genome.jp/pub/db/virushostdb/virushostdb.tsv',
+            download_with_retries('ftp://ftp.genome.jp/pub/db/virushostdb/virushostdb.tsv',
                                   args.output_dir + 'virushostdb.tsv')
         virHost_table = pd.read_csv(args.output_dir + "virushostdb.tsv", sep="\t").fillna('')
         plnVir = virHost_table[virHost_table['host lineage'].str.contains("Viridiplantae")]
