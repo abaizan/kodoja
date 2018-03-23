@@ -58,7 +58,7 @@ echo "Beginning tests..."
 echo "=============================================================="
 echo "Testing kodoja_build.py"
 echo "=============================================================="
-# Create test database - doing this from a clean slate ought work,
+# Create test database - doing this from a clean slate ought to work,
 # but we run out of disk space on TravisCI while downloading and
 # unzipping the taxonomy data. Instead we provide a prepopulated
 # minimal test/building_db/krakenDB_test/taxonomy/ folder.
@@ -66,7 +66,9 @@ diagnosticTool_scripts/kodoja_build.py -o test/building_db/ -t 1 --db_tag 'test'
 ls test/building_db
 diff test/example_db/krakenDB_test/database.idx test/building_db/krakenDB_test/database.idx
 diff test/example_db/krakenDB_test/database.kdb test/building_db/krakenDB_test/database.kdb
-# TODO: Compare more of the output files?
+#Binary files differ slightly - although same size
+#diff test/example_db/kaijuDB_test/kaiju_library.fmi test/building_db/kaijuDB_test/kaiju_library.fmi
+if [ ! -s test/building_db/kaijuDB_test/kaiju_library.fmi ]; then echo "Missing kaiju_library.fmi" && false; fi
 
 echo "=============================================================="
 echo "Testing kodoja_search.py with paired end FASTQ"
