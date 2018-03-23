@@ -13,7 +13,7 @@ from Bio.SeqIO.FastaIO import SimpleFastaParser
 from Bio.SeqIO.QualityIO import FastqGeneralIterator
 
 # The user-facing scripts will all report this version number via --version:
-version = "0.0.3"
+version = "0.0.4"
 
 
 def check_path(dirs):
