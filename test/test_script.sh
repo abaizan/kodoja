@@ -98,7 +98,7 @@ then
 fi
 
 echo "Running kodoja_build.py with three viruses as input"
-diagnosticTool_scripts/kodoja_build.py -o test/building_db/ -t 1 --db_tag 'test' -n -e 137758.fna.gz 946046.fna.gz 12227.fna.gz 137758.faa.gz 946046.faa.gz 12227.faa.gz -x 137758 946046 12227 137758 946046 12227 -k 18 -m 5
+diagnosticTool_scripts/kodoja_build.py -o test/building_db/ -t 1 --db_tag 'test' -v -n -e 137758.fna.gz 946046.fna.gz 12227.fna.gz 137758.faa.gz 946046.faa.gz 12227.faa.gz -x 137758 946046 12227 137758 946046 12227 -k 18 -m 5
 ls test/building_db
 diff test/example_db/krakenDB_test/database.idx test/building_db/krakenDB_test/database.idx
 diff test/example_db/krakenDB_test/database.kdb test/building_db/krakenDB_test/database.kdb
