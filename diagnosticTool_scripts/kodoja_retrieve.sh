@@ -4,4 +4,4 @@
 #$ -j yes
 #$ -pe smp 1
 
-python /home/ae42909/viral_diagnostics/diagnosticTool_scripts/diagnostic_seqRetrive.py -r1 '/home/ae42909/Scratch/smallTest_data/100_Potato_withViruses_1.fastq' -o '/home/ae42909/Scratch/100Seq_krakenDB_viral/' -r2 '/home/ae42909/Scratch/smallTest_data/100_Potato_withViruses_2.fastq' -f 'fastq' -t 137758
+/home/ae42909/kodoja/viral_diagnostics/diagnosticTool_scripts/kodoja_retrieve.py -r1 '/home/ae42909/kodoja/Stuart_data/Dee-B5_S1_R1.fastq' -o '/home/ae42909/kodoja/diagnostic_results/Stuarts_data/Dee-B5_S1/'  -r2 '/home/ae42909/kodoja/Stuart_data/Dee-B5_S1_R2.fastq' -f 'fastq' -t 12275
