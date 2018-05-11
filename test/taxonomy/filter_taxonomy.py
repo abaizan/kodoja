@@ -47,7 +47,11 @@ print("Expanded %i given TaxID to a list of %i including ancestors"
 with open("delnodes.dmp", "w"):
     pass
 
-for name in ("citations.dmp", "division.dmp", "gencode.dmp", "merged.dmp", "names.dmp", "nodes.dmp"):
+# For our needs, can ignore citations.dmp
+with open("citations.dmp", "w"):
+    pass
+
+for name in ("merged.dmp", "names.dmp", "nodes.dmp"):
     print("Filtering %s" % name)
     # Using binary mode to handle encoding of citations.dmp
     # Python 2 doesn't support open(..., encoding="latin1")
@@ -58,4 +62,7 @@ for name in ("citations.dmp", "division.dmp", "gencode.dmp", "merged.dmp", "name
                 taxid = int(part[0].strip())
                 if taxid in include:
                     output.write(line)
+
+# TODO - filter gencode.dmp and divisions.dmp
+
 print("Done")
