@@ -47,10 +47,6 @@ print("Expanded %i given TaxID to a list of %i including ancestors"
 with open("delnodes.dmp", "w"):
     pass
 
-# For our needs, can ignore citations.dmp
-with open("citations.dmp", "w"):
-    pass
-
 for name in ("merged.dmp", "names.dmp", "nodes.dmp"):
     print("Filtering %s" % name)
     # Using binary mode to handle encoding of citations.dmp
@@ -92,6 +88,21 @@ with open("/tmp/division.dmp", "rb") as handle:
         for line in handle:
             part = line.decode("latin1").split("\t|\t", 1)
             if int(part[0].strip()) in wanted_division:
+                output.write(line)
+
+print("Filtering citations.dmp")
+with open("/tmp/citations.dmp", "rb") as handle:
+    with open("citations.dmp", "wb") as output:
+        for line in handle:
+            # Columns 6 is space-separated taxids,
+            # but expect trailing \t|\n as well.
+            field = line.decode("latin1").split("\t|\t")[6].strip("\t\n| ")
+            # Note at time of writing, there was a corrupt entry
+            # 54234 | Dissanayake et al. (2017c) | ...
+            # which had line breaks within the URL
+            # http://www.mycosphere.org/pdf/Mycosphere_8_2_7.pdf
+            # I opted to fix the input file manually.
+            if include.intersection(int(_) for _ in field.split()):
                 output.write(line)
 
 print("Done")
