@@ -42,12 +42,15 @@ $ ./filter_taxonomy.py 137758 946046 12227
 Filtering NCBI taxonomy files /tmp/nodes.dmp and names.dmp etc
 Will create ./nodes.dmp and ./names.dmp etc using just the given
 3 entries and their parent nodes.
-Loaded 1700774 entries from /tmp/nodes.dmp
+Loaded 1755515 entries from /tmp/nodes.dmp
 Expanded 3 given TaxID to a list of 10 including ancestors
-Filtering citations.dmp
-Filtering division.dmp
-Filtering gencode.dmp
 Filtering merged.dmp
 Filtering names.dmp
 Filtering nodes.dmp
+Checking which genetic codes and divisions are needed
+Only want these genetic codes: 1
+Only want these divisions: 8,9
+Filtering gencode.dmp
+Filtering division.dmp
+Filtering citations.dmp
 Done
