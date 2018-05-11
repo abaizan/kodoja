@@ -63,6 +63,35 @@ for name in ("merged.dmp", "names.dmp", "nodes.dmp"):
                 if taxid in include:
                     output.write(line)
 
-# TODO - filter gencode.dmp and divisions.dmp
+print("Checking which genetic codes and divisions are needed")
+wanted_gencode = set()
+wanted_division = set()
+with open("/tmp/nodes.dmp") as handle:
+    for line in handle:
+        part = line.split("\t|\t")
+        taxid = int(part[0].strip())
+        if taxid in include:
+            wanted_gencode.add(int(part[6].strip()))
+            wanted_division.add(int(part[4].strip()))
+print("Only want these genetic codes: "
+      + ",".join(str(_) for _ in sorted(wanted_gencode)))
+print("Only want these divisions: "
+      + ",".join(str(_) for _ in sorted(wanted_division)))
+
+print("Filtering gencode.dmp")
+with open("/tmp/gencode.dmp", "rb") as handle:
+    with open("gencode.dmp", "wb") as output:
+        for line in handle:
+            part = line.decode("latin1").split("\t|\t", 1)
+            if int(part[0].strip()) in wanted_gencode:
+                output.write(line)
+
+print("Filtering division.dmp")
+with open("/tmp/division.dmp", "rb") as handle:
+    with open("division.dmp", "wb") as output:
+        for line in handle:
+            part = line.decode("latin1").split("\t|\t", 1)
+            if int(part[0].strip()) in wanted_division:
+                output.write(line)
 
 print("Done")
