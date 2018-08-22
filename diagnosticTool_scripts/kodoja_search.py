@@ -1,7 +1,10 @@
 #!/usr/bin/env python
 """Script for running Kodoja pipeline modules."""
+
+import argparse
 import os
 import time
+
 from diagnostic_modules import version
 from diagnostic_modules import check_path
 from diagnostic_modules import test_format
@@ -11,9 +14,32 @@ from diagnostic_modules import kraken_classify
 from diagnostic_modules import seq_reanalysis
 from diagnostic_modules import kaiju_classify
 from diagnostic_modules import result_analysis
-import argparse
 
-parser = argparse.ArgumentParser(description='Kodoja')
+help_text = """Kodoja Search is a tool intended to identify viral sequences
+in a FASTQ/FASTA sequencing run by matching them against both Kraken and
+Kaiju databases.
+"""
+
+help_epilog = """
+The main output of ``kodoja_search.py`` is a file called ``virus_table.txt``
+in the specified output directory. This is a plain text tab-separated table,
+the columns are as follows:
+
+1. Species name,
+2. Species NCBI taxonomy identifier (TaxID),
+3. Number of reads assigned by *either* Kraken or Kaiju to this species,
+4. Number of Reads assigned by *both* Kraken and Kaiju to this species,
+5. Genus name,
+6. Number of reads assigned by *either* Kraken or Kaiju to this genus,
+7. Number of reads assigned by *both* Kraken and Kaiju to this genus.
+
+The output directory includes additional files, some of which are used
+internally by the ``kodoja_retrieve.py`` script.
+"""
+
+parser = argparse.ArgumentParser(description=help_text,
+                                 epilog=help_epilog,
+                                 formatter_class=argparse.RawDescriptionHelpFormatter)
 parser.add_argument('--version',
                     action='version',
                     version='Kodoja v' + version)
