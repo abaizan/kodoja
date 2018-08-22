@@ -78,9 +78,11 @@ with open(args.output_dir + "log_file.txt", "w") as log_file:
 
 
 t0 = time.time()
+
 # Test format, change seqIDs and check paired files are correct
 test_format(args.read1, args.data_format)
 check_file(args.read1, args.output_dir, args.data_format, args.read2)
+
 t1 = time.time()
 
 # Set all variables
@@ -98,7 +100,8 @@ else:
 
 if args.data_format == "fastq":
     # fasta files cannot be QC'd - only for fastq files
-    fastqc_trim(args.output_dir, initial_file1, args.trim_minlen, args.threads, args.trim_adapt, initial_file2)
+    fastqc_trim(args.output_dir, initial_file1, args.trim_minlen, args.threads,
+                args.trim_adapt, initial_file2)
 else:
     kraken_file1 = kaiju_file1 = initial_file1
     kraken_file2 = kaiju_file2 = initial_file2
@@ -108,26 +111,40 @@ else:
     # kaiju_file1 = args.output_dir + "subset_file1." + args.data_format
     # if args.read2:
     #     kaiju_file2 = args.output_dir + "subset_file2." + args.data_format
-t2 = time.time()
 
+t2 = time.time()
 # Kraken classification
-kraken_classify(args.output_dir, kraken_file1, args.threads, args.data_format, args.kraken_db, kraken_file2,
+with open(args.output_dir + "log_file.txt", "a") as log_file:
+    log_file.write("Starting Kraken classification\n")
+kraken_classify(args.output_dir, kraken_file1, args.threads,
+                args.data_format, args.kraken_db, kraken_file2,
                 quick_minhits=args.kraken_quick, preload=args.kraken_preload)
+
 t3 = time.time()
 
 # Format kraken data and subset unclassified and non-host sequences
+with open(args.output_dir + "log_file.txt", "a") as log_file:
+    log_file.write("Analyzing Kraken results\n")
 seq_reanalysis("kraken_table.txt", "kraken_labels.txt", args.output_dir,
                args.data_format, kraken_file1, kraken_file2)
+
 t4 = time.time()
 
 # Kaiju classification of all sequences or subset sequences
-kaiju_classify(kaiju_file1, args.threads, args.output_dir, args.kaiju_db, args.kaiju_minlen, args.kraken_db,
+with open(args.output_dir + "log_file.txt", "a") as log_file:
+    log_file.write("Starting Kaiju classification\n")
+kaiju_classify(kaiju_file1, args.threads, args.output_dir,
+               args.kaiju_db, args.kaiju_minlen, args.kraken_db,
                kaiju_file2, kaiju_mismatch=args.kaiju_mismatch,
                kaiju_score=args.kaiju_score)
+
 t5 = time.time()
 
-# Merege results
-result_analysis(args.output_dir, "kraken_VRL.txt", "kaiju_table.txt", "kaiju_labels.txt", args.host_subset)
+# Merge results
+with open(args.output_dir + "log_file.txt", "a") as log_file:
+    log_file.write("Analyzing Kraken and Kaiju results\n")
+result_analysis(args.output_dir, "kraken_VRL.txt", "kaiju_table.txt", "kaiju_labels.txt",
+                args.host_subset)
 t6 = time.time()
 
 
@@ -143,4 +160,4 @@ with open(args.output_dir + "log_file.txt", "a") as log_file:
                    "kraken classification = " + str((t3 - t2) / 3600) + " h\n" +
                    print_statment + "kaiju classification = " + str((t5 - t6) / 3600) +
                    " h\n" + "Results = " + str((t6 - t5) / 3600) + " h\n" + "total = " +
-                   str((t6 - t0) / 3600) + " h\n")
+                   str((t6 - t0) / 3600) + " h\n\nkodoja_search.py finished sucessfully.\n")
