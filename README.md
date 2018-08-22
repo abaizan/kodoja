@@ -129,7 +129,7 @@ added to the databases(default=False)
 | 0.0.2   | 2018-01-22 | - Now tested under Python 3.6 as well as Python 2.7 |
 | 0.0.3   | 2018-02-22 | - Include genus level counts in search results      |
 |         |            | - Simplify internal renaming of sequencing reads    |
-| 0.0.4   | *Pending*  | - Code style updates (no functional changes)        |
+| 0.0.4   | 2018-08-22 | - Code style updates (no functional changes)        |
 |         |            | - Provide cut-down NCBI taxonomy for tests cases    |
 |         |            | - Additional database build testing                 |
 |         |            | - Downloads virus files with HTTPS rather than FTP  |
@@ -146,8 +146,8 @@ The release process includes:
 1. Update version in ``diagnosticTool_scripts/diagnostic_modules.py``.
 1. Update release history in this ``README.md`` file.
 3. Commit changes.
-4  Tag the commit with ``git tag kodoja-vX.Y.X``
+4  Tag the commit with ``git tag kodoja-vX.Y.Z``
 5. Push commits and tags to github with ``git push origin master --tags``
 6. Submit a pull request to BioConda to update the package, which usally
-   just means bumping the verion and updating the checksum in ``meta.yaml``:
+   just means bumping the version and updating the checksum in ``meta.yaml``:
    https://github.com/bioconda/bioconda-recipes/tree/master/recipes/kodoja
