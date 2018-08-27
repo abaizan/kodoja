@@ -122,12 +122,12 @@ t1 = time.time()
 
 # Set all variables
 initial_file1 = args.output_dir + 'renamed_file_1.' + args.data_format
-kraken_file1 = kaiju_file1 = args.output_dir + "trimmed_read1"
+kraken_file1 = kaiju_file1 = os.path.join(args.output_dir, "trimmed_read1")
 
 if args.read2:
     # Set tool files
-    kraken_file2 = kaiju_file2 = args.output_dir + "trimmed_read2"
-    initial_file2 = args.output_dir + 'renamed_file_2.' + args.data_format
+    kraken_file2 = kaiju_file2 = os.path.join(args.output_dir, "trimmed_read2")
+    initial_file2 = os.path.join(args.output_dir, 'renamed_file_2.' + args.data_format)
 
 else:
     kraken_file2 = kaiju_file2 = False
@@ -144,9 +144,9 @@ else:
 
 
 # if args.host_subset:
-    # kaiju_file1 = args.output_dir + "subset_file1." + args.data_format
+    # kaiju_file1 = os.path.join(args.output_dir, "subset_file1." + args.data_format)
     # if args.read2:
-    #     kaiju_file2 = args.output_dir + "subset_file2." + args.data_format
+    #     kaiju_file2 = os.path.join(args.output_dir, "subset_file2." + args.data_format)
 
 t2 = time.time()
 # Kraken classification

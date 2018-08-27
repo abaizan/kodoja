@@ -30,12 +30,12 @@ parser.add_argument('-s', '--stringent', action='store_true',
                     help='Only subset sequences identified by both tools')
 args = parser.parse_args()
 
-table_summary = pd.read_csv(args.file_dir + "virus_table.txt", sep="\t", header=0,
+table_summary = pd.read_csv(os.path.join(args.file_dir, "virus_table.txt"), sep="\t", header=0,
                             index_col=False)
-kodoja_vrl = pd.read_csv(args.file_dir + "kodoja_VRL.txt", sep="\t", header=0,
+kodoja_vrl = pd.read_csv(os.path.join(args.file_dir, "kodoja_VRL.txt"), sep="\t", header=0,
                          index_col=False).fillna('')
 args.file_dir += check_path(args.file_dir)
-output_dir = args.file_dir + 'subset_files/'
+output_dir = os.path.join(args.file_dir, "subset_files/")
 
 
 # Create directory
@@ -47,7 +47,7 @@ if args.taxID:
     label = 'virus_' + str(args.taxID)
     if args.genus:
         more_taxids = []
-        with open(args.file_dir + 'genus_taxid.pkl', 'rb') as id_dict:
+        with open(os.path.join(args.file_dir, 'genus_taxid.pkl'), 'rb') as id_dict:
             genus_taxid = pickle.load(id_dict)
         for sp_taxid in TaxId_out:
             genus_name = table_summary.Genus[table_summary['Species TaxID'] == sp_taxid].values[0]
@@ -77,9 +77,9 @@ sequence_subset(output_dir, args.read1, label + "_sequences1.", args.user_format
                 seqID_wanted, label + '_sequences1.txt')
 
 if args.read2:
-    with open(args.file_dir + 'ids1.pkl', 'rb') as id_dict:
+    with open(os.path.join(args.file_dir, 'ids1.pkl'), 'rb') as id_dict:
         ids1 = pickle.load(id_dict)
-    with open(args.file_dir + 'ids2.pkl', 'rb') as id_dict:
+    with open(os.path.join(args.file_dir, 'ids2.pkl'), 'rb') as id_dict:
         ids2 = pickle.load(id_dict)
     iv_ids1 = dict((v, k) for k, v in ids1.iteritems())
     kodoja_vrl["Seq_ID"] = kodoja_vrl["Seq_ID"].map(iv_ids1)

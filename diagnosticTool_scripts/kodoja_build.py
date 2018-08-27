@@ -54,8 +54,8 @@ args = parser.parse_args()
 tool_list = ['kraken', 'kaiju']
 
 args.output_dir += check_path(args.output_dir)
-kraken_db_dir = args.output_dir + "krakenDB"
-kaiju_db_dir = args.output_dir + "kaijuDB"
+kraken_db_dir = os.path.join(args.output_dir, "krakenDB")
+kaiju_db_dir = os.path.join(args.output_dir, "kaijuDB")
 
 # Check args.output_dir exits, else make dir
 if not os.path.exists(args.output_dir):
@@ -81,15 +81,15 @@ if args.extra_files:
                      "for genomic data, or '.faa.gz' for protein data. "
                      "Got %r" % f)
     # Make a copy of each file in extra_files into 'extra' directory
-    os.makedirs(args.output_dir + "extra/")
+    os.makedirs(os.path.join(args.output_dir, "extra/"))
     for extraFile in args.extra_files:
-        shutil.copy(extraFile, args.output_dir + 'extra/')
+        shutil.copy(extraFile, os.path.join(args.output_dir, 'extra/'))
 
 # Download virus assembly summary for refseq
-if not os.path.exists(args.output_dir + "viral_assembly_summary.txt"):
+if not os.path.exists(os.path.join(args.output_dir, "viral_assembly_summary.txt")):
     download_with_retries('https://ftp.ncbi.nih.gov/genomes/refseq/viral/assembly_summary.txt',
-                          args.output_dir + 'viral_assembly_summary.txt')
-path_assembly_summary = args.output_dir + "viral_assembly_summary.txt"
+                          os.path.join(args.output_dir, 'viral_assembly_summary.txt'))
+path_assembly_summary = os.path.join(args.output_dir, "viral_assembly_summary.txt")
 vir_assembly = pd.read_table(path_assembly_summary, sep='\t', skiprows=1, header=0)
 vir_assembly = vir_assembly.rename(columns={'# assembly_accession': 'assembly_accession'})
 
@@ -103,11 +103,11 @@ if args.all_viruses:
     vir_host = False
 else:
     # After downloading, will filter for plant-host virus
-    if not os.path.exists(args.output_dir + "virushostdb.tsv"):
+    if not os.path.exists(os.path.join(args.output_dir, "virushostdb.tsv")):
         # os.chdir(args.output_dir)
         download_with_retries('ftp://ftp.genome.jp/pub/db/virushostdb/virushostdb.tsv',
-                              args.output_dir + 'virushostdb.tsv')
-    virHost_table = pd.read_csv(args.output_dir + "virushostdb.tsv", sep="\t").fillna('')
+                              os.path.join(args.output_dir, 'virushostdb.tsv'))
+    virHost_table = pd.read_csv(os.path.join(args.output_dir, "virushostdb.tsv"), sep="\t").fillna('')
     plnVir = virHost_table[virHost_table['host lineage'].str.contains("Viridiplantae")]
     vir_host = list(plnVir['virus tax id'])
 
@@ -137,7 +137,7 @@ for tool in tool_list:
             other_genomes_text += str(args.host_taxid) + ', '
         if args.extra_taxids:
             other_genomes_text += str(args.extra_taxids)
-        with open(kraken_db_dir + "log_file.txt", "w") as out_file:
+        with open(os.path.join(kraken_db_dir, "log_file.txt"), "w") as out_file:
             text = 'output_dir = ' + args.output_dir + '\n'
             text += 'kraken_kmer = ' + str(args.kraken_kmer) + '\n'
             text += 'kraken_minimizer = ' + str(args.kraken_minimizer) + '\n'
@@ -147,7 +147,7 @@ for tool in tool_list:
     elif tool == "kaiju":
         # Make Kaiju database
         kaijuDB_build(args.output_dir, kaiju_db_dir, subset_vir_assembly)
-        with open(kaiju_db_dir + "log_file.txt", "w") as out_file:
+        with open(os.path.join(kaiju_db_dir, "log_file.txt"), "w") as out_file:
             text = 'output_dir = ' + args.output_dir + '\n'
             text += 'Viral genomes added to db = ' + vir_genomes_text + '\n'
             text += 'Other genome added to db = ' + other_genomes_text + '\n'
