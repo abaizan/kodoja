@@ -54,7 +54,7 @@ parser.add_argument('-r1', '--read1', type=str, required=True,
 parser.add_argument('-r2', '--read2', type=str, default=False,
                     help='Read 2 file path')
 parser.add_argument('-f', '--data_format', type=str, default='fastq',
-                    help='Sequence data format')
+                    help='Sequence data format (default fastq)')
 parser.add_argument('-t', '--threads', type=int, default=1,
                     help='Number of threads')
 parser.add_argument('-s', '--host_subset', type=int, default=False,
@@ -126,6 +126,8 @@ else:
 
 if args.data_format == "fastq":
     # fasta files cannot be QC'd - only for fastq files
+    with open(args.output_dir + "log_file.txt", "a") as log_file:
+        log_file.write("Starting FASTQ read trimming\n")
     fastqc_trim(args.output_dir, initial_file1, args.trim_minlen, args.threads,
                 args.trim_adapt, initial_file2)
 else:
