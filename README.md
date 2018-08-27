@@ -133,6 +133,7 @@ added to the databases(default=False)
 |         |            | - Provide cut-down NCBI taxonomy for tests cases    |
 |         |            | - Additional database build testing                 |
 |         |            | - Downloads virus files with HTTPS rather than FTP  |
+| 0.0.5   | *pending*  | - Refactor logging in ``kodoja_search.py``          |
 
 
 ## Development
