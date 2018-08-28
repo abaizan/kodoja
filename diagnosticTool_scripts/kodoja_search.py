@@ -91,24 +91,23 @@ if not os.path.exists(args.output_dir):
 # Write a log_file:
 log_filename = os.path.join(args.output_dir, "log_file.txt")
 with open(log_filename, "w") as log_file:
-    log_file.write("""General parameters:
-                   file1 = %s
-                   file2 = %s
-                   output directory = %s
-                   threads = %i
-                   host_subset = %s
-                   Trimmomatic parameters:
-                   trim_minlen = %s
-                   Kraken parameters:
-                   kraken database = %s
-                   quick_minhits = %s
-                   preload = %s
-                   Kaiju parameters:
-                   args.kaiju_db = %s
-                   kaiju_minlen = %i
-                   kaiju_score = %i
-                   kaiju_mismatch = %i
-                   """
+    log_file.write("General parameters:\n"
+                   "file1 = %s\n"
+                   "file2 = %s\n"
+                   "output directory = %s\n"
+                   "threads = %i\n"
+                   "host_subset = %s\n"
+                   "Trimmomatic parameters:\n"
+                   "trim_minlen = %s\n"
+                   "Kraken parameters:\n"
+                   "kraken database = %s\n"
+                   "quick_minhits = %s\n"
+                   "preload = %s\n"
+                   "Kaiju parameters:\n"
+                   "args.kaiju_db = %s\n"
+                   "kaiju_minlen = %i\n"
+                   "kaiju_score = %i\n"
+                   "kaiju_mismatch = %i\n"
                    % (args.read1, args.read2, args.output_dir,
                       args.threads, args.host_subset, args.trim_minlen,
                       args.kraken_db, args.kraken_quick, args.kraken_preload,
@@ -196,21 +195,21 @@ def main():
     else:
         print_statment = "formatting kraken data = %0.1f min" % ((t4 - t3) / 60)
 
-    log("""Script timer:
-        testing format/replace seqID = %0.1f s
-        fastq and trim = %0.1f min
-        kraken classification = %0.1f h
-        %s
-        kaiju classification = %0.1f h
-        Results = %0.1f h
-        total = %0.1f h
-        """ % (t1 - t0,
-               (t2 - t1) / 60,
-               (t3 - t2) / 3600,
-               print_statment,
-               (t5 - t4) / 3600,
-               (t6 - t5) / 3600,
-               (t6 - t0) / 3600))
+    log("Script timer:\n"
+        "testing format/replace seqID = %0.1f s\n"
+        "fastq and trim = %0.1f min\n"
+        "kraken classification = %0.1f h\n"
+        "%s\n"
+        "kaiju classification = %0.1f h\n"
+        "Results = %0.1f h\n"
+        "total = %0.1f h\n"
+        % (t1 - t0,
+           (t2 - t1) / 60,
+           (t3 - t2) / 3600,
+           print_statment,
+           (t5 - t4) / 3600,
+           (t6 - t5) / 3600,
+           (t6 - t0) / 3600))
 
     log("\nkodoja_search.py finished sucessfully.\n")
 
@@ -222,17 +221,16 @@ except KeyboardInterrupt:
     log(msg)
     sys.exit(msg)
 except Exception as e:
-    msg = """Kodoja failed unexpected with the following:
-
-          %s
-
-          If this happens consistently, please check you are using the
-          latest version, then check the issue tracker to see if this is
-          a known issue, and if not please report the problem:
-
-          https://github.com/abaizan/kodoja/issues
-
-          Kodoja aborted.
-          """ % e
+    msg = ("Kodoja failed unexpected with the following:\n"
+           "\n"
+           "%s\n"
+           "\n"
+           "If this happens consistently, please check you are using the\n"
+           "latest version, then check the issue tracker to see if this is\n"
+           "a known issue, and if not please report the problem:\n"
+           "\n"
+           "https://github.com/abaizan/kodoja/issues\n"
+           "\n"
+           "Kodoja aborted.\n" % e)
     log(msg)
     sys.exit(msg)

@@ -162,16 +162,15 @@ except KeyboardInterrupt:
     msg = "Kodoja was interupted by the user.\n"
     sys.exit(msg)
 except Exception as e:
-    msg = """Kodoja failed unexpected with the following:
-
-          %s
-
-          If this happens consistently, please check you are using the
-          latest version, then check the issue tracker to see if this is
-          a known issue, and if not please report the problem:
-
-          https://github.com/abaizan/kodoja/issues
-
-          Kodoja aborted.
-          """ % e
+    msg = ("Kodoja failed unexpected with the following:\n"
+           "\n"
+           "%s\n"
+           "\n"
+           "If this happens consistently, please check you are using the\n"
+           "latest version, then check the issue tracker to see if this is\n"
+           "a known issue, and if not please report the problem:\n"
+           "\n"
+           "https://github.com/abaizan/kodoja/issues\n"
+           "\n"
+           "Kodoja aborted.\n" % e)
     sys.exit(msg)
