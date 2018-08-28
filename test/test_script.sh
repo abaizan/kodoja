@@ -53,6 +53,14 @@ python -c "from pandas import __version__; print(__version__)"
 echo "Do we have biopython?"
 python -c "from Bio import __version__; print(__version__)"
 
+# Catches any syntax errors, or broken version option:
+echo "What version of kodoja build?"
+./diagnosticTool_scripts/kodoja_build.py --version
+echo "What version of kodoja search?"
+./diagnosticTool_scripts/kodoja_search.py --version
+echo "What version of kodoja retrieve?"
+./diagnosticTool_scripts/kodoja_retrieve.py --version
+
 echo "Beginning tests..."
 
 echo "=============================================================="
