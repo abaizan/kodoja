@@ -417,10 +417,11 @@ def result_analysis(out_dir, kraken_VRL, kaiju_table, kaiju_label, host_subset):
                       for key, value in levels_dict.items()}
 
         LCA_tax = {}
-        for key, tax in levels_tax.items():
+        # Iterate over a copy of the values as we may remove taxonomy entries
+        for key, tax in list(levels_tax.items()):
             if tax[-1][0] != 's':
                 LCA_tax[key] = tax[-1]
-                levels_tax.pop(key, tax)
+                levels_tax.pop(key)
 
         species_dict = {}
         for key in levels_tax:
