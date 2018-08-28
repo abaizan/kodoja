@@ -106,6 +106,12 @@ diff test/example_db/krakenDB_test/database.kdb test/building_db/krakenDB_test/d
 #diff test/example_db/kaijuDB_test/kaiju_library.fmi test/building_db/kaijuDB_test/kaiju_library.fmi
 if [ ! -s test/building_db/kaijuDB_test/kaiju_library.fmi ]; then echo "Missing kaiju_library.fmi" && false; fi
 
+if [ -d test/building_db/extra/ ]
+then
+    echo "Removing test/building_db/extra/ from a previous test run"
+    rm -rf test/building_db/extra/
+fi
+
 echo "=============================================================="
 echo "Testing kodoja_search.py with paired end FASTQ"
 echo "=============================================================="
