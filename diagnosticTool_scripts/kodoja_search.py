@@ -220,8 +220,9 @@ except KeyboardInterrupt:
     msg = "Kodoja was interupted by the user.\n"
     log(msg)
     sys.exit(msg)
-except Exception as e:
-    msg = ("Kodoja failed unexpected with the following:\n"
+except Exception:
+    import traceback
+    msg = ("Kodoja failed unexpectedly with the following:\n"
            "\n"
            "%s\n"
            "\n"
@@ -231,6 +232,6 @@ except Exception as e:
            "\n"
            "https://github.com/abaizan/kodoja/issues\n"
            "\n"
-           "Kodoja aborted.\n" % e)
+           "Kodoja aborted.\n" % traceback.format_exc())
     log(msg)
     sys.exit(msg)
