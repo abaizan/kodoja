@@ -56,7 +56,7 @@ parser.add_argument('-r2', '--read2', type=str, default=False,
 parser.add_argument('-f', '--data_format', type=str, default='fastq',
                     help='Sequence data format (default fastq)')
 parser.add_argument('-t', '--threads', type=int, default=1,
-                    help='Number of threads')
+                    help='Number of threads (default 1)')
 parser.add_argument('-s', '--host_subset', type=int, default=False,
                     help='Subset sequences with this tax id from results')
 parser.add_argument('-m', '--trim_minlen', type=int, default=50,
@@ -90,19 +90,29 @@ if not os.path.exists(args.output_dir):
 # Write a log_file:
 log_filename = os.path.join(args.output_dir, "log_file.txt")
 with open(log_filename, "w") as log_file:
-    log_file.write("General parameters:\n" + "file1 = " + args.read1 + "\n" +
-                   "file2 = " + str(args.read2) + "\n" +
-                   "output directory = " + args.output_dir + "\n" +
-                   "threads =" + str(args.threads) + "\n" +
-                   "host_subset =" + str(args.host_subset) + "\n" +
-                   "Trimmomatic parameters:\n" + "trim_minlen = " + str(args.trim_minlen) + "\n" +
-                   "Kraken parameters:\n" + "kraken database = " + args.kraken_db + "\n" +
-                   "quick_minhits = " + str(args.kraken_quick) + "\n" + "preload =" +
-                   str(args.kraken_preload) + "\n" +
-                   "Kaiju parameters:\n" + "args.kaiju_db =" + args.kaiju_db + "\n" +
-                   "kaiju_minlen = " + str(args.kaiju_minlen) + "\n" +
-                   "kaiju_score = " + str(args.kaiju_score) + "\n" +
-                   "kaiju_mismatch = " + str(args.kaiju_mismatch) + "\n")
+    log_file.write("""General parameters:
+                   file1 = %s
+                   file2 = %s
+                   output directory = %s
+                   threads = %i
+                   host_subset = %s
+                   Trimmomatic parameters:
+                   trim_minlen = %s
+                   Kraken parameters:
+                   kraken database = %s
+                   quick_minhits = %s
+                   preload = %s
+                   Kaiju parameters:
+                   args.kaiju_db = %s
+                   kaiju_minlen = %i
+                   kaiju_score = %i
+                   kaiju_mismatch = %i
+                   """
+                   % (args.read1, args.read2, args.output_dir,
+                      args.threads, args.host_subset, args.trim_minlen,
+                      args.kraken_db, args.kraken_quick, args.kraken_preload,
+                      args.kaiju_db, args.kaiju_minlen, args.kaiju_score,
+                      args.kaiju_mismatch))
 
 
 # TODO: Review this and consider using Python standard library's logging module
@@ -182,13 +192,24 @@ t6 = time.time()
 
 # Create log file
 if args.host_subset:
-    print_statment = "subset sequences = " + str((t4 - t3) / 60) + " min\n"
+    print_statment = "subset sequences = %0.1f min\n" % ((t4 - t3) / 60)
 else:
-    print_statment = "formatting kraken data = " + str((t4 - t3) / 60) + " min\n"
+    print_statment = "formatting kraken data = %0.1f min" % ((t4 - t3) / 60)
 
-log("Script timer:\n" + "testing format/replace seqID = " + str((t1 - t0)) + " s\n" +
-    "fastq and trim = " + str((t2 - t1) / 60) + " min\n" +
-    "kraken classification = " + str((t3 - t2) / 3600) + " h\n" +
-    print_statment + "kaiju classification = " + str((t5 - t4) / 3600) +
-    " h\n" + "Results = " + str((t6 - t5) / 3600) + " h\n" + "total = " +
-    str((t6 - t0) / 3600) + " h\n\nkodoja_search.py finished sucessfully.\n")
+log("""Script timer:
+    testing format/replace seqID = %0.1f s
+    fastq and trim = %0.1f min
+    kraken classification = %0.1f h
+    %s
+    kaiju classification = %0.1f h
+    Results = %0.1f h
+    total = %0.1f h
+    """ % (t1 - t0,
+           (t2 - t1) / 60,
+           (t3 - t2) / 3600,
+           print_statment,
+           (t5 - t4) / 3600,
+           (t6 - t5) / 3600,
+           (t6 - t0) / 3600))
+
+log("\nkodoja_search.py finished sucessfully.\n")
