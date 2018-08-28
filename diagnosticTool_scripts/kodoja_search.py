@@ -189,6 +189,6 @@ else:
 log("Script timer:\n" + "testing format/replace seqID = " + str((t1 - t0)) + " s\n" +
     "fastq and trim = " + str((t2 - t1) / 60) + " min\n" +
     "kraken classification = " + str((t3 - t2) / 3600) + " h\n" +
-    print_statment + "kaiju classification = " + str((t5 - t6) / 3600) +
+    print_statment + "kaiju classification = " + str((t5 - t4) / 3600) +
     " h\n" + "Results = " + str((t6 - t5) / 3600) + " h\n" + "total = " +
     str((t6 - t0) / 3600) + " h\n\nkodoja_search.py finished sucessfully.\n")
