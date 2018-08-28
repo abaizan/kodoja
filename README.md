@@ -53,11 +53,11 @@ IMPORTANT: do not put original data in the output directory when executing kodoj
 ## kodoja_search.py parameters:
 ### General:
 * ``--read1`` - path to the single-end or first paired-end file (required)
+* ``--read2`` - path to second paired-end file (default=False)
 * ``--data_format`` - specify the file-type for file1 ("fasta" or "fastq" - default='fastq')
 * ``--output_dir`` - path to the results folder (required)
 * ``--threads`` - number of threads on cluster (default=1)
-* ``--read2`` - path to second paired-end file (default=False)
-*``--host_subset`` - tax id of host. Use this is a host genome was added to the
+* ``--host_subset`` - tax id of host. Use this is a host genome was added to the
 databases and you do not wish to see the number of reads classifed to this group
 in the final table
 
