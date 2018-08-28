@@ -3,6 +3,7 @@
 
 import argparse
 import os
+import sys
 import time
 
 from diagnostic_modules import version
@@ -122,94 +123,116 @@ def log(message):
         log_file.write(message)
 
 
-t0 = time.time()
+def main():
+    """Run kodoja search using command line options."""
+    t0 = time.time()
 
-# Test format, change seqIDs and check paired files are correct
-test_format(args.read1, args.data_format)
-check_file(args.read1, args.output_dir, args.data_format, args.read2)
+    # Test format, change seqIDs and check paired files are correct
+    test_format(args.read1, args.data_format)
+    check_file(args.read1, args.output_dir, args.data_format, args.read2)
 
-t1 = time.time()
+    t1 = time.time()
 
-# Set all variables
-initial_file1 = args.output_dir + 'renamed_file_1.' + args.data_format
-kraken_file1 = kaiju_file1 = os.path.join(args.output_dir, "trimmed_read1")
+    # Set all variables
+    initial_file1 = args.output_dir + 'renamed_file_1.' + args.data_format
+    kraken_file1 = kaiju_file1 = os.path.join(args.output_dir, "trimmed_read1")
 
-if args.read2:
-    # Set tool files
-    kraken_file2 = kaiju_file2 = os.path.join(args.output_dir, "trimmed_read2")
-    initial_file2 = os.path.join(args.output_dir, 'renamed_file_2.' + args.data_format)
+    if args.read2:
+        # Set tool files
+        kraken_file2 = kaiju_file2 = os.path.join(args.output_dir, "trimmed_read2")
+        initial_file2 = os.path.join(args.output_dir, 'renamed_file_2.' + args.data_format)
+    else:
+        kraken_file2 = kaiju_file2 = False
+        initial_file2 = False
 
-else:
-    kraken_file2 = kaiju_file2 = False
-    initial_file2 = False
+    if args.data_format == "fastq":
+        # fasta files cannot be QC'd - only for fastq files
+        log("Starting FASTQ read trimming\n")
+        fastqc_trim(args.output_dir, initial_file1, args.trim_minlen, args.threads,
+                    args.trim_adapt, initial_file2)
+    else:
+        kraken_file1 = kaiju_file1 = initial_file1
+        kraken_file2 = kaiju_file2 = initial_file2
 
-if args.data_format == "fastq":
-    # fasta files cannot be QC'd - only for fastq files
-    log("Starting FASTQ read trimming\n")
-    fastqc_trim(args.output_dir, initial_file1, args.trim_minlen, args.threads,
-                args.trim_adapt, initial_file2)
-else:
-    kraken_file1 = kaiju_file1 = initial_file1
-    kraken_file2 = kaiju_file2 = initial_file2
+    # if args.host_subset:
+    #     kaiju_file1 = os.path.join(args.output_dir, "subset_file1." + args.data_format)
+    #     if args.read2:
+    #         kaiju_file2 = os.path.join(args.output_dir, "subset_file2." + args.data_format)
+
+    t2 = time.time()
+    # Kraken classification
+    log("Starting Kraken classification\n")
+    kraken_classify(args.output_dir, kraken_file1, args.threads,
+                    args.data_format, args.kraken_db, kraken_file2,
+                    quick_minhits=args.kraken_quick, preload=args.kraken_preload)
+
+    t3 = time.time()
+
+    # Format kraken data and subset unclassified and non-host sequences
+    log("Analyzing Kraken results\n")
+    seq_reanalysis("kraken_table.txt", "kraken_labels.txt", args.output_dir,
+                   args.data_format, kraken_file1, kraken_file2)
+
+    t4 = time.time()
+
+    # Kaiju classification of all sequences or subset sequences
+    log("Starting Kaiju classification\n")
+    kaiju_classify(kaiju_file1, args.threads, args.output_dir,
+                   args.kaiju_db, args.kaiju_minlen, args.kraken_db,
+                   kaiju_file2, kaiju_mismatch=args.kaiju_mismatch,
+                   kaiju_score=args.kaiju_score)
+
+    t5 = time.time()
+
+    # Merge results
+    log("Analyzing Kraken and Kaiju results\n")
+    result_analysis(args.output_dir, "kraken_VRL.txt", "kaiju_table.txt", "kaiju_labels.txt",
+                    args.host_subset)
+    t6 = time.time()
+
+    # Create log file
+    if args.host_subset:
+        print_statment = "subset sequences = %0.1f min\n" % ((t4 - t3) / 60)
+    else:
+        print_statment = "formatting kraken data = %0.1f min" % ((t4 - t3) / 60)
+
+    log("""Script timer:
+        testing format/replace seqID = %0.1f s
+        fastq and trim = %0.1f min
+        kraken classification = %0.1f h
+        %s
+        kaiju classification = %0.1f h
+        Results = %0.1f h
+        total = %0.1f h
+        """ % (t1 - t0,
+               (t2 - t1) / 60,
+               (t3 - t2) / 3600,
+               print_statment,
+               (t5 - t4) / 3600,
+               (t6 - t5) / 3600,
+               (t6 - t0) / 3600))
+
+    log("\nkodoja_search.py finished sucessfully.\n")
 
 
-# if args.host_subset:
-    # kaiju_file1 = os.path.join(args.output_dir, "subset_file1." + args.data_format)
-    # if args.read2:
-    #     kaiju_file2 = os.path.join(args.output_dir, "subset_file2." + args.data_format)
+try:
+    main()
+except KeyboardInterrupt:
+    msg = "Kodoja was interupted by the user.\n"
+    log(msg)
+    sys.exit(msg)
+except Exception as e:
+    msg = """Kodoja failed unexpected with the following:
 
-t2 = time.time()
-# Kraken classification
-log("Starting Kraken classification\n")
-kraken_classify(args.output_dir, kraken_file1, args.threads,
-                args.data_format, args.kraken_db, kraken_file2,
-                quick_minhits=args.kraken_quick, preload=args.kraken_preload)
+          %s
 
-t3 = time.time()
+          If this happens consistently, please check you are using the
+          latest version, then check the issue tracker to see if this is
+          a known issue, and if not please report the problem:
 
-# Format kraken data and subset unclassified and non-host sequences
-log("Analyzing Kraken results\n")
-seq_reanalysis("kraken_table.txt", "kraken_labels.txt", args.output_dir,
-               args.data_format, kraken_file1, kraken_file2)
+          https://github.com/abaizan/kodoja/issues
 
-t4 = time.time()
-
-# Kaiju classification of all sequences or subset sequences
-log("Starting Kaiju classification\n")
-kaiju_classify(kaiju_file1, args.threads, args.output_dir,
-               args.kaiju_db, args.kaiju_minlen, args.kraken_db,
-               kaiju_file2, kaiju_mismatch=args.kaiju_mismatch,
-               kaiju_score=args.kaiju_score)
-
-t5 = time.time()
-
-# Merge results
-log("Analyzing Kraken and Kaiju results\n")
-result_analysis(args.output_dir, "kraken_VRL.txt", "kaiju_table.txt", "kaiju_labels.txt",
-                args.host_subset)
-t6 = time.time()
-
-
-# Create log file
-if args.host_subset:
-    print_statment = "subset sequences = %0.1f min\n" % ((t4 - t3) / 60)
-else:
-    print_statment = "formatting kraken data = %0.1f min" % ((t4 - t3) / 60)
-
-log("""Script timer:
-    testing format/replace seqID = %0.1f s
-    fastq and trim = %0.1f min
-    kraken classification = %0.1f h
-    %s
-    kaiju classification = %0.1f h
-    Results = %0.1f h
-    total = %0.1f h
-    """ % (t1 - t0,
-           (t2 - t1) / 60,
-           (t3 - t2) / 3600,
-           print_statment,
-           (t5 - t4) / 3600,
-           (t6 - t5) / 3600,
-           (t6 - t0) / 3600))
-
-log("\nkodoja_search.py finished sucessfully.\n")
+          Kodoja aborted.
+          """ % e
+    log(msg)
+    sys.exit(msg)

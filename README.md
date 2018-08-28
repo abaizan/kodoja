@@ -134,6 +134,7 @@ added to the databases(default=False)
 |         |            | - Additional database build testing                 |
 |         |            | - Downloads virus files with HTTPS rather than FTP  |
 | 0.0.5   | *pending*  | - Refactor logging in ``kodoja_search.py``          |
+|         |            | - Top level error handling, with logging in search  |
 
 
 ## Development
