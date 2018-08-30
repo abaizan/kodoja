@@ -148,6 +148,10 @@ echo "=============================================================="
 diagnosticTool_scripts/kodoja_retrieve.py -o test/SE_test/ -r1 test/data/testData_1.fastq -g
 ls test/SE_test/subset_files/
 diff test/SE_test/subset_files/virus_all_sequences1.fastq test/data/filtered_SE_fastq_genus.fastq
+# Now again but with taxid option
+rm -rf test/SE_test/subset_files/
+diagnosticTool_scripts/kodoja_retrieve.py -o test/SE_test/ -r1 test/data/testData_1.fastq -t 12227
+diff test/SE_test/subset_files/virus_12227_sequences1.fastq test/data/filtered_SE_fastq_12227.fastq
 rm -r test/SE_test/
 
 echo "=============================================================="
