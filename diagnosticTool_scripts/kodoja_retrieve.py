@@ -40,6 +40,7 @@ However, if the ``-t 12345`` option is used rather than ``virus_all_...``
 the files will be named ``virus_12345_...`` instead.
 """
 
+
 def main():
     """Run kodoka retrieve."""
     parser = argparse.ArgumentParser(description=help_text,
