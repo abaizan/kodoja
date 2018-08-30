@@ -125,6 +125,15 @@ echo "Testing kodoja_search.py with paired end FASTQ"
 echo "=============================================================="
 diagnosticTool_scripts/kodoja_search.py -r1 test/data/testData_1.fastq -o test/PE_test/ -d1 test/example_db/krakenDB_test/ -d2 test/example_db/kaijuDB_test/ -r2 ./test/data/testData_2.fastq -t 2
 diff test/PE_test/virus_table.txt test/data/virus_table_PE_fastq.txt
+
+echo "=============================================================="
+echo "Testing kodoja_retrieve.py with paired end FASTQ"
+echo "=============================================================="
+# Using -s for stringent, defaults to fastq
+diagnosticTool_scripts/kodoja_retrieve.py -o test/PE_test/ -r1 test/data/testData_1.fastq -r2 test/data/testData_2.fastq -s
+ls test/PE_test/subset_files/
+diff test/PE_test/subset_files/virus_all_sequences1.txt test/data/filtered_PE_fastq_stringent_R1.txt
+diff test/PE_test/subset_files/virus_all_sequences2.txt test/data/filtered_PE_fastq_stringent_R2.txt
 rm -r test/PE_test/
 
 echo "=============================================================="
@@ -139,6 +148,15 @@ echo "Testing kodoja_search.py with paired end FASTA"
 echo "=============================================================="
 diagnosticTool_scripts/kodoja_search.py -r1 test/data/testData_1.fasta -o test/fasta_test/ -d1 test/example_db/krakenDB_test/ -d2 test/example_db/kaijuDB_test/ -r2 ./test/data/testData_2.fasta -f fasta
 diff test/fasta_test/virus_table.txt test/data/virus_table_PE_fasta.txt
+
+echo "=============================================================="
+echo "Testing kodoja_retreive.py with paired end FASTA"
+echo "=============================================================="
+# Using -g for genus level, explicitly saying using fasta
+diagnosticTool_scripts/kodoja_retrieve.py -o test/fasta_test/ -r1 test/data/testData_1.fasta -r2 test/data/testData_2.fasta -f fasta -g
+ls test/fasta_test/subset_files/
+diff test/fasta_test/subset_files/virus_all_sequences1.txt test/data/filtered_PE_fasta_genus_R1.txt
+diff test/fasta_test/subset_files/virus_all_sequences2.txt test/data/filtered_PE_fasta_genus_R2.txt
 rm -r test/fasta_test/
 
 echo "=============================================================="
