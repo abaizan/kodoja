@@ -102,20 +102,20 @@ def main():
     else:
         rows_wanted = (kodoja_vrl['kraken_tax_ID'].isin(TaxId_out) |
                        kodoja_vrl['kaiju_tax_ID'].isin(TaxId_out))
-    seqID_wanted = set(kodoja_vrl.loc[rows_wanted, 'Seq_ID'])
+    seqID_wanted = set(_.rstrip("\n").split(None, 1)[0] for _ in kodoja_vrl.loc[rows_wanted, 'Seq_ID'])
 
     sequence_subset(output_dir, args.read1, label + "_sequences1.", args.user_format,
                     seqID_wanted)
 
     if args.read2:
-        with open(os.path.join(args.file_dir, 'ids1.pkl'), 'rb') as id_dict:
-            ids1 = pickle.load(id_dict)
-        with open(os.path.join(args.file_dir, 'ids2.pkl'), 'rb') as id_dict:
-            ids2 = pickle.load(id_dict)
-        iv_ids1 = dict((v, k) for k, v in ids1.items())
-        kodoja_vrl["Seq_ID"] = kodoja_vrl["Seq_ID"].map(iv_ids1)
-        kodoja_vrl["Seq_ID"] = kodoja_vrl["Seq_ID"].map(ids2)
-        seqID_wanted = set(kodoja_vrl.loc[rows_wanted, 'Seq_ID'])
+        # Cope with case where inputs are example/1 and example/2 style:
+        def rename2to1(identifier):
+            if identifier.endswith("/1"):
+                return identifier[:-1] + "2"
+            else:
+                return identifier
+        assert rename2to1("example/1") == "example/2"
+        seqID_wanted = set(rename2to1(_) for _ in seqID_wanted)
         sequence_subset(output_dir, args.read2, label + "_sequences2.", args.user_format,
                         seqID_wanted)
 
