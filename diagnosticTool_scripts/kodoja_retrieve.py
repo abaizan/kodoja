@@ -24,15 +24,13 @@ identifiers). This second file is used as input to ``kodoja_retrieve.py``
 along with the original sequencing read files.
 
 A sub-directory ``subreads/`` will be created in the output directory,
-which will include files named as follows:
+which will include either FASTA or FASTQ files named as follows:
 
-* ``subset_files/virus_all_sequences1.txt`` listing the IDs, one per line
 * ``subset_files/virus_all_sequences1.fasta`` FASTA output
 * ``subset_files/virus_all_sequences1.fastq`` FASTQ output
 
 And, for paired end datasets,
 
-* ``subset_files/virus_all_sequences2.txt`` selected IDs, one per line
 * ``subset_files/virus_all_sequences2.fasta`` FASTA output
 * ``subset_files/virus_all_sequences2.fastq`` FASTQ output
 
@@ -107,7 +105,7 @@ def main():
     seqID_wanted = set(kodoja_vrl.loc[rows_wanted, 'Seq_ID'])
 
     sequence_subset(output_dir, args.read1, label + "_sequences1.", args.user_format,
-                    seqID_wanted, label + '_sequences1.txt')
+                    seqID_wanted)
 
     if args.read2:
         with open(os.path.join(args.file_dir, 'ids1.pkl'), 'rb') as id_dict:
@@ -119,7 +117,7 @@ def main():
         kodoja_vrl["Seq_ID"] = kodoja_vrl["Seq_ID"].map(ids2)
         seqID_wanted = set(kodoja_vrl.loc[rows_wanted, 'Seq_ID'])
         sequence_subset(output_dir, args.read2, label + "_sequences2.", args.user_format,
-                        seqID_wanted, label + '_sequences2.txt')
+                        seqID_wanted)
 
 
 try:

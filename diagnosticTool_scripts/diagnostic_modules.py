@@ -233,17 +233,14 @@ def format_result_table(out_dir, data_table, data_labels, table_colNames):
     return seq_result
 
 
-def sequence_subset(out_dir, input_file, output_file, user_format, id_list, id_list_name):
-    """Create a subset of sequences based on seuqnce IDs in id_list.
+def sequence_subset(out_dir, input_file, output_file, user_format, id_list):
+    """Create a subset of sequences based on sequence IDs in id_list.
 
-    Return subset of sequences file and a text file with list of sequence IDs.
+    Writes a FASTA or FASTQ file in the output file specified using the format
+    as the extension.
     """
-    with open(os.path.join(out_dir, id_list_name), 'w') as outfile:
-        outfile.write("\n".join(str(i) for i in id_list) + "\n")
-    id_file = os.path.join(out_dir, id_list_name)
-
-    wanted = set(line.rstrip("\n").split(None, 1)[0] for line in open(id_file))
-    print("Found %i unique identifiers in %s" % (len(wanted), id_file))
+    wanted = set(i.rstrip("\n").split(None, 1)[0] for i in id_list)
+    print("Selecting %i unique identifiers")
 
     records = (r for r in SeqIO.parse(input_file, user_format)
                if r.id in wanted)
