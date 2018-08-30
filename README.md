@@ -136,7 +136,8 @@ added to the databases(default=False)
 | 0.0.5   | 2018-08-29 | - Refactor logging in ``kodoja_search.py``          |
 |         |            | - Top level error handling, with logging in search  |
 |         |            | - ``dictionary changed size during iteration`` bug  |
-|         |            |   fixed                                             |
+| 0.0.6   | *pending*  | - Python 3 fix for ``kodoja_retrieve.py``           |
+|         |            | - Automated testing of ``kodoja_retrieve.py``       |
 
 
 ## Development
