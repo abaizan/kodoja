@@ -13,9 +13,35 @@ from diagnostic_modules import sequence_subset
 from diagnostic_modules import check_path
 
 
+help_text = """Kodoja Retrieve is used with the output of Kodoja Search to
+give subsets of your input sequencing reads matching viruses."""
+
+help_epilog = """
+The main output of ``kodoja_search.py`` is a file called ``virus_table.txt``
+(a table summarising the potential viruses found), but the specified output
+directory will also contain ``kodoja_VRL.txt`` (a table listing the read
+identifiers). This second file is used as input to ``kodoja_retrieve.py``
+along with the original sequencing read files.
+
+A sub-directory ``subreads/`` will be created in the output directory,
+which will include files named as follows:
+
+* ``subset_files/virus_all_sequences1.txt`` listing the IDs, one per line
+* ``subset_files/virus_all_sequences1.fasta`` FASTA output
+* ``subset_files/virus_all_sequences1.fastq`` FASTQ output
+
+And, for paired end datasets,
+
+* ``subset_files/virus_all_sequences2.txt`` selected IDs, one per line
+* ``subset_files/virus_all_sequences2.fasta`` FASTA output
+* ``subset_files/virus_all_sequences2.fastq`` FASTQ output
+"""
+
 def main():
     """Run kodoka retrieve."""
-    parser = argparse.ArgumentParser(description='Retrieve viral sequences of interest')
+    parser = argparse.ArgumentParser(description=help_text,
+                                     epilog=help_epilog,
+                                     formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('--version',
                         action='version',
                         version='Kodoja v' + version)

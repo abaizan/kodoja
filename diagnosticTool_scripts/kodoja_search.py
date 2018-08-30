@@ -34,8 +34,9 @@ the columns are as follows:
 6. Number of reads assigned by *either* Kraken or Kaiju to this genus,
 7. Number of reads assigned by *both* Kraken and Kaiju to this genus.
 
-The output directory includes additional files, some of which are used
-internally by the ``kodoja_retrieve.py`` script.
+The output directory includes additional files, including ``kodoja_VRL.txt``
+(a table listing the read identifiers used) which is intended mainly as
+input to the ``kodoja_retrieve.py`` script.
 """
 
 parser = argparse.ArgumentParser(description=help_text,
