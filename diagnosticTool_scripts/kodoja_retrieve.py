@@ -116,7 +116,7 @@ def main():
         iv_ids1 = dict((v, k) for k, v in ids1.items())
         kodoja_vrl["Seq_ID"] = kodoja_vrl["Seq_ID"].map(iv_ids1)
         kodoja_vrl["Seq_ID"] = kodoja_vrl["Seq_ID"].map(ids2)
-        seqID_wanted = list(kodoja_vrl.loc[rows_wanted, 'Seq_ID'])
+        seqID_wanted = set(kodoja_vrl.loc[rows_wanted, 'Seq_ID'])
         sequence_subset(output_dir, args.read2, label + "_sequences2.", args.user_format,
                         seqID_wanted, label + '_sequences2.txt')
 
