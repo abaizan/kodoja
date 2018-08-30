@@ -79,10 +79,12 @@ def rename_seqIDs(input_file, out_dir, user_format, paired=False):
     Returns dictionary mapping the sequence number to the old
     identifier and description line.
     """
-    if paired:
+    if paired==2:
         output_file = os.path.join(out_dir, "renamed_file_2." + user_format)
-    else:
+    elif paired==1 or paired==False:
         output_file = os.path.join(out_dir, "renamed_file_1." + user_format)
+    else:
+        raise ValueError("Wanted 1, 2 or False - not %r" % paired)
     id_dict = {}
     with open(input_file, 'r') as in_file, open(output_file, 'w') as out_file:
         if user_format == 'fasta':
