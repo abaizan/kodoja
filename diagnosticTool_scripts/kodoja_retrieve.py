@@ -35,6 +35,9 @@ And, for paired end datasets,
 * ``subset_files/virus_all_sequences2.txt`` selected IDs, one per line
 * ``subset_files/virus_all_sequences2.fasta`` FASTA output
 * ``subset_files/virus_all_sequences2.fastq`` FASTQ output
+
+However, if the ``-t 12345`` option is used rather than ``virus_all_...``
+the files will be named ``virus_12345_...`` instead.
 """
 
 def main():
