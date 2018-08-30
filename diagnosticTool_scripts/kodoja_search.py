@@ -133,7 +133,7 @@ def main():
     t1 = time.time()
 
     # Set all variables
-    initial_file1 = args.output_dir + 'renamed_file_1.' + args.data_format
+    initial_file1 = os.path.join(args.output_dir, 'renamed_file_1.' + args.data_format)
     kraken_file1 = kaiju_file1 = os.path.join(args.output_dir, "trimmed_read1")
 
     if args.read2:

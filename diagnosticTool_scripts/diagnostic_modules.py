@@ -79,7 +79,7 @@ def rename_seqIDs(input_file, out_dir, user_format, paired=False):
     Returns dictionary mapping the sequence number to the old
     identifier and description line.
     """
-    output_file = out_dir + "renamed_file_"
+    output_file = os.path.join(out_dir, "renamed_file_")
     if paired == 2:
         output_file += str(paired) + "." + user_format
     else:
@@ -113,7 +113,7 @@ def check_file(file1, out_dir, user_format, file2=False):
     if file2:
         ids1 = rename_seqIDs(file1, out_dir, user_format, paired=1)
         ids2 = rename_seqIDs(file2, out_dir, user_format, paired=2)
-        with open(out_dir + 'ids2.pkl', 'wb') as pkl_dict:
+        with open(os.path.join(out_dir, 'ids2.pkl'), 'wb') as pkl_dict:
             pickle.dump(ids2, pkl_dict, protocol=pickle.HIGHEST_PROTOCOL)
 
         assert len(ids1) == len(ids2), \
@@ -129,10 +129,10 @@ def check_file(file1, out_dir, user_format, file2=False):
     else:
         ids1 = rename_seqIDs(file1, out_dir, user_format, paired=False)
 
-    with open(out_dir + "log_file.txt", "a") as log_file:
+    with open(os.path.join(out_dir, "log_file.txt"), "a") as log_file:
         log_file.write("Number of sequences = " + str(list(ids1)[-1]) + "\n")
 
-    with open(out_dir + 'ids1.pkl', 'wb') as pkl_dict:
+    with open(os.path.join(out_dir, 'ids1.pkl'), 'wb') as pkl_dict:
         pickle.dump(ids1, pkl_dict, protocol=pickle.HIGHEST_PROTOCOL)
 
 
@@ -152,18 +152,24 @@ def fastqc_trim(out_dir, file1, trim_minlen, threads, adapter_file, file2=False)
 
     if file2:
         PE_trim_command = "trimmomatic PE -threads " + str(threads) + " " + file1 + " " + file2 + \
-            " " + out_dir + "trimmed_read1 " + out_dir + "PE_trimmed_data_1U " + \
-            out_dir + "trimmed_read2 " + out_dir + "PE_trimmed_data_2U" + trimAdapt_command
+            " " + os.path.join(out_dir, "trimmed_read1") + \
+            " " + os.path.join(out_dir, "PE_trimmed_data_1U") + \
+            " " + os.path.join(out_dir, "trimmed_read2") + \
+            " " + os.path.join(out_dir, "PE_trimmed_data_2U") + trimAdapt_command
 
         subprocess.check_call(PE_trim_command, shell=True)
-        os.remove(out_dir + "PE_trimmed_data_1U")
-        os.remove(out_dir + "PE_trimmed_data_2U")
-        subprocess.check_call("fastqc " + out_dir + "trimmed_read1 -o " + out_dir, shell=True)
-        subprocess.check_call("fastqc " + out_dir + "trimmed_read2 -o " + out_dir, shell=True)
+        os.remove(os.path.join(out_dir, "PE_trimmed_data_1U"))
+        os.remove(os.path.join(out_dir, "PE_trimmed_data_2U"))
+        subprocess.check_call("fastqc " + os.path.join(out_dir, "trimmed_read1") +
+                              " -o " + out_dir, shell=True)
+        subprocess.check_call("fastqc " + os.path.join(out_dir, "trimmed_read2") +
+                              " -o " + out_dir, shell=True)
     else:
         subprocess.check_call("trimmomatic SE -threads " + str(threads) + " " + file1 +
-                              " " + out_dir + "trimmed_read1 " + trimAdapt_command, shell=True)
-        subprocess.check_call("fastqc " + out_dir + "trimmed_read1 -o " + out_dir, shell=True)
+                              " " + os.path.join(out_dir, "trimmed_read1") +
+                              " " + trimAdapt_command, shell=True)
+        subprocess.check_call("fastqc " + os.path.join(out_dir, "trimmed_read1") +
+                              " -o " + out_dir, shell=True)
 
 
 def kraken_classify(out_dir, kraken_file1, threads, user_format, kraken_db, kraken_file2=False,
@@ -197,14 +203,14 @@ def kraken_classify(out_dir, kraken_file1, threads, user_format, kraken_db, krak
 
     if kraken_file2:
         kraken_command += " --paired " + kraken_file1 + " " + \
-                          kraken_file2 + " > " + out_dir + "kraken_table.txt"
+                          kraken_file2 + " > " + os.path.join(out_dir, "kraken_table.txt")
     else:
-        kraken_command += " " + kraken_file1 + " > " + out_dir + "kraken_table.txt"
+        kraken_command += " " + kraken_file1 + " > " + os.path.join(out_dir, "kraken_table.txt")
 
     subprocess.check_call(kraken_command, shell=True)
     subprocess.check_call("kraken-translate --mpa-format --db " + kraken_db +
-                          " " + out_dir + "kraken_table.txt > " + out_dir +
-                          "kraken_labels.txt", shell=True)
+                          " " + os.path.join(out_dir, "kraken_table.txt") + " > " +
+                          os.path.join(out_dir, "kraken_labels.txt"), shell=True)
 
 
 def format_result_table(out_dir, data_table, data_labels, table_colNames):
@@ -216,9 +222,11 @@ def format_result_table(out_dir, data_table, data_labels, table_colNames):
     Return merged table
     """
     label_colNames = ["Seq_ID", "Seq_tax"]
-    seq_data = pd.read_csv(out_dir + data_table, sep="\t", header=None, names=table_colNames,
+    seq_data = pd.read_csv(os.path.join(out_dir, data_table),
+                           sep="\t", header=None, names=table_colNames,
                            index_col=False)
-    seq_labelData = pd.read_csv(out_dir + data_labels, sep="\t", header=None,
+    seq_labelData = pd.read_csv(os.path.join(out_dir, data_labels),
+                                sep="\t", header=None,
                                 names=label_colNames)
     seq_result = pd.merge(seq_data, seq_labelData, on='Seq_ID', how='outer')
     return seq_result
@@ -229,16 +237,16 @@ def sequence_subset(out_dir, input_file, output_file, user_format, id_list, id_l
 
     Return subset of sequences file and a text file with list of sequence IDs.
     """
-    with open(out_dir + id_list_name, 'w') as outfile:
+    with open(os.path.join(out_dir, id_list_name), 'w') as outfile:
         outfile.write("\n".join(str(i) for i in id_list) + "\n")
-    id_file = out_dir + id_list_name
+    id_file = os.path.join(out_dir, id_list_name)
 
     wanted = set(line.rstrip("\n").split(None, 1)[0] for line in open(id_file))
     print("Found %i unique identifiers in %s" % (len(wanted), id_file))
 
     records = (r for r in SeqIO.parse(input_file, user_format)
                if r.id in wanted)
-    count = SeqIO.write(records, out_dir + output_file + user_format, user_format)
+    count = SeqIO.write(records, os.path.join(out_dir, output_file + user_format), user_format)
     print("Saved %i records from %s to %s" % (count, input_file, output_file))
     if count < len(wanted):
         print("Warning %i IDs not found in %s" % (len(wanted) - count, input_file))
@@ -265,17 +273,20 @@ def seq_reanalysis(kraken_table, kraken_labels, out_dir, user_format, forSubset_
     kraken_fullTable['Seq_ID'] = kraken_fullTable['Seq_ID'].astype(int)
 
     kraken_results = kraken_fullTable[["kraken_classified", "Seq_ID", "Tax_ID", "Seq_tax"]]
-    kraken_results.to_csv(out_dir + 'kraken_VRL.txt', sep='\t', index=False)
+    kraken_results.to_csv(os.path.join(out_dir, 'kraken_VRL.txt'),
+                          sep='\t', index=False)
 
-    with open(out_dir + 'ids1.pkl', 'rb') as id_dict:
+    with open(os.path.join(out_dir, 'ids1.pkl'), 'rb') as id_dict:
         ids1 = pickle.load(id_dict)
     kraken_fullTable["Seq_ID"] = kraken_fullTable["Seq_ID"].map(ids1)
-    kraken_fullTable.to_csv(out_dir + "kraken_FormattedTable.txt", sep='\t', index=False)
-    if os.path.isfile(out_dir + "kraken_FormattedTable.txt.gz"):
-        os.remove(out_dir + "kraken_FormattedTable.txt.gz")
-    subprocess.check_call("gzip " + out_dir + "kraken_FormattedTable.txt", shell=True)
-    os.remove(out_dir + "kraken_table.txt")
-    os.remove(out_dir + "kraken_labels.txt")
+    kraken_fullTable.to_csv(os.path.join(out_dir, "kraken_FormattedTable.txt"),
+                            sep='\t', index=False)
+    if os.path.isfile(os.path.join(out_dir, "kraken_FormattedTable.txt.gz")):
+        os.remove(os.path.join(out_dir, "kraken_FormattedTable.txt.gz"))
+    subprocess.check_call("gzip " + os.path.join(out_dir, "kraken_FormattedTable.txt"),
+                          shell=True)
+    os.remove(os.path.join(out_dir, "kraken_table.txt"))
+    os.remove(os.path.join(out_dir, "kraken_labels.txt"))
 
 
 def kaiju_classify(kaiju_file1, threads, out_dir, kaiju_db, kaiju_minlen, kraken_db,
@@ -299,15 +310,16 @@ def kaiju_classify(kaiju_file1, threads, out_dir, kaiju_db, kaiju_minlen, kraken
         mode = "mem"
 
     kaiju_command = "kaiju -z " + str(threads) + " -t " + kaiju_nodes + " -f " + kaiju_fmi + \
-                    " -i " + kaiju_file1 + " -o " + out_dir + "kaiju_table.txt -x -v -a " + mode + " -m " + \
-                    str(kaiju_minlen)
+                    " -i " + kaiju_file1 + " -o " + os.path.join(out_dir, "kaiju_table.txt") + \
+                    " -x -v -a " + mode + " -m " + str(kaiju_minlen)
 
     if kaiju_file2:
         kaiju_command += " -j " + kaiju_file2
 
     subprocess.check_call(kaiju_command, shell=True)
     subprocess.check_call("kraken-translate --mpa-format --db " + kraken_db + " " +
-                          out_dir + "kaiju_table.txt > " + out_dir + "kaiju_labels.txt", shell=True)
+                          os.path.join(out_dir, "kaiju_table.txt") + " > " +
+                          os.path.join(out_dir, "kaiju_labels.txt"), shell=True)
 
     for dirs, sub_dirs, files in os.walk(out_dir):
         # Only delete file when it's in out_put
@@ -325,7 +337,8 @@ def result_analysis(out_dir, kraken_VRL, kaiju_table, kaiju_label, host_subset):
     kraken and kaiju results into one table (kodoja). It then makes a table with
     all identified species and count number of intances for each usin virusSummary().
     """
-    kraken_results = pd.read_csv(out_dir + kraken_VRL, header=0, sep='\t',
+    kraken_results = pd.read_csv(os.path.join(out_dir + kraken_VRL),
+                                 header=0, sep='\t',
                                  dtype={"kraken_classified": str, "Seq_ID": int,
                                         "Tax_ID": int, "Seq_tax": str})
 
@@ -337,13 +350,15 @@ def result_analysis(out_dir, kraken_VRL, kaiju_table, kaiju_label, host_subset):
     kaiju_fullTable['Seq_ID'] = kaiju_fullTable['Seq_ID'].astype(int)
     kaiju_results = kaiju_fullTable[["kaiju_classified", "Seq_ID", "Tax_ID", "Seq_tax"]]
 
-    with open(out_dir + 'ids1.pkl', 'rb') as id_dict:
+    with open(os.path.join(out_dir, 'ids1.pkl'), 'rb') as id_dict:
         ids1 = pickle.load(id_dict)
     kaiju_fullTable["Seq_ID"] = kaiju_fullTable["Seq_ID"].map(ids1)
-    kaiju_fullTable.to_csv(out_dir + 'kaiju_FormattedTable.txt', sep='\t', index=False)
-    if os.path.isfile(out_dir + "kaiju_FormattedTable.txt.gz"):
-        os.remove(out_dir + "kaiju_FormattedTable.txt.gz")
-    subprocess.check_call('gzip ' + out_dir + 'kaiju_FormattedTable.txt', shell=True)
+    kaiju_fullTable.to_csv(os.path.join(out_dir, 'kaiju_FormattedTable.txt'),
+                           sep='\t', index=False)
+    if os.path.isfile(os.path.join(out_dir, "kaiju_FormattedTable.txt.gz")):
+        os.remove(os.path.join(out_dir, "kaiju_FormattedTable.txt.gz"))
+    subprocess.check_call('gzip ' + os.path.join(out_dir, 'kaiju_FormattedTable.txt'),
+                          shell=True)
 
     kodoja = pd.merge(kraken_results, kaiju_results, on='Seq_ID', how='outer')
     assert len(kraken_results) == len(kodoja), \
@@ -355,15 +370,16 @@ def result_analysis(out_dir, kraken_VRL, kaiju_table, kaiju_label, host_subset):
 
     kodoja["Seq_ID"] = kodoja["Seq_ID"].map(ids1)
 
-    os.remove(out_dir + "kaiju_table.txt")
-    os.remove(out_dir + "kaiju_labels.txt")
-    os.remove(out_dir + "kraken_VRL.txt")
+    os.remove(os.path.join(out_dir, "kaiju_table.txt"))
+    os.remove(os.path.join(out_dir, "kaiju_labels.txt"))
+    os.remove(os.path.join(out_dir, "kraken_VRL.txt"))
 
     kodoja['combined_result'] = kodoja.kraken_tax_ID[kodoja['kraken_tax_ID'] == kodoja['kaiju_tax_ID']]
     if host_subset:
         kodoja = kodoja[(kodoja['kraken_tax_ID'] != float(host_subset)) &
                         (kodoja['kaiju_tax_ID'] != float(host_subset))]
-    kodoja.to_csv(out_dir + 'kodoja_VRL.txt', sep='\t', index=False)
+    kodoja.to_csv(os.path.join(out_dir, 'kodoja_VRL.txt'),
+                  sep='\t', index=False)
 
     def virusSummary(kodoja_data):
         """Merge tables to create summary table.
@@ -444,7 +460,7 @@ def result_analysis(out_dir, kraken_VRL, kaiju_table, kaiju_label, host_subset):
                     genus_taxid[genus].append(key)
                 else:
                     genus_taxid[genus] = [key]
-        with open(out_dir + 'genus_taxid.pkl', 'wb') as pkl_dict:
+        with open(os.path.join(out_dir, 'genus_taxid.pkl'), 'wb') as pkl_dict:
             pickle.dump(genus_taxid, pkl_dict, protocol=pickle.HIGHEST_PROTOCOL)
 
         # Number of sequences classified to genus level
@@ -476,6 +492,7 @@ def result_analysis(out_dir, kraken_VRL, kaiju_table, kaiju_label, host_subset):
         table_summary['Genus sequences (stringent)'] = table_summary['Genus'].map(genus_combined)
         table_summary = table_summary.sort_values('Species sequences', ascending=False)
         table_summary = table_summary.sort_values('Species sequences (stringent)', ascending=False)
-        table_summary.to_csv(out_dir + 'virus_table.txt', sep='\t', index=False)
+        table_summary.to_csv(os.path.join(out_dir, 'virus_table.txt'),
+                             sep='\t', index=False)
 
     virusSummary(kodoja)

@@ -78,7 +78,7 @@ def ncbi_rename_customDB(tool, genome_download_dir, host_taxid, extra_files=Fals
     else:
         file_extension = ".faa.gz"
 
-    path_assembly_summary = genome_download_dir + "viral_assembly_summary.txt"
+    path_assembly_summary = os.path.join(genome_download_dir, "viral_assembly_summary.txt")
     assembly_summary = pd.read_table(path_assembly_summary, sep='\t',
                                      skiprows=1, header=0)
     assembly_summary.rename(columns={'# assembly_accession': 'assembly_accession'},
@@ -148,7 +148,7 @@ def krakenDB_build(genome_download_dir, kraken_db_dir, threads, kraken_kmer, kra
 
     # Download or create symlink of taxonomy for Kraken database
     if taxonomy:
-        os.symlink(taxonomy, kraken_db_dir + "taxonomy")
+        os.symlink(taxonomy, os.path.join(kraken_db_dir, "taxonomy"))
     else:
         subprocess.check_call("kraken-build --download-taxonomy --threads " +
                               str(threads) + " --db " + kraken_db_dir, shell=True)
@@ -198,7 +198,7 @@ def kaijuDB_build(genome_download_dir, kaiju_db_dir, subset_vir_assembly):
         os.makedirs(kaiju_db_dir)
 
     # Add files downloaded and ready for kaiju ("<file>.kaiju.faa") to one fasta file
-    kaijuDB_fasta = kaiju_db_dir + "kaiju_library.faa"
+    kaijuDB_fasta = os.path.join(kaiju_db_dir, "kaiju_library.faa")
     count = 0
     file_list = []
     for root, subdirs, files in os.walk(genome_download_dir):
@@ -230,9 +230,12 @@ def kaijuDB_build(genome_download_dir, kaiju_db_dir, subset_vir_assembly):
             subprocess.check_call("gzip " + unzip_filename, shell=True)
 
     # Build Kaiju database
-    subprocess.check_call("mkbwt -n 5 -a ACDEFGHIKLMNPQRSTVWY -o " + kaiju_db_dir +
-                          "kaiju_library " + kaiju_db_dir + "kaiju_library.faa", shell=True)
-    subprocess.check_call("mkfmi " + kaiju_db_dir + "kaiju_library", shell=True)
-    os.remove(kaiju_db_dir + "kaiju_library.faa")
-    os.remove(kaiju_db_dir + "kaiju_library.bwt")
-    os.remove(kaiju_db_dir + "kaiju_library.sa")
+    subprocess.check_call("mkbwt -n 5 -a ACDEFGHIKLMNPQRSTVWY -o " +
+                          os.path.join(kaiju_db_dir, "kaiju_library") + " " +
+                          os.path.join(kaiju_db_dir, "kaiju_library.faa"),
+                          shell=True)
+    subprocess.check_call("mkfmi " + os.path.join(kaiju_db_dir, "kaiju_library"),
+                          shell=True)
+    os.remove(os.path.join(kaiju_db_dir, "kaiju_library.faa"))
+    os.remove(os.path.join(kaiju_db_dir, "kaiju_library.bwt"))
+    os.remove(os.path.join(kaiju_db_dir, "kaiju_library.sa"))
