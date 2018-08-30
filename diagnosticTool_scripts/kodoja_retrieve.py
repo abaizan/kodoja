@@ -103,7 +103,7 @@ def main():
     else:
         rows_wanted = (kodoja_vrl['kraken_tax_ID'].isin(TaxId_out) |
                        kodoja_vrl['kaiju_tax_ID'].isin(TaxId_out))
-    seqID_wanted = list(kodoja_vrl.loc[rows_wanted, 'Seq_ID'])
+    seqID_wanted = set(kodoja_vrl.loc[rows_wanted, 'Seq_ID'])
 
     sequence_subset(output_dir, args.read1, label + "_sequences1.", args.user_format,
                     seqID_wanted, label + '_sequences1.txt')
