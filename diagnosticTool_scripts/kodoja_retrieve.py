@@ -84,7 +84,7 @@ def main():
             ids1 = pickle.load(id_dict)
         with open(os.path.join(args.file_dir, 'ids2.pkl'), 'rb') as id_dict:
             ids2 = pickle.load(id_dict)
-        iv_ids1 = dict((v, k) for k, v in ids1.iteritems())
+        iv_ids1 = dict((v, k) for k, v in ids1.items())
         kodoja_vrl["Seq_ID"] = kodoja_vrl["Seq_ID"].map(iv_ids1)
         kodoja_vrl["Seq_ID"] = kodoja_vrl["Seq_ID"].map(ids2)
         seqID_wanted = list(kodoja_vrl.loc[rows_wanted, 'Seq_ID'])
