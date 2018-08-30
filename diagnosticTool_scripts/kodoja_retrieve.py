@@ -55,7 +55,7 @@ def main():
                 genus_taxid = pickle.load(id_dict)
             for sp_taxid in TaxId_out:
                 genus_name = table_summary.Genus[table_summary['Species TaxID'] == sp_taxid].values[0]
-                if genus_name in list(genus_taxid.keys()):
+                if genus_name in genus_taxid:
                     for items in genus_taxid[genus_name]:
                         if items not in more_taxids:
                             more_taxids.append(items)
@@ -65,8 +65,7 @@ def main():
         kraken_taxid = list(kodoja_vrl.kraken_tax_ID[kodoja_vrl['kraken_seq_tax'].str.contains("Viruses")])
         kraken_taxid += list(kodoja_vrl.kraken_tax_ID[kodoja_vrl['kraken_seq_tax'].str.contains("Viroids")])
         kaiju_taxid = list(kodoja_vrl.kaiju_tax_ID[kodoja_vrl['kaiju_seq_tax'].str.contains("Viruses")])
-        TaxId_out = set(kraken_taxid + kaiju_taxid)
-        TaxId_out = list(TaxId_out)
+        TaxId_out = sorted(set(kraken_taxid + kaiju_taxid))
         # TaxId_out = list(table_summary['Species TaxID'])
         label = 'virus_all'
 

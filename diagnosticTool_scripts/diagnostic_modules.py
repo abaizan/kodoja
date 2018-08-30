@@ -130,7 +130,7 @@ def check_file(file1, out_dir, user_format, file2=False):
         ids1 = rename_seqIDs(file1, out_dir, user_format, paired=False)
 
     with open(out_dir + "log_file.txt", "a") as log_file:
-        log_file.write("Number of sequences = " + str(list(ids1.keys())[-1]) + "\n")
+        log_file.write("Number of sequences = " + str(list(ids1)[-1]) + "\n")
 
     with open(out_dir + 'ids1.pkl', 'wb') as pkl_dict:
         pickle.dump(ids1, pkl_dict, protocol=pickle.HIGHEST_PROTOCOL)
@@ -399,10 +399,10 @@ def result_analysis(out_dir, kraken_VRL, kaiju_table, kaiju_label, host_subset):
         either_class.update(kaiju_class)
         either_class.pop(0, None)
         for key, value in either_class.items():
-            if key in list(kraken_class.keys()):
-                if key in list(kaiju_class.keys()):
+            if key in kraken_class:
+                if key in kaiju_class:
                     either_class[key] = kraken_class[key] + kaiju_class[key]
-                    if key in list(combined_class.keys()):
+                    if key in combined_class:
                         either_class[key] = either_class[key] - combined_class[key]
                 else:
                     either_class[key] = kraken_class[key]
@@ -440,7 +440,7 @@ def result_analysis(out_dir, kraken_VRL, kaiju_table, kaiju_label, host_subset):
         for key, value in LCA_tax.items():
             if value[0:3] == 'g__':
                 genus = value[3:]
-                if genus in list(genus_taxid.keys()):
+                if genus in genus_taxid:
                     genus_taxid[genus].append(key)
                 else:
                     genus_taxid[genus] = [key]
@@ -453,7 +453,7 @@ def result_analysis(out_dir, kraken_VRL, kaiju_table, kaiju_label, host_subset):
             for key, value in genus_taxid.items():
                 seq_sum = 0
                 for taxid in value:
-                    if taxid in list(dict_class.keys()):
+                    if taxid in dict_class:
                         seq_sum += dict_class[taxid]
                 genus_dict[key] = seq_sum
             return genus_dict
