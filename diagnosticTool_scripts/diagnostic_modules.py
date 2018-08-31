@@ -79,9 +79,9 @@ def rename_seqIDs(input_file, out_dir, user_format, paired=False):
     Returns dictionary mapping the sequence number to the old
     identifier and description line.
     """
-    if paired==2:
+    if paired == 2:
         output_file = os.path.join(out_dir, "renamed_file_2." + user_format)
-    elif paired==1 or paired==False:
+    elif paired == 1 or paired is False:
         output_file = os.path.join(out_dir, "renamed_file_1." + user_format)
     else:
         raise ValueError("Wanted 1, 2 or False - not %r" % paired)
