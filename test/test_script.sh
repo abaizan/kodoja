@@ -148,6 +148,7 @@ echo "Testing kodoja_search.py with paired end FASTQ with /1, /2"
 echo "=============================================================="
 diagnosticTool_scripts/kodoja_search.py -r1 test/data/testData_1.fastq -o test/PE_test/ -d1 test/example_db/krakenDB_test/ -d2 test/example_db/kaijuDB_test/ -r2 ./test/data/testData_2.fastq -t 2
 diff test/PE_test/virus_table.txt test/data/virus_table_PE_fastq.txt
+diff test/PE_test/kodoja_VRL.txt test/data/virus_reads_PE_fastq.txt
 
 echo "=============================================================="
 echo "Testing kodoja_retrieve.py with paired end FASTQ with /1, /2"
@@ -164,7 +165,7 @@ echo "Testing kodoja_search.py with paired end FASTQ without /1, /2"
 echo "=============================================================="
 diagnosticTool_scripts/kodoja_search.py -r1 test/data/test_names_R1.fq -r2 test/data/test_names_R2.fq -o test/PE_test/ -d1 test/example_db/krakenDB_test/ -d2 test/example_db/kaijuDB_test -t 2
 diff test/PE_test/virus_table.txt test/data/virus_table_PE_fastq.txt
-
+diff test/PE_test/kodoja_VRL.txt test/data/virus_reads_PE_names_fastq.txt
 
 echo "=============================================================="
 echo "Testing kodoja_retrieve.py on paired end FASTQ without /1, /2"
@@ -181,6 +182,7 @@ echo "Testing kodoja_search.py with single end FASTQ"
 echo "=============================================================="
 diagnosticTool_scripts/kodoja_search.py -r1 test/data/testData_1.fastq -o test/SE_test/ -d1 test/example_db/krakenDB_test/ -d2 test/example_db/kaijuDB_test/ -t 2
 diff test/SE_test/virus_table.txt test/data/virus_table_SE_fastq.txt
+diff test/SE_test/kodoja_VRL.txt test/data/virus_reads_SE_fastq.txt
 
 echo "=============================================================="
 echo "Testing kodoja_retrieve.py with single end FASTQ"
@@ -199,6 +201,7 @@ echo "Testing kodoja_search.py with paired end FASTA"
 echo "=============================================================="
 diagnosticTool_scripts/kodoja_search.py -r1 test/data/testData_1.fasta -o test/fasta_test/ -d1 test/example_db/krakenDB_test/ -d2 test/example_db/kaijuDB_test/ -r2 ./test/data/testData_2.fasta -f fasta
 diff test/fasta_test/virus_table.txt test/data/virus_table_PE_fasta.txt
+diff test/fasta_test/kodoja_VRL.txt test/data/virus_reads_PE_fasta.txt
 
 echo "=============================================================="
 echo "Testing kodoja_retreive.py with paired end FASTA"
