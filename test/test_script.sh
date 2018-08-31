@@ -61,6 +61,29 @@ echo "What version of kodoja search?"
 echo "What version of kodoja retrieve?"
 ./diagnosticTool_scripts/kodoja_retrieve.py --version
 
+# Generating test data using modern Illumina paired naming without /1 and /2
+# Also deliberately using .fq rather than .fastq to ensure that works too
+if [ ! -f "test/data/test_names_R1.fq" ]
+then
+    echo "Generating test_names_R1.fq"
+    sed -e 's#/1$# 1:N:0:CTCCGC#g' test/data/testData_1.fastq > test/data/test_names_R1.fq
+fi
+if [ ! -f "test/data/test_names_R2.fq" ]
+then
+    echo "Generating test_names_R2.fq"
+    sed -e 's#/2$# 2:N:0:CTCCGC#g' test/data/testData_2.fastq > test/data/test_names_R2.fq
+fi
+if [ ! -f "test/data/filtered_PE_fastq_names_stringent_R1.fq" ]
+then
+    echo "Generating filtered_PE_fastq_names_stringent_R1.fq"
+    sed -e 's#/1$# 1:N:0:CTCCGC#g' test/data/filtered_PE_fastq_stringent_R1.fastq > test/data/filtered_PE_fastq_names_stringent_R1.fq
+fi
+if [ ! -f "test/data/filtered_PE_fastq_names_stringent_R2.fq" ]
+then
+    echo "Generating filtered_PE_fastq_names_stringent_R2.fq"
+    sed -e 's#/2$# 2:N:0:CTCCGC#g' test/data/filtered_PE_fastq_stringent_R2.fastq > test/data/filtered_PE_fastq_names_stringent_R2.fq
+fi
+
 echo "Beginning tests..."
 
 echo "=============================================================="
@@ -121,19 +144,36 @@ then
 fi
 
 echo "=============================================================="
-echo "Testing kodoja_search.py with paired end FASTQ"
+echo "Testing kodoja_search.py with paired end FASTQ with /1, /2"
 echo "=============================================================="
 diagnosticTool_scripts/kodoja_search.py -r1 test/data/testData_1.fastq -o test/PE_test/ -d1 test/example_db/krakenDB_test/ -d2 test/example_db/kaijuDB_test/ -r2 ./test/data/testData_2.fastq -t 2
 diff test/PE_test/virus_table.txt test/data/virus_table_PE_fastq.txt
 
 echo "=============================================================="
-echo "Testing kodoja_retrieve.py with paired end FASTQ"
+echo "Testing kodoja_retrieve.py with paired end FASTQ with /1, /2"
 echo "=============================================================="
 # Using -s for stringent, defaults to fastq
 diagnosticTool_scripts/kodoja_retrieve.py -o test/PE_test/ -r1 test/data/testData_1.fastq -r2 test/data/testData_2.fastq -s
 ls test/PE_test/subset_files/
 diff test/PE_test/subset_files/virus_all_sequences1.fastq test/data/filtered_PE_fastq_stringent_R1.fastq
 diff test/PE_test/subset_files/virus_all_sequences2.fastq test/data/filtered_PE_fastq_stringent_R2.fastq
+rm -r test/PE_test/
+
+echo "=============================================================="
+echo "Testing kodoja_search.py with paired end FASTQ without /1, /2"
+echo "=============================================================="
+diagnosticTool_scripts/kodoja_search.py -r1 test/data/test_names_R1.fq -r2 test/data/test_names_R2.fq -o test/PE_test/ -d1 test/example_db/krakenDB_test/ -d2 test/example_db/kaijuDB_test -t 2
+diff test/PE_test/virus_table.txt test/data/virus_table_PE_fastq.txt
+
+
+echo "=============================================================="
+echo "Testing kodoja_retrieve.py on paired end FASTQ without /1, /2"
+echo "=============================================================="
+# Using -s for stringent, defaults to fastq format and extension
+diagnosticTool_scripts/kodoja_retrieve.py -o test/PE_test/ -r1 test/data/test_names_R1.fq -r2 test/data/test_names_R2.fq -s
+ls test/PE_test/subset_files/
+diff test/PE_test/subset_files/virus_all_sequences1.fastq test/data/filtered_PE_fastq_names_stringent_R1.fq
+diff test/PE_test/subset_files/virus_all_sequences2.fastq test/data/filtered_PE_fastq_names_stringent_R2.fq
 rm -r test/PE_test/
 
 echo "=============================================================="

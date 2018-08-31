@@ -138,6 +138,7 @@ added to the databases(default=False)
 |         |            | - ``dictionary changed size during iteration`` bug  |
 | 0.0.6   | *pending*  | - Python 3 fix for ``kodoja_retrieve.py``           |
 |         |            | - Automated testing of ``kodoja_retrieve.py``       |
+|         |            | - Also test paired reads without /1 and /2 suffices |
 
 
 ## Development
