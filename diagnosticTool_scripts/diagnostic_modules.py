@@ -106,10 +106,10 @@ def check_file(file1, out_dir, user_format, file2=False):
     id names). Create dictionaries containing real IDs and
     renamed version and pickle. If data is PE, assert
     paired files have the same number of entries and if
-    the paired reads are mached by choosing a random
-    entry from the first list of ids (minus meatdata) and
+    the paired reads are matched by choosing a random
+    entry from the first list of ids (minus metadata) and
     the same entry for the second list of ids (can have
-    one character different as could be named 1 or 2).
+    one character different as could be named /1 or /2).
     """
     if file2:
         ids1 = rename_seqIDs(file1, out_dir, user_format, paired=1)
