@@ -61,7 +61,7 @@ def rename_seqIDs(input_file, out_dir, user_format, paired=False):
     Write a new file where each sequence ID is replaced with
     the read number (counting from one).
 
-    Does not attempt to include "/1" and "/2" name suffices, nor
+    Does not attempt to include "/1" and "/2" name suffixes, nor
     include "1:" or "2:" in the description, for paired reads.
 
     Returns dictionary mapping the sequence number to the old
@@ -96,7 +96,7 @@ def check_file(file1, out_dir, user_format, file2=False):
     paired files have the same number of entries and if
     the paired reads are matched by choosing random
     entries and confirming the IDs match (optionally
-    with /1 and /2 suffices).
+    with /1 and /2 suffixes).
     """
     if file2:
         ids1 = rename_seqIDs(file1, out_dir, user_format, paired=1)
