@@ -55,18 +55,6 @@ def test_format(file1, user_format):
         " format rather than " + user_format + " format."
 
 
-def str_overlap(str1, str2):
-    """Get number of matching characters between two strings.
-
-    Returns int with number of matching characters.
-    """
-    count = 0
-    for i in range(min(len(str1), len(str2))):
-        if str1[i] == str2[i]:
-            count += 1
-    return count
-
-
 def rename_seqIDs(input_file, out_dir, user_format, paired=False):
     """Rename sequence identifiers to just the read number.
 
@@ -106,10 +94,9 @@ def check_file(file1, out_dir, user_format, file2=False):
     id names). Create dictionaries containing real IDs and
     renamed version and pickle. If data is PE, assert
     paired files have the same number of entries and if
-    the paired reads are matched by choosing a random
-    entry from the first list of ids (minus metadata) and
-    the same entry for the second list of ids (can have
-    one character different as could be named /1 or /2).
+    the paired reads are matched by choosing random
+    entries and confirming the IDs match (optionally
+    with /1 and /2 suffices).
     """
     if file2:
         ids1 = rename_seqIDs(file1, out_dir, user_format, paired=1)
@@ -124,9 +111,11 @@ def check_file(file1, out_dir, user_format, file2=False):
             random_id = random.randint(1, len(ids1) - 1)
             id_1 = ids1[random_id].split()[0]
             id_2 = ids2[random_id].split()[0]
-            id_overlap = str_overlap(id_1, id_2)
-            assert id_overlap == len(id_1) or id_overlap == len(id_1) - 1, \
-                "Paired-end sequences don't match"
+            assert id_1 == id_2 or (id_1.endswith("/1") and
+                                    id_2.endswith("/2") and
+                                    id_1[:-1] == id_2[:-1]), \
+                ("Paired-end sequences don't match, e.g. %r vs %r"
+                  % (id_1, id_2))
     else:
         ids1 = rename_seqIDs(file1, out_dir, user_format, paired=False)
 
