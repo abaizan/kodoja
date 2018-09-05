@@ -11,16 +11,20 @@ There are three main scripts:
 
 * ``kodoja_search.py`` - classify RNA-seq data.
 * ``kodoja_build.py`` - download viral/host genomes and create new Kraken and Kaiju databases.
-* ``kodoja_retrieve.py`` - pull out sequences of interest from kodoja_search.py results file.
+* ``kodoja_retrieve.py`` - pull out sequences of interest from ``kodoja_search.py`` results file.
 
-Python files ``diagnostic_modules.py`` and ``database_modules.py`` contain the fuctions called by kodoja_search.py and kodoja_build.py
-The ``.sh`` files are example script for submission to SGE cluster
+Python files ``diagnostic_modules.py`` and ``database_modules.py`` contain the fuctions called by ``kodoja_search.py`` and ``kodoja_build.py``, and are not intended for public use.
+
+The ``.sh`` files are example scripts for submission to an SGE cluster.
 
 ## License
 
 Kodoja is released under the MIT licence, see file ``LICENSE.txt`` for details.
 
 ## Dependencies
+
+The versions listed were those used in the initial development of kodoja, later updates
+will likely work unless the tool makes a backward incompatible change.
 
 * FastQC v0.11.5
 * Trimmomatic v0.36
