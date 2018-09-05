@@ -115,7 +115,7 @@ def check_file(file1, out_dir, user_format, file2=False):
                                     id_2.endswith("/2") and
                                     id_1[:-1] == id_2[:-1]), \
                 ("Paired-end sequences don't match, e.g. %r vs %r"
-                  % (id_1, id_2))
+                 % (id_1, id_2))
     else:
         ids1 = rename_seqIDs(file1, out_dir, user_format, paired=False)
 
