@@ -46,6 +46,29 @@ For manual installation, you must install all the dependencies by hand and then 
 scripts folder to your ``$PATH`` so that you can run ``kodoja_search.py`` etc at the command
 line.
 
+## Pre-built Databases
+
+You can	use ``kodoja_build.py``	to make	your own databses, or download the
+pre-built database as described here.
+
+The kodojaDB v1.0 was released Sept 2018 under the CC-BY 4.0 license. It can
+be downloaded and cited as https://doi.org/10.5281/zenodo.1406071 (where the
+metadata describes how it was made). We suggest you install it as follows:
+
+``` bash
+$ cd /mnt/shared/data/
+$ mkdir kodojaDB_v1.0
+$ cd kodojaDB_v1.0
+$ wget https://zenodo.org/record/1406071/files/kodojaDB_v1.0.tar.gz
+$ tar -zxvf kodojaDB_v1.0.tar.gz
+```
+
+You would then use this with ``kodoja_search.py`` as follows:
+
+``` bash
+$ kodoja_search.py --kraken_db /mnt/shared/data/krakenDB --kaiju_db /mnt/shared/data/kaijuDB ...
+```
+
 ## Usage
 
 IMPORTANT: do not put original data in the output directory when executing kodoja_search!
@@ -117,7 +140,7 @@ added to the databases(default=False)
 * ``--user_format`` - Sequence data format (default=fastq)
 * ``--read1`` - Path to read 1 file (required)
 * ``--read2`` - Path to read 2 file
-* ``--taxID' - Virus tax ID for subsetting (default: All viral sequences)
+* ``--taxID`` - Virus tax ID for subsetting (default: All viral sequences)
 * ``--genus`` - Include sequences classified at the genus level in subset file
 * ``--stringent`` - Only subset sequences identified to same virus by both tools
 
@@ -139,7 +162,7 @@ added to the databases(default=False)
 | 0.0.6   | 2018-09-04 | - Python 3 fix for ``kodoja_retrieve.py``           |
 |         |            | - Automated testing of ``kodoja_retrieve.py``       |
 |         |            | - Also test paired reads without /1 and /2 suffixes |
-
+| 0.0.7   | *pending*  | - Document installing prebuilt database from Zenodo |
 
 ## Development
 
