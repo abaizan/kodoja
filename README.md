@@ -66,7 +66,9 @@ $ tar -zxvf kodojaDB_v1.0.tar.gz
 You would then use this with ``kodoja_search.py`` as follows:
 
 ``` bash
-$ kodoja_search.py --kraken_db /mnt/shared/data/krakenDB --kaiju_db /mnt/shared/data/kaijuDB ...
+$ kodoja_search.py --kraken_db /mnt/shared/data/kodojaDB_v1.0/krakenDB \
+                   --kaiju_db /mnt/shared/data/kodojaDB_v1.0/kaijuDB \
+		   ...
 ```
 
 ## Usage
