@@ -352,7 +352,11 @@ def result_analysis(out_dir, kraken_VRL, kaiju_table, kaiju_label, host_subset):
     kodoja = pd.merge(kraken_results, kaiju_results, on='Seq_ID', how='outer')
     assert len(kraken_results) == len(kodoja), \
         'ERROR: Kraken and Kaiju results not merged properly'
-    kodoja.sort_values(['Seq_ID'], inplace=True)
+    if hasattr(kodoja, 'sort_values'):
+        # pandas 0.17 onwards
+        kodoja.sort_values(['Seq_ID'], inplace=True)
+    else:
+        kodoja.sort(['Seq_ID'], inplace=True)
     kodoja.reset_index(drop=True, inplace=True)
     kodoja.rename(columns={"Seq_tax_x": "kraken_seq_tax", "Seq_tax_y": "kaiju_seq_tax",
                            'Tax_ID_x': 'kraken_tax_ID', 'Tax_ID_y': 'kaiju_tax_ID'}, inplace=True)
@@ -479,8 +483,13 @@ def result_analysis(out_dir, kraken_VRL, kaiju_table, kaiju_label, host_subset):
         table_summary['Genus'] = table_summary['Species TaxID'].map(genus_per_species)
         table_summary['Genus sequences'] = table_summary['Genus'].map(genus_either)
         table_summary['Genus sequences (stringent)'] = table_summary['Genus'].map(genus_combined)
-        table_summary.sort_values(['Species sequences (stringent)', 'Species sequences'],
-                                  ascending=False, inplace=True)
+        if hasattr(table_summary, 'sort_values'):
+            # pandas 0.17 onwards
+            table_summary.sort_values(['Species sequences (stringent)', 'Species sequences'],
+                                      ascending=False, inplace=True)
+        else:
+            table_summary.sort(['Species sequences (stringent)', 'Species sequences'],
+                               ascending=False, inplace=True)
         table_summary.to_csv(os.path.join(out_dir, 'virus_table.txt'),
                              sep='\t', index=False)
 
