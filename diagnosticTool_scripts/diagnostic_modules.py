@@ -6,6 +6,7 @@ import pandas as pd
 import random
 import os
 import pickle
+from collections import Counter
 from math import isnan
 
 from Bio import SeqIO
@@ -453,7 +454,7 @@ def result_analysis(out_dir, kraken_VRL, kaiju_table, kaiju_label, host_subset):
 
         # Number of sequences classified to genus level
         def genus_seq_count(dict_class):
-            genus_dict = {}
+            genus_dict = Counter()  # like a dictionary but default value zero
             for key, value in genus_taxid.items():
                 seq_sum = 0
                 for taxid in value:

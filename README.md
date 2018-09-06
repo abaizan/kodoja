@@ -170,6 +170,7 @@ added to the databases(default=False)
 |         |            | - Also test paired reads without /1 and /2 suffixes |
 | 0.0.7   | *pending*  | - Document installing prebuilt database from Zenodo |
 |         |            | - Optimise sorting of pandas dataframes             |
+|         |            | - Zero not blank in cols 6 and 7 of virus_table.txt |
 
 
 ## Development
