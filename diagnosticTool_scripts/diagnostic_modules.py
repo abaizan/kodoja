@@ -13,7 +13,7 @@ from Bio.SeqIO.FastaIO import SimpleFastaParser
 from Bio.SeqIO.QualityIO import FastqGeneralIterator
 
 # The user-facing scripts will all report this version number via --version:
-version = "0.0.6"
+version = "0.0.7"
 
 
 def check_path(dirs):
@@ -453,7 +453,7 @@ def result_analysis(out_dir, kraken_VRL, kaiju_table, kaiju_label, host_subset):
 
         # Number of sequences classified to genus level
         def genus_seq_count(dict_class):
-            genus_dict = genus_taxid.copy()
+            genus_dict = {}
             for key, value in genus_taxid.items():
                 seq_sum = 0
                 for taxid in value:
