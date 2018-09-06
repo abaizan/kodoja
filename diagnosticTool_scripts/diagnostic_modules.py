@@ -352,7 +352,7 @@ def result_analysis(out_dir, kraken_VRL, kaiju_table, kaiju_label, host_subset):
     assert len(kraken_results) == len(kodoja), \
         'ERROR: Kraken and Kaiju results not merged properly'
     kodoja.sort_values(['Seq_ID'], inplace=True)
-    kodoja = kodoja.reset_index(drop=True)
+    kodoja.reset_index(drop=True, inplace=True)
     kodoja.rename(columns={"Seq_tax_x": "kraken_seq_tax", "Seq_tax_y": "kaiju_seq_tax",
                            'Tax_ID_x': 'kraken_tax_ID', 'Tax_ID_y': 'kaiju_tax_ID'}, inplace=True)
 
