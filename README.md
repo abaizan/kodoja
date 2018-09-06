@@ -169,6 +169,8 @@ added to the databases(default=False)
 |         |            | - Automated testing of ``kodoja_retrieve.py``       |
 |         |            | - Also test paired reads without /1 and /2 suffixes |
 | 0.0.7   | *pending*  | - Document installing prebuilt database from Zenodo |
+|         |            | - Optimise sorting of pandas dataframes             |
+
 
 ## Development
 
