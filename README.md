@@ -23,8 +23,9 @@ Kodoja is released under the MIT licence, see file ``LICENSE.txt`` for details.
 
 ## Dependencies
 
-The versions listed were those used in the initial development of kodoja, later updates
-will likely work unless the tool makes a backward incompatible change.
+The lower versions listed were those used in the initial development and/or
+local testing of Kodoja. Later updates will likely work unless the tool makes
+a backward incompatible change.
 
 * FastQC v0.11.5
 * Trimmomatic v0.36
@@ -32,15 +33,19 @@ will likely work unless the tool makes a backward incompatible change.
 * Kaiju v1.5.0
 
 Python packages:
-* numpy
-* biopython
-* pandas
-* ncbi-genome-download
+
+* numpy v1.9
+* biopython v1.67
+* pandas v0.14
+* ncbi-genome-download v0.2.6
+
+You can use Python 2.7 or Python 3, specifically Kodoja has been tested
+on Python 3.6.
 
 ## Installation
 
-A conda package has been prepared on the BioConda channel which will install Kodoja and a known
-working combination of the dependencies, all with just:
+A conda package has been prepared on the BioConda channel which will install
+Kodoja and the dependencies, all with just:
 
 ```
 $ conda install -c bioconda kodoja
