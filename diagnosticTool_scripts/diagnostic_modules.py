@@ -6,7 +6,6 @@ import pandas as pd
 import random
 import os
 import pickle
-from collections import Counter
 from math import isnan
 
 from Bio import SeqIO
@@ -458,7 +457,7 @@ def result_analysis(out_dir, kraken_VRL, kaiju_table, kaiju_label, host_subset):
 
         # Number of sequences classified to genus level
         def genus_seq_count(dict_class):
-            genus_dict = Counter()  # like a dictionary but default value zero
+            genus_dict = {}
             for key, value in genus_taxid.items():
                 seq_sum = 0
                 for taxid in value:
@@ -481,8 +480,10 @@ def result_analysis(out_dir, kraken_VRL, kaiju_table, kaiju_label, host_subset):
         table_summary['Species sequences (stringent)'] = table_summary['Species TaxID'].map(combined_class)
         table_summary['Species'] = table_summary['Species TaxID'].map(species_dict)
         table_summary['Genus'] = table_summary['Species TaxID'].map(genus_per_species)
-        table_summary['Genus sequences'] = table_summary['Genus'].map(genus_either)
-        table_summary['Genus sequences (stringent)'] = table_summary['Genus'].map(genus_combined)
+        # Using functions in map to set default value of 0,
+        # can use a defaultdict or Counter if have pandas 0.20 onwards
+        table_summary['Genus sequences'] = table_summary['Genus'].map(lambda g: genus_either.get(g, 0))
+        table_summary['Genus sequences (stringent)'] = table_summary['Genus'].map(lambda g: genus_combined.get(g, 0))
         if hasattr(table_summary, 'sort_values'):
             # pandas 0.17 onwards
             table_summary.sort_values(['Species sequences (stringent)', 'Species sequences'],
