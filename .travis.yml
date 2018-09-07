@@ -1,8 +1,23 @@
 language: python
+
+# Defining a 2x2 test matrix with Python version and dependency versions.
+
 python:
 # We don't actually use the Travis Python, but this keeps it organized.
  - "2.7"
  - "3.6"
+
+env:
+# We have a legacy version test, and a latest version test
+# Splitting numpy from rest of pip as need it before can
+# compile older versions of pandas or biopython (while recent
+# versions provided pre-compiled as a wheel file).
+ - CONDA="trimmomatic kraken kaiju fastqc"
+   NUMPY="numpy"
+   PIP="numpy pandas biopython ncbi-genome-download"
+ - CONDA="trimmomatic=0.36 kraken=1.0 kaiju=1.5.0 fastqc=0.11.5"
+   NUMPY="numpy==1.9"
+   PIP="pandas==0.14 biopython==1.67 ncbi-genome-download==0.2.6"
 
 before_install:
  # This happens using the TravisCI copy of Python, BEFORE we install conda.
@@ -32,16 +47,12 @@ install:
  - conda config --add channels conda-forge
  - conda config --add channels bioconda
  # ==============================================
- # Install our conda dependencies here:
- # - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION trimmomatic
- # - source activate test-environment
- # This should be fine for us, don't care about conda environments,
- - conda install trimmomatic=0.36
- - conda install kraken=1.0
- - conda install kaiju=1.5.0
- - conda install fastqc=0.11.5
+ # Install our conda dependencies here, not bothering with a conda environment
+ - conda install $CONDA
  # ==============================================
- - "pip install numpy pandas biopython ncbi-genome-download"
+ # Install our Python dependencies here, not bothering with a virtual env
+ - pip install $NUMPY
+ - pip install $PIP
 
 script:
 - test/test_script.sh
