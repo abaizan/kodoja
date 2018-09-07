@@ -173,7 +173,7 @@ added to the databases(default=False)
 | 0.0.6   | 2018-09-04 | - Python 3 fix for ``kodoja_retrieve.py``           |
 |         |            | - Automated testing of ``kodoja_retrieve.py``       |
 |         |            | - Also test paired reads without /1 and /2 suffixes |
-| 0.0.7   | *pending*  | - Document installing prebuilt database from Zenodo |
+| 0.0.7   | 2018-09-07 | - Document installing prebuilt database from Zenodo |
 |         |            | - Optimise sorting of pandas dataframes             |
 |         |            | - Zero not blank in cols 6 and 7 of virus_table.txt |
 |         |            | - Automated testing of pinned & latest dependencies |
