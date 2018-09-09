@@ -17,6 +17,8 @@ Python files ``diagnostic_modules.py`` and ``database_modules.py`` contain the f
 
 The ``.sh`` files are example scripts for submission to an SGE cluster.
 
+For a examples of how to run the code please see the wiki page: https://github.com/abaizan/kodoja/wiki/Kodoja-Manual
+
 ## License
 
 Kodoja is released under the MIT licence, see file ``LICENSE.txt`` for details.
