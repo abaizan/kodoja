@@ -102,6 +102,9 @@ def main():
     else:
         rows_wanted = (kodoja_vrl['kraken_tax_ID'].isin(TaxId_out) |
                        kodoja_vrl['kaiju_tax_ID'].isin(TaxId_out))
+    # Since kodoja v0.0.8 the Seq_ID column has been just the ID,
+    # but on earlier versions would be full description line -
+    # thus splitting on the first white space:
     seqID_wanted = set(_.rstrip("\n").split(None, 1)[0] for _ in kodoja_vrl.loc[rows_wanted, 'Seq_ID'])
 
     sequence_subset(output_dir, args.read1, label + "_sequences1.", args.user_format,

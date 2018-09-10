@@ -13,7 +13,7 @@ from Bio.SeqIO.FastaIO import SimpleFastaParser
 from Bio.SeqIO.QualityIO import FastqGeneralIterator
 
 # The user-facing scripts will all report this version number via --version:
-version = "0.0.7"
+version = "0.0.8"
 
 
 def check_path(dirs):
@@ -65,7 +65,7 @@ def rename_seqIDs(input_file, out_dir, user_format, paired=False):
     include "1:" or "2:" in the description, for paired reads.
 
     Returns dictionary mapping the sequence number to the old
-    identifier and description line.
+    identifier (first word only from the description line).
     """
     if paired == 2:
         output_file = os.path.join(out_dir, "renamed_file_2." + user_format)
@@ -77,11 +77,11 @@ def rename_seqIDs(input_file, out_dir, user_format, paired=False):
     with open(input_file, 'r') as in_file, open(output_file, 'w') as out_file:
         if user_format == 'fasta':
             for index, (title, seq) in enumerate(SimpleFastaParser(in_file)):
-                id_dict[index + 1] = title
+                id_dict[index + 1] = title.split(None, 1)[0]
                 out_file.write(">%i\n%s\n" % (index + 1, seq))
         else:
             for index, (title, seq, qual) in enumerate(FastqGeneralIterator(in_file)):
-                id_dict[index + 1] = title
+                id_dict[index + 1] = title.split(None, 1)[0]
                 out_file.write("@%i\n%s\n+\n%s\n" % (index + 1, seq, qual))
     return id_dict
 
@@ -109,8 +109,8 @@ def check_file(file1, out_dir, user_format, file2=False):
 
         for values in range(1, 50):
             random_id = random.randint(1, len(ids1) - 1)
-            id_1 = ids1[random_id].split()[0]
-            id_2 = ids2[random_id].split()[0]
+            id_1 = ids1[random_id]
+            id_2 = ids2[random_id]
             assert id_1 == id_2 or (id_1.endswith("/1") and
                                     id_2.endswith("/2") and
                                     id_1[:-1] == id_2[:-1]), \

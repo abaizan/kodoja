@@ -179,6 +179,7 @@ added to the databases(default=False)
 |         |            | - Optimise sorting of pandas dataframes             |
 |         |            | - Zero not blank in cols 6 and 7 of virus_table.txt |
 |         |            | - Automated testing of pinned & latest dependencies |
+| 0.0.8   | *pending*  | - Output read ID not title in ``kraken_VRL.txt``    |
 
 
 ## Development
