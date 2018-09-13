@@ -65,7 +65,8 @@ def rename_seqIDs(input_file, out_dir, user_format, paired=False):
     include "1:" or "2:" in the description, for paired reads.
 
     Returns dictionary mapping the sequence number to the old
-    identifier (first word only from the description line).
+    identifier (first word only from the description line,
+    and if paired without any "/1" or "/2" suffix).
     """
     if paired == 2:
         output_file = os.path.join(out_dir, "renamed_file_2." + user_format)
@@ -77,11 +78,17 @@ def rename_seqIDs(input_file, out_dir, user_format, paired=False):
     with open(input_file, 'r') as in_file, open(output_file, 'w') as out_file:
         if user_format == 'fasta':
             for index, (title, seq) in enumerate(SimpleFastaParser(in_file)):
-                id_dict[index + 1] = title.split(None, 1)[0]
+                name = title.split(None, 1)[0]
+                if (paired==1 and name.endswith("/1")) or (paired==2 and name.endswith("/2")):
+                    name = name[:-2]
+                id_dict[index + 1] = name
                 out_file.write(">%i\n%s\n" % (index + 1, seq))
         else:
             for index, (title, seq, qual) in enumerate(FastqGeneralIterator(in_file)):
-                id_dict[index + 1] = title.split(None, 1)[0]
+                name = title.split(None, 1)[0]
+                if (paired==1 and name.endswith("/1")) or (paired==2 and name.endswith("/2")):
+                    name = name[:-2]
+                id_dict[index + 1] = name
                 out_file.write("@%i\n%s\n+\n%s\n" % (index + 1, seq, qual))
     return id_dict
 
@@ -111,9 +118,7 @@ def check_file(file1, out_dir, user_format, file2=False):
             random_id = random.randint(1, len(ids1) - 1)
             id_1 = ids1[random_id]
             id_2 = ids2[random_id]
-            assert id_1 == id_2 or (id_1.endswith("/1") and
-                                    id_2.endswith("/2") and
-                                    id_1[:-1] == id_2[:-1]), \
+            assert id_1 == id_2, \
                 ("Paired-end sequences don't match, e.g. %r vs %r"
                  % (id_1, id_2))
     else:

@@ -102,23 +102,20 @@ def main():
     else:
         rows_wanted = (kodoja_vrl['kraken_tax_ID'].isin(TaxId_out) |
                        kodoja_vrl['kaiju_tax_ID'].isin(TaxId_out))
-    # Since kodoja v0.0.8 the Seq_ID column has been just the ID,
+
+    # Since kodoja v0.0.8 the Seq_ID column has been just the ID
     # but on earlier versions would be full description line -
     # thus splitting on the first white space:
     seqID_wanted = set(_.rstrip("\n").split(None, 1)[0] for _ in kodoja_vrl.loc[rows_wanted, 'Seq_ID'])
+    if args.read2:
+        # Since kodoja v0.0.8 in paired-end more, we like Kraken
+        # also strip off the /1 or /2 suffix
+        seqID_wanted = set(_[:-2] if _.endswith("/1") else _ for _ in seqID_wanted)
 
     sequence_subset(output_dir, args.read1, label + "_sequences1.", args.user_format,
                     seqID_wanted)
 
     if args.read2:
-        # Cope with case where inputs are example/1 and example/2 style:
-        def rename2to1(identifier):
-            if identifier.endswith("/1"):
-                return identifier[:-1] + "2"
-            else:
-                return identifier
-        assert rename2to1("example/1") == "example/2"
-        seqID_wanted = set(rename2to1(_) for _ in seqID_wanted)
         sequence_subset(output_dir, args.read2, label + "_sequences2.", args.user_format,
                         seqID_wanted)
 
