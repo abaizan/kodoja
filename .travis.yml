@@ -22,9 +22,9 @@ env:
 before_install:
  # This happens using the TravisCI copy of Python, BEFORE we install conda.
  # Doing this here as want to abort and fail quickly if style checks break.
- - "pip install --upgrade pip"
- - "pip install flake8"
- - "flake8 --max-line-length 140"
+ - pip install --upgrade pip
+ - pip install flake8
+ - flake8
 
 install:
  # We want to use Conda under TravisCI for things like trimmomatic. See:
