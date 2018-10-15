@@ -79,14 +79,14 @@ def rename_seqIDs(input_file, out_dir, user_format, paired=False):
         if user_format == 'fasta':
             for index, (title, seq) in enumerate(SimpleFastaParser(in_file)):
                 name = title.split(None, 1)[0]
-                if (paired==1 and name.endswith("/1")) or (paired==2 and name.endswith("/2")):
+                if (paired == 1 and name.endswith("/1")) or (paired == 2 and name.endswith("/2")):
                     name = name[:-2]
                 id_dict[index + 1] = name
                 out_file.write(">%i\n%s\n" % (index + 1, seq))
         else:
             for index, (title, seq, qual) in enumerate(FastqGeneralIterator(in_file)):
                 name = title.split(None, 1)[0]
-                if (paired==1 and name.endswith("/1")) or (paired==2 and name.endswith("/2")):
+                if (paired == 1 and name.endswith("/1")) or (paired == 2 and name.endswith("/2")):
                     name = name[:-2]
                 id_dict[index + 1] = name
                 out_file.write("@%i\n%s\n+\n%s\n" % (index + 1, seq, qual))
