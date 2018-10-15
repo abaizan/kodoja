@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+"""Simple script to filter NCBI taxonomy dump files."""
 # TODO: Proper API, including option to set paths for the input and output
 # locations to make dealing with the filenames easier
 
