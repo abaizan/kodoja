@@ -51,7 +51,7 @@ install:
  - conda config --add channels conda-forge
  - conda config --add channels bioconda
  # ==============================================
- # Install our conda dependencies here, not bothering with a conda environment
+ # Install our conda dependencies here
  - conda install $CONDA
  # ==============================================
  # Install our Python dependencies here, not bothering with a virtual env
