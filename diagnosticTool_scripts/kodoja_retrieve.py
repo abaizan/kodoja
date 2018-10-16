@@ -108,7 +108,6 @@ def main():
     # thus splitting on the first white space:
     seqID_wanted = set(_.rstrip("\n").split(None, 1)[0] for _ in kodoja_vrl.loc[rows_wanted, 'Seq_ID'])
 
-
     if args.read2:
         # Paired reads
 
