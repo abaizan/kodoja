@@ -39,9 +39,11 @@ install:
  - bash miniconda.sh -b -p $HOME/miniconda
  - export PATH="$HOME/miniconda/bin:$PATH"
  - hash -r
- - python --version
  - conda config --set always_yes yes --set changeps1 no
  - conda update -q conda
+ - conda create -q -n snowflakes python=$TRAVIS_PYTHON_VERSION
+ - source activate snowflakes
+ - python --version
  # Useful for debugging any issues with conda
  - conda info -a
  # We want to use the BioConda channel
