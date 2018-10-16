@@ -227,19 +227,28 @@ def format_result_table(out_dir, data_table, data_labels, table_colNames):
     return seq_result
 
 
-def sequence_subset(out_dir, input_file, output_file, user_format, wanted):
-    """Create a subset of sequences based on sequence IDs in id_list.
+def filter_sequence_file(input_file, output_file, user_format, wanted,
+                         ignore_suffix=None):
+    """Create a subset of sequences based on sequence IDs.
 
-    Writes a FASTA or FASTQ file in the output file specified using the format
-    as the extension.
+    Writes a FASTA or FASTQ file in the output file specified.
 
     Argument wanted should be a Python set of identifers (with no white space,
     i.e. the first word only from the FASTA or FASTQ title lines).
+
+    Optional argument ignore_suffix="/1" means remove any suffix "/1"
+    from the input read names before matching to the wanted list.
+    The suffix is retained in the output file.
     """
     print("Selecting %i unique identifiers" % len(wanted))
-    records = (r for r in SeqIO.parse(input_file, user_format)
-               if r.id in wanted)
-    count = SeqIO.write(records, os.path.join(out_dir, output_file + user_format), user_format)
+    if ignore_suffix:
+        cut = len(ignore_suffix)
+        records = (r for r in SeqIO.parse(input_file, user_format)
+                   if (r.id[:-cut] if r.id.endswith(ignore_suffix) else r.id) in wanted)
+    else:
+        records = (r for r in SeqIO.parse(input_file, user_format)
+                   if r.id in wanted)
+    count = SeqIO.write(records, output_file, user_format)
     print("Saved %i records from %s to %s" % (count, input_file, output_file))
     if count < len(wanted):
         print("Warning %i IDs not found in %s" % (len(wanted) - count, input_file))

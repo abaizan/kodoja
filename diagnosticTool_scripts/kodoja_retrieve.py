@@ -9,7 +9,7 @@ import sys
 
 import pandas as pd
 from diagnostic_modules import version
-from diagnostic_modules import sequence_subset
+from diagnostic_modules import filter_sequence_file
 from diagnostic_modules import check_path
 
 
@@ -107,17 +107,27 @@ def main():
     # but on earlier versions would be full description line -
     # thus splitting on the first white space:
     seqID_wanted = set(_.rstrip("\n").split(None, 1)[0] for _ in kodoja_vrl.loc[rows_wanted, 'Seq_ID'])
+
+
     if args.read2:
+        # Paired reads
+
         # Since kodoja v0.0.8 in paired-end more, we like Kraken
         # also strip off the /1 or /2 suffix
+        # Removing it here in case using input from an older version of kodoja
         seqID_wanted = set(_[:-2] if _.endswith("/1") else _ for _ in seqID_wanted)
 
-    sequence_subset(output_dir, args.read1, label + "_sequences1.", args.user_format,
-                    seqID_wanted)
-
-    if args.read2:
-        sequence_subset(output_dir, args.read2, label + "_sequences2.", args.user_format,
-                        seqID_wanted)
+        filter_sequence_file(args.read1,
+                             os.path.join(output_dir, label + "_sequences1." + args.user_format),
+                             args.user_format, seqID_wanted, ignore_suffix="/1")
+        filter_sequence_file(args.read2,
+                             os.path.join(output_dir, label + "_sequences2." + args.user_format),
+                             args.user_format, seqID_wanted, ignore_suffix="/2")
+    else:
+        # Single reads
+        filter_sequence_file(args.read1,
+                             os.path.join(output_dir, label + "_sequences1." + args.user_format),
+                             args.user_format, seqID_wanted)
 
 
 try:
