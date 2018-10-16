@@ -3,7 +3,8 @@ language: python
 # Defining a 2x2 test matrix with Python version and dependency versions.
 
 python:
-# We don't actually use the Travis Python, but this keeps it organized.
+# We don't actually use the Travis Python (except for flake8), but this
+#keeps it organized.
  - "2.7"
  - "3.6"
 
@@ -38,6 +39,7 @@ install:
  - bash miniconda.sh -b -p $HOME/miniconda
  - export PATH="$HOME/miniconda/bin:$PATH"
  - hash -r
+ - python --version
  - conda config --set always_yes yes --set changeps1 no
  - conda update -q conda
  # Useful for debugging any issues with conda
