@@ -37,6 +37,8 @@ the columns are as follows:
 The output directory includes additional files, including ``kodoja_VRL.txt``
 (a table listing the read identifiers used) which is intended mainly as
 input to the ``kodoja_retrieve.py`` script.
+
+See also https://github.com/abaizan/kodoja/wiki/Kodoja-Manual
 """
 
 parser = argparse.ArgumentParser(description=help_text,

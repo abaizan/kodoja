@@ -16,10 +16,18 @@ from database_modules import ncbi_rename_customDB
 from database_modules import krakenDB_build
 from database_modules import kaijuDB_build
 
+help_text = """Kodoja Build creates a database for use with Kodoja Search."""
+
+help_epilog = """
+See also https://github.com/abaizan/kodoja/wiki/Kodoja-Manual
+"""
+
 
 def main():
     """Run kodoja build."""
-    parser = argparse.ArgumentParser(description='Kodoja database construction')
+    parser = argparse.ArgumentParser(description=help_text,
+                                     epilog=help_epilog,
+                                     formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('--version',
                         action='version',
                         version='Kodoja v' + version)
