@@ -19,6 +19,14 @@ The ``.sh`` files are example scripts for submission to an SGE cluster.
 
 For a examples of how to run the code please see the wiki page: https://github.com/abaizan/kodoja/wiki/Kodoja-Manual
 
+## Citation
+
+Please cite the following manuscript for Kodoja:
+
+> Amanda Baizan-Edge *et al.* (2019), *Kodoja*: A workflow for virus
+> detection in plants using *k-mer* analysis of RNA-sequencing data,
+> Journal of General Virology https://doi.org/10.1099/jgv.0.001210
+
 ## License
 
 Kodoja is released under the MIT licence, see file ``LICENSE.txt`` for details.
