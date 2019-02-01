@@ -19,6 +19,8 @@ The ``.sh`` files are example scripts for submission to an SGE cluster.
 
 For a examples of how to run the code please see the wiki page: https://github.com/abaizan/kodoja/wiki/Kodoja-Manual
 
+Additionally, for those of you using the Galaxy web-platform for running bioinformatics analysis from your web-browser, we have provided a [Galaxy Wrapper for Kodoja](https://github.com/abaizan/kodoja_galaxy) available to install from the [Galaxy Tool Shed](http://toolshed.g2.bx.psu.edu/view/abaizan/kodoja).
+
 ## Citation
 
 Please cite the following manuscript for Kodoja:
