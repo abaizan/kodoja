@@ -209,6 +209,6 @@ The release process includes:
 3. Commit changes.
 4  Tag the commit with ``git tag kodoja-vX.Y.Z``
 5. Push commits and tags to github with ``git push origin master --tags``
-6. Submit a pull request to BioConda to update the package, which usally
+6. Review the automated BioConda pull request to update their package, usually
    just means bumping the version and updating the checksum in ``meta.yaml``:
    https://github.com/bioconda/bioconda-recipes/tree/master/recipes/kodoja
