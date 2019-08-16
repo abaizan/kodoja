@@ -171,7 +171,7 @@ added to the databases(default=False)
 
 | Version | Date       | Notes                                               |
 | ------- | ---------- | --------------------------------------------------- |
-| 0.0.10  | *pending*  | - Link to the online manual from command line help  |
+| 0.0.10  | 2018-08-16 | - Link to the online manual from command line help  |
 |         |            | - Support Kaiju v1.7.0 (``mkbwt`` now has a prefix) |
 | 0.0.9   | 2018-10-16 | - Fix v0.0.8 regression in ``kodoja_retrieve.py``   |
 | 0.0.8   | 2018-09-14 | - Output read ID not title in ``kraken_VRL.txt``    |
