@@ -229,12 +229,20 @@ def kaijuDB_build(genome_download_dir, kaiju_db_dir, subset_vir_assembly):
 
             subprocess.check_call("gzip " + unzip_filename, shell=True)
 
+    try:
+        # Assume kaiju v1.7.0 onwards:
+        subprocess.check_output(["kaiju-mkbwt", "-help"])
+        prefix = "kaiju-"
+    except OSError:  # Expect FileNotFoundError on Python 3.3+
+        # kaiju prior to v1.7.0
+        prefix = ""
+
     # Build Kaiju database
-    subprocess.check_call("mkbwt -n 5 -a ACDEFGHIKLMNPQRSTVWY -o " +
+    subprocess.check_call(prefix + "mkbwt -n 5 -a ACDEFGHIKLMNPQRSTVWY -o " +
                           os.path.join(kaiju_db_dir, "kaiju_library") + " " +
                           os.path.join(kaiju_db_dir, "kaiju_library.faa"),
                           shell=True)
-    subprocess.check_call("mkfmi " + os.path.join(kaiju_db_dir, "kaiju_library"),
+    subprocess.check_call(prefix + "mkfmi " + os.path.join(kaiju_db_dir, "kaiju_library"),
                           shell=True)
     os.remove(os.path.join(kaiju_db_dir, "kaiju_library.faa"))
     os.remove(os.path.join(kaiju_db_dir, "kaiju_library.bwt"))
