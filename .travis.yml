@@ -57,6 +57,8 @@ install:
  # Install our Python dependencies here, not bothering with a virtual env
  - pip install $NUMPY
  - pip install $PIP
+ # Nasty hack for Python 2.7 HTTPS certificate problem with NCBI download
+ - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then export PYTHONHTTPSVERIFY=0; fi
 
 script:
 - test/test_script.sh
