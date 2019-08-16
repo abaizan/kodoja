@@ -171,28 +171,28 @@ added to the databases(default=False)
 
 | Version | Date       | Notes                                               |
 | ------- | ---------- | --------------------------------------------------- |
-| 0.0.1   | 2018-01-15 | - Initial release for BioConda packaging            |
-| 0.0.2   | 2018-01-22 | - Now tested under Python 3.6 as well as Python 2.7 |
-| 0.0.3   | 2018-02-22 | - Include genus level counts in search results      |
-|         |            | - Simplify internal renaming of sequencing reads    |
-| 0.0.4   | 2018-08-22 | - Code style updates (no functional changes)        |
-|         |            | - Provide cut-down NCBI taxonomy for tests cases    |
-|         |            | - Additional database build testing                 |
-|         |            | - Downloads virus files with HTTPS rather than FTP  |
-| 0.0.5   | 2018-08-29 | - Refactor logging in ``kodoja_search.py``          |
-|         |            | - Top level error handling, with logging in search  |
-|         |            | - ``dictionary changed size during iteration`` bug  |
-| 0.0.6   | 2018-09-04 | - Python 3 fix for ``kodoja_retrieve.py``           |
-|         |            | - Automated testing of ``kodoja_retrieve.py``       |
-|         |            | - Also test paired reads without /1 and /2 suffixes |
+| 0.0.10  | *pending*  | - Link to the online manual from command line help  |
+| 0.0.9   | 2018-10-16 | - Fix v0.0.8 regression in ``kodoja_retrieve.py``   |
+| 0.0.8   | 2018-09-14 | - Output read ID not title in ``kraken_VRL.txt``    |
+|         |            | - Omit /1 and /2 suffixes in ``kraken_VRL.txt``     |
 | 0.0.7   | 2018-09-07 | - Document installing prebuilt database from Zenodo |
 |         |            | - Optimise sorting of pandas dataframes             |
 |         |            | - Zero not blank in cols 6 and 7 of virus_table.txt |
 |         |            | - Automated testing of pinned & latest dependencies |
-| 0.0.8   | 2018-09-14 | - Output read ID not title in ``kraken_VRL.txt``    |
-|         |            | - Omit /1 and /2 suffixes in ``kraken_VRL.txt``     |
-| 0.0.9   | 2018-10-16 | - Fix v0.0.8 regression in ``kodoja_retrieve.py``   |
-| 0.0.10  | *pending*  | - Link to the online manual from command line help  |
+| 0.0.6   | 2018-09-04 | - Python 3 fix for ``kodoja_retrieve.py``           |
+|         |            | - Automated testing of ``kodoja_retrieve.py``       |
+|         |            | - Also test paired reads without /1 and /2 suffixes |
+| 0.0.5   | 2018-08-29 | - Refactor logging in ``kodoja_search.py``          |
+|         |            | - Top level error handling, with logging in search  |
+|         |            | - ``dictionary changed size during iteration`` bug  |
+| 0.0.4   | 2018-08-22 | - Code style updates (no functional changes)        |
+|         |            | - Provide cut-down NCBI taxonomy for tests cases    |
+|         |            | - Additional database build testing                 |
+|         |            | - Downloads virus files with HTTPS rather than FTP  |
+| 0.0.3   | 2018-02-22 | - Include genus level counts in search results      |
+|         |            | - Simplify internal renaming of sequencing reads    |
+| 0.0.2   | 2018-01-22 | - Now tested under Python 3.6 as well as Python 2.7 |
+| 0.0.1   | 2018-01-15 | - Initial release for BioConda packaging            |
 
 
 ## Development
