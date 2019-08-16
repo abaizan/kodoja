@@ -30,12 +30,14 @@ def download_with_retries(url, destination, retries=5):
         urlcleanup()  # Seems important with FTP on Python 2.7
         try:
             return urlretrieve(url, destination)
-        except URLError:
+        except URLError as err:
             if attempt < retries:
                 time.sleep(attempt)
                 sys.stderr.write("Will retry downloading %r attempt %i\n"
                                  % (url, attempt + 1))
-    sys.exit("Failed to download %r" % url)
+            else:
+                sys.stderr.write("ERROR: Failed to download %r\n" % url)
+                raise err
 
 
 # Download refseq files from ncbi ftp site - use ncbi-genome-download
